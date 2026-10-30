@@ -260,10 +260,10 @@ class MyE2eAttribute implements E2eAttribute {
   }
   async set_attribute_attr6(attr_6: StructSimple): Promise<void> {}
   async get_attribute_attr61(): Promise<UnionSimple> {
-    return attributeState.attr61 as unknown as UnionSimple;
+    return attributeState.attr61;
   }
   async set_attribute_attr61(attr_61: UnionSimple): Promise<void> {
-    attributeState.attr61 = attr_61 as any;
+    attributeState.attr61 = attr_61;
   }
   async get_attribute_attr7(): Promise<string[]> {
     return [];
@@ -435,11 +435,16 @@ const typeServerState = {
   type_attr2: ['attr2'],
 };
 
-const attributeState = {
+const attributeState: {
+  attr1: string;
+  attr2: string[];
+  attr4: string;
+  attr61: UnionSimple;
+} = {
   attr1: 'attr1',
   attr2: ['attr2'],
   attr4: 'V1',
-  attr61: { data: 1, tag: 'V1' },
+  attr61: { data: 1, tag: 'V1' } satisfies UnionSimple,
 };
 
 const hostState = 'localhost';

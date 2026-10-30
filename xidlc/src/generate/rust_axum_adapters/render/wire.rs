@@ -4,8 +4,7 @@ use super::super::construction::{ConstructionField, ConstructionValue};
 use super::*;
 use crate::generate::adapter::wire_layout::WireLayouts;
 use crate::generate::adapter::{TypeShape, TypeUse, VersionPlan};
-use crate::generate::rust::util::render_const;
-use crate::generate::rust::util::union_serde_tag_string;
+use crate::generate::utils::union_wire::UnionWire;
 use xidl_parser::hir;
 
 struct WireBuilder<'a> {
@@ -307,12 +306,7 @@ impl WireBuilder<'_> {
                         .ok_or_else(|| Layout::error(key, "union wire case has no public label"))?;
                     let name = self.renderer.union_case_name(case, is_http)?;
                     for label in &case.label {
-                        let tag = match label {
-                            hir::CaseLabel::Value(label) => {
-                                union_serde_tag_string(&render_const(label))
-                            }
-                            hir::CaseLabel::Default => "default".into(),
-                        };
+                        let tag = UnionWire::label(label);
                         definition.fields.push(WireField {
                             name: name.clone(),
                             wire: tag,

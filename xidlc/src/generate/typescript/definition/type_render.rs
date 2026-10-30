@@ -9,12 +9,12 @@ use super::contexts::{
     StructZodContext, TypedefTypeContext, TypedefZodContext, UnionTypeContext, UnionZodContext,
 };
 use super::method::TypeRefTarget;
-use super::names::{declarator_name, ts_ident, ts_prop_name};
+use super::names::{declarator_name, ts_ident};
 use super::output::TsRenderOutput;
 use super::struct_fields::struct_fields;
 use super::type_expr::{
     apply_array_ts, apply_array_zod, ts_type_for_constr_inline, ts_type_for_decl,
-    ts_type_for_element, zod_schema_for_constr_inline, zod_schema_for_decl, zod_schema_for_element,
+    zod_schema_for_constr_inline, zod_schema_for_decl,
 };
 use super::type_render_helpers::{render_bit_number, render_native};
 
@@ -239,39 +239,12 @@ fn render_union(
     ctx: &TsRenderCtx<'_>,
 ) -> IdlcResult<TsRenderOutput> {
     let ident = ts_ident(&def.ident);
-    let variants = def
-        .case
-        .iter()
-        .map(|case| {
-            let prop = ts_prop_name(declarator_name(&case.element.value));
-            let ty = ts_type_for_element(
-                &case.element.ty,
-                &case.element.value,
-                module_path,
-                TypeRefTarget::Types,
-            );
-            super::contexts::TsType::InlineStruct(vec![FieldTypeContext {
-                prop,
-                ty,
-                optional: false,
-                doc: Vec::new(),
-            }])
-        })
-        .collect::<Vec<_>>();
-    let schema_variants = def
-        .case
-        .iter()
-        .map(|case| {
-            let prop = ts_prop_name(declarator_name(&case.element.value));
-            let schema = zod_schema_for_element(&case.element.ty, &case.element.value, module_path);
-            super::contexts::ZodSchema::Object(vec![FieldZodContext {
-                prop,
-                schema,
-                optional: false,
-                xjson_meta: None,
-            }])
-        })
-        .collect::<Vec<_>>();
+    let projection = super::union::TsUnion {
+        definition: def,
+        module_path,
+    };
+    let variants = projection.types(TypeRefTarget::Types);
+    let schema_variants = projection.schemas();
     Ok(TsRenderOutput {
         types: vec![ctx.renderer.render_template(
             "union.d.ts.j2",

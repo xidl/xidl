@@ -337,7 +337,7 @@ import { xjson } from "xidl-typescript-codec";
 
     
 export const HttpAnnoServiceGetUserRequestSchema = z.object({
-        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
         lang: z.coerce.string(),
     });
 export type HttpAnnoServiceGetUserRequest = z.infer<typeof HttpAnnoServiceGetUserRequestSchema>;
@@ -345,7 +345,7 @@ export type HttpAnnoServiceGetUserRequest = z.infer<typeof HttpAnnoServiceGetUse
     
 export const HttpAnnoServiceCreateUserRequestSchema = z.object({
         name: z.string(),
-        age: z.number().int().nonnegative(),
+        age: z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpAnnoServiceCreateUserRequest = z.infer<typeof HttpAnnoServiceCreateUserRequestSchema>;
 
@@ -358,47 +358,47 @@ export type HttpAnnoServiceGetNameRequest = z.infer<typeof HttpAnnoServiceGetNam
     
 export const HttpAnnoServiceSearchUserRequestSchema = z.object({
         keyword: z.coerce.string(),
-        page: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        page: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
     });
 export type HttpAnnoServiceSearchUserRequest = z.infer<typeof HttpAnnoServiceSearchUserRequestSchema>;
 
     
 export const HttpAnnoServiceGetUserAliasRequestSchema = z.object({
-        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        user_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
         locale: z.coerce.string(),
     });
 export type HttpAnnoServiceGetUserAliasRequest = z.infer<typeof HttpAnnoServiceGetUserAliasRequestSchema>;
 
     
 export const HttpAnnoServiceAddRequestSchema = z.object({
-        a: z.number().int(),
-        b: z.number().int(),
+        a: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
+        b: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpAnnoServiceAddRequest = z.infer<typeof HttpAnnoServiceAddRequestSchema>;
 
     
 export const HttpAnnoServiceAddResponseSchema = z.object({
-        return: z.number().int(),
-        sum: z.number().int(),
+        return: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
+        sum: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpAnnoServiceAddResponse = z.infer<typeof HttpAnnoServiceAddResponseSchema>;
 
     
 export const HttpAnnoServiceBumpRequestSchema = z.object({
-        value: z.number().int(),
+        value: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpAnnoServiceBumpRequest = z.infer<typeof HttpAnnoServiceBumpRequestSchema>;
 
     
 export const HttpAnnoServiceBumpResponseSchema = z.object({
-        return: z.number().int(),
-        value: z.number().int(),
+        return: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
+        value: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpAnnoServiceBumpResponse = z.infer<typeof HttpAnnoServiceBumpResponseSchema>;
 
     
 export const HttpAnnoServiceGetCountResponseSchema = z.object({
-        count: z.number().int(),
+        count: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"),
     });
 export type HttpAnnoServiceGetCountResponse = z.infer<typeof HttpAnnoServiceGetCountResponseSchema>;
 ===============

@@ -1,0 +1,36 @@
+module catalog {
+    @rename_all("camelCase")
+    enum Availability { in_stock, sold_out };
+
+    @rename_all("camelCase")
+    struct Item {
+        @rename("sku_id") string sku;
+        @skip string internal_note;
+        @optional string memo;
+        ::catalog::Availability availability;
+        long stock_grid[2][3];
+        sequence<octet> thumbnail;
+        long long revision;
+        char initial;
+        wchar mark;
+        sequence<char> letters;
+    };
+
+    union Change switch (long) {
+        case 0:
+        case 1: ::catalog::Item item;
+        case 2: sequence<::catalog::Item> batch;
+        default: string reason;
+    };
+
+    union LabelChange switch (char) {
+        case '"': string quoted;
+        case '\\': string escaped;
+        case '\n': string newline;
+        case 'A':
+        default: string reason;
+    };
+};
+
+@http(409)
+exception Conflict { @rename("sku_id") string sku; string reason; };

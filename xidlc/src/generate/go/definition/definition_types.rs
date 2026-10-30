@@ -93,7 +93,7 @@ pub(crate) fn go_const_type(ty: &hir::ConstType, packages: &GoPackages) -> Strin
     match ty {
         hir::ConstType::IntegerType(value) => go_integer_type(value),
         hir::ConstType::FloatingPtType | hir::ConstType::FixedPtConstType => "float64".to_string(),
-        hir::ConstType::CharType | hir::ConstType::WideCharType => "rune".to_string(),
+        hir::ConstType::CharType | hir::ConstType::WideCharType => packages.runtime_type("Char"),
         hir::ConstType::BooleanType => "bool".to_string(),
         hir::ConstType::OctetType => "byte".to_string(),
         hir::ConstType::StringType(_) | hir::ConstType::WideStringType(_) => "string".to_string(),
@@ -106,7 +106,7 @@ pub(crate) fn go_type(ty: &hir::TypeSpec, packages: &GoPackages) -> String {
     match ty {
         hir::TypeSpec::IntegerType(value) => go_integer_type(value),
         hir::TypeSpec::FloatingPtType => "float64".to_string(),
-        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => "rune".to_string(),
+        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => packages.runtime_type("Char"),
         hir::TypeSpec::Boolean => "bool".to_string(),
         hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
             "any".to_string()

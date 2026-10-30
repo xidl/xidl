@@ -50,10 +50,16 @@ func RegisterHttpResponseShapeServiceHandler(r gin.IRouter, svc HttpResponseShap
 		req := &HttpResponseShapeServiceHelloRequest{}
 		resp, err := svc.Hello(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpResponseShapeServiceHelloFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -67,10 +73,16 @@ func RegisterHttpResponseShapeServiceHandler(r gin.IRouter, svc HttpResponseShap
 		req := &HttpResponseShapeServiceGetCountRequest{}
 		resp, err := svc.GetCount(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpResponseShapeServiceGetCountFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -91,10 +103,16 @@ func RegisterHttpResponseShapeServiceHandler(r gin.IRouter, svc HttpResponseShap
 		req.B = body.B
 		resp, err := svc.Add(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpResponseShapeServiceAddFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -118,10 +136,16 @@ func RegisterHttpResponseShapeServiceHandler(r gin.IRouter, svc HttpResponseShap
 		req.Value = body
 		resp, err := svc.Bump(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpResponseShapeServiceBumpFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -137,11 +161,18 @@ func RegisterHttpResponseShapeServiceHandler(r gin.IRouter, svc HttpResponseShap
 	r.POST("/ping", func(c *gin.Context) {
 
 		req := &HttpResponseShapeServicePingRequest{}
-		if _, err := svc.Ping(c.Request.Context(), req); err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+		_, err := svc.Ping(c.Request.Context(), req)
+		if err != nil {
+			failure := encodeHttpResponseShapeServicePingFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -174,8 +205,9 @@ func (c *HttpResponseShapeServiceClient) Hello(ctx context.Context, req *HttpRes
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpResponseShapeServiceHelloResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpResponseShapeServiceHelloFailure)
 	}
 	decoded, err := decodeHttpResponseShapeServiceHelloResponse(resp)
 	if err != nil {
@@ -196,8 +228,9 @@ func (c *HttpResponseShapeServiceClient) GetCount(ctx context.Context, req *Http
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpResponseShapeServiceGetCountResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpResponseShapeServiceGetCountFailure)
 	}
 	decoded, err := decodeHttpResponseShapeServiceGetCountResponse(resp)
 	if err != nil {
@@ -227,8 +260,9 @@ func (c *HttpResponseShapeServiceClient) Add(ctx context.Context, req *HttpRespo
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpResponseShapeServiceAddResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpResponseShapeServiceAddFailure)
 	}
 	decoded, err := decodeHttpResponseShapeServiceAddResponse(resp)
 	if err != nil {
@@ -255,8 +289,9 @@ func (c *HttpResponseShapeServiceClient) Bump(ctx context.Context, req *HttpResp
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpResponseShapeServiceBumpResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpResponseShapeServiceBumpFailure)
 	}
 	decoded, err := decodeHttpResponseShapeServiceBumpResponse(resp)
 	if err != nil {
@@ -277,8 +312,9 @@ func (c *HttpResponseShapeServiceClient) Ping(ctx context.Context, req *HttpResp
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpResponseShapeServicePingResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpResponseShapeServicePingFailure)
 	}
 	decoded, err := decodeHttpResponseShapeServicePingResponse(resp)
 	if err != nil {
@@ -318,6 +354,16 @@ func decodeHttpResponseShapeServiceHelloResponse(resp *http.Response) (HttpRespo
 	return out, nil
 }
 
+func encodeHttpResponseShapeServiceHelloFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpResponseShapeServiceHelloFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpResponseShapeServiceGetCountRequest struct {
 }
 
@@ -347,6 +393,16 @@ func decodeHttpResponseShapeServiceGetCountResponse(resp *http.Response) (HttpRe
 	}
 	out.Count = body
 	return out, nil
+}
+
+func encodeHttpResponseShapeServiceGetCountFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpResponseShapeServiceGetCountFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type HttpResponseShapeServiceAddRequest struct {
@@ -394,6 +450,16 @@ func decodeHttpResponseShapeServiceAddResponse(resp *http.Response) (HttpRespons
 	return out, nil
 }
 
+func encodeHttpResponseShapeServiceAddFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpResponseShapeServiceAddFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpResponseShapeServiceBumpRequest struct {
 	Value int32 `xjson:"value" form:"value"`
 }
@@ -433,6 +499,16 @@ func decodeHttpResponseShapeServiceBumpResponse(resp *http.Response) (HttpRespon
 	return out, nil
 }
 
+func encodeHttpResponseShapeServiceBumpFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpResponseShapeServiceBumpFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpResponseShapeServicePingRequest struct {
 }
 
@@ -456,4 +532,14 @@ func formatHttpResponseShapeServicePingPath(req *HttpResponseShapeServicePingReq
 func decodeHttpResponseShapeServicePingResponse(resp *http.Response) (HttpResponseShapeServicePingResponse, error) {
 	out := HttpResponseShapeServicePingResponse{}
 	return out, nil
+}
+
+func encodeHttpResponseShapeServicePingFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpResponseShapeServicePingFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }

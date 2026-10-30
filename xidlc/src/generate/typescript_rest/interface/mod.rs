@@ -31,7 +31,6 @@ pub(crate) fn render_interface(
     let Some(http_interface) = rest_hir.find_interface(module_path, &def.header.ident) else {
         return Ok(TsHttpBlocks::default());
     };
-    let unions = switched_union_idents(&rest_hir.spec);
     let methods = http_interface
         .operations
         .iter()
@@ -41,7 +40,6 @@ pub(crate) fn render_interface(
                 module_path,
                 op,
                 exceptions: &rest_hir.document.exceptions,
-                union_idents: &unions,
                 text_aliases,
             })
         })
@@ -98,32 +96,4 @@ pub(crate) fn render_interface(
     );
 
     Ok(out)
-}
-
-/// Switched unions whose zod schemas do not yet match the `{tag, data}`
-/// wire shape the other generators emit, so direct-union responses keep
-/// raw passthrough instead of schema validation.
-fn switched_union_idents(spec: &hir::Specification) -> std::collections::BTreeSet<String> {
-    fn walk(defs: &[hir::Definition], unions: &mut std::collections::BTreeSet<String>) {
-        for def in defs {
-            match def {
-                hir::Definition::ModuleDcl(module) => walk(&module.definition, unions),
-                hir::Definition::ConstrTypeDcl(constr) => collect(constr, unions),
-                hir::Definition::TypeDcl(hir::TypeDcl::ConstrTypeDcl(constr)) => {
-                    collect(constr, unions);
-                }
-                _ => {}
-            }
-        }
-    }
-
-    fn collect(constr: &hir::ConstrTypeDcl, unions: &mut std::collections::BTreeSet<String>) {
-        if let hir::ConstrTypeDcl::UnionDef(def) = constr {
-            unions.insert(ts_ident(&def.ident));
-        }
-    }
-
-    let mut unions = std::collections::BTreeSet::new();
-    walk(&spec.0, &mut unions);
-    unions
 }

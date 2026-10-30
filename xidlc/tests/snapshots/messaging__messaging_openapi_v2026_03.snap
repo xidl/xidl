@@ -27,10 +27,14 @@ expression: document
         "properties": {
           "limit": {
             "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
             "type": "integer"
           },
           "used": {
             "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
             "type": "integer"
           }
         },
@@ -47,23 +51,37 @@ expression: document
         "oneOf": [
           {
             "properties": {
-              "text": {
+              "data": {
                 "$ref": "#/components/schemas/v2026_03.Relay.TextContent"
+              },
+              "tag": {
+                "enum": [
+                  "1"
+                ],
+                "type": "string"
               }
             },
             "required": [
-              "text"
+              "tag",
+              "data"
             ],
             "type": "object"
           },
           {
             "properties": {
-              "legacy": {
+              "data": {
                 "$ref": "#/components/schemas/v2026_03.Relay.LegacyEnvelope"
+              },
+              "tag": {
+                "enum": [
+                  "4"
+                ],
+                "type": "string"
               }
             },
             "required": [
-              "legacy"
+              "tag",
+              "data"
             ],
             "type": "object"
           }
@@ -98,6 +116,8 @@ expression: document
           },
           "created_at": {
             "format": "int64",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
             "type": "integer"
           },
           "id": {
@@ -168,23 +188,37 @@ expression: document
         "oneOf": [
           {
             "properties": {
-              "like_by": {
+              "data": {
+                "type": "string"
+              },
+              "tag": {
+                "enum": [
+                  "LIKE"
+                ],
                 "type": "string"
               }
             },
             "required": [
-              "like_by"
+              "tag",
+              "data"
             ],
             "type": "object"
           },
           {
             "properties": {
-              "love_by": {
+              "data": {
+                "type": "string"
+              },
+              "tag": {
+                "enum": [
+                  "LOVE"
+                ],
                 "type": "string"
               }
             },
             "required": [
-              "love_by"
+              "tag",
+              "data"
             ],
             "type": "object"
           }
@@ -207,6 +241,8 @@ expression: document
           },
           "member_count": {
             "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
             "type": "integer"
           },
           "name": {

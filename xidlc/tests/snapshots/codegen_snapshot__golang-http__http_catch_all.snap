@@ -45,19 +45,27 @@ func RegisterHttpCatchAllServiceHandler(r gin.IRouter, svc HttpCatchAllServiceSe
 	r.GET("/files/*path", func(c *gin.Context) {
 
 		req := &HttpCatchAllServiceReadFileRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "path"); err == nil {
-			req.RelPath = value
+		if raw, err := xidlgohttp.GinPathString(c, "path"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.RelPath); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.ReadFile(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpCatchAllServiceReadFileFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -69,26 +77,36 @@ func RegisterHttpCatchAllServiceHandler(r gin.IRouter, svc HttpCatchAllServiceSe
 	r.GET("/assets/*key", func(c *gin.Context) {
 
 		req := &HttpCatchAllServiceReadAssetRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "key"); err == nil {
-			req.Key = value
+		if raw, err := xidlgohttp.GinPathString(c, "key"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Key); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.QueryString(c.Request.URL.Query(), "v"); err == nil {
-			req.Version = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "v"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Version); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.ReadAsset(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpCatchAllServiceReadAssetFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -124,8 +142,9 @@ func (c *HttpCatchAllServiceClient) ReadFile(ctx context.Context, req *HttpCatch
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpCatchAllServiceReadFileResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpCatchAllServiceReadFileFailure)
 	}
 	decoded, err := decodeHttpCatchAllServiceReadFileResponse(resp)
 	if err != nil {
@@ -137,8 +156,13 @@ func (c *HttpCatchAllServiceClient) ReadFile(ctx context.Context, req *HttpCatch
 func (c *HttpCatchAllServiceClient) ReadAsset(ctx context.Context, req *HttpCatchAllServiceReadAssetRequest) (*HttpCatchAllServiceReadAssetResponse, error) {
 	requestURL := c.baseURL + formatHttpCatchAllServiceReadAssetPath(req)
 	query := url.Values{}
-
-	query.Set("v", req.Version)
+	{
+		raw, err := xidlgohttp.FormatText(req.Version)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("v", raw)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
@@ -152,8 +176,9 @@ func (c *HttpCatchAllServiceClient) ReadAsset(ctx context.Context, req *HttpCatc
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpCatchAllServiceReadAssetResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpCatchAllServiceReadAssetFailure)
 	}
 	decoded, err := decodeHttpCatchAllServiceReadAssetResponse(resp)
 	if err != nil {
@@ -196,6 +221,16 @@ func decodeHttpCatchAllServiceReadFileResponse(resp *http.Response) (HttpCatchAl
 	return out, nil
 }
 
+func encodeHttpCatchAllServiceReadFileFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpCatchAllServiceReadFileFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpCatchAllServiceReadAssetRequest struct {
 	Key     string `xjson:"key" form:"key"`
 	Version string `xjson:"version" form:"version"`
@@ -229,4 +264,14 @@ func decodeHttpCatchAllServiceReadAssetResponse(resp *http.Response) (HttpCatchA
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeHttpCatchAllServiceReadAssetFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpCatchAllServiceReadAssetFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }

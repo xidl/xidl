@@ -1,5 +1,6 @@
 import shutil
 import subprocess
+import os
 from pathlib import Path
 
 from behave import then, when
@@ -15,7 +16,16 @@ def run(command, *, cwd):
 def generate_independent_target(context):
     context.execute_steps("When I generate ts code for the IDL")
     help_result = run(
-        [str(Path.cwd() / "target/debug/xidlc"), "gen", "--help"], cwd=Path.cwd()
+        [
+            str(
+                Path.cwd()
+                / os.environ.get("CARGO_TARGET_DIR", "target")
+                / "debug/xidlc"
+            ),
+            "gen",
+            "--help",
+        ],
+        cwd=Path.cwd(),
     )
     assert "typescript-rest-adapters" in help_result.stdout
     generate_adapter_artifact(context, "typescript-rest-adapters")
@@ -33,7 +43,7 @@ def generate_adapter_artifact(context, target):
         path.name: path.read_bytes() for path in output.iterdir() if path.is_file()
     }
     command = [
-        str(Path.cwd() / "target/debug/xidlc"),
+        str(Path.cwd() / os.environ.get("CARGO_TARGET_DIR", "target") / "debug/xidlc"),
         "gen",
         "--out-dir",
         str(output),

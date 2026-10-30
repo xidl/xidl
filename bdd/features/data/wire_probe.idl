@@ -1,0 +1,22 @@
+#include "wire_probe_types.idl"
+
+interface Store {
+    @post(path = "/items")
+    catalog::Item echo(catalog::Item item) raises(Conflict);
+
+    @post(path = "/changes")
+    catalog::Change apply(@body @flatten catalog::Change change);
+
+    @post(path = "/labels")
+    catalog::LabelChange label(@body @flatten catalog::LabelChange change);
+
+    @get(path = "/bindings")
+    string bindings(@query long count,
+                    @header @rename("X-Initial") char initial,
+                    @cookie string session,
+                    @header @rename("X-Count") out long count_reply,
+                    @cookie out string receipt);
+
+    @server_stream @get(path = "/feed/{state}")
+    catalog::Change feed(@path string state) raises(Conflict);
+};

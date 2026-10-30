@@ -1,7 +1,3 @@
-{%- if ty == "string" %}
-    {{ field }} = resp.Header.Get("{{ wire_name }}")
-{%- elif ty == "uint32" %}
-    if raw := resp.Header.Get("{{ wire_name }}"); raw != "" {
-        if value, err := xidlgohttp.ParseUint32(raw); err == nil { {{ field }} = value } else { return out, err }
-    }
-{%- endif %}
+if raw := resp.Header.Get("{{ wire_name }}"); raw != "" {
+    if err := xidlgohttp.ParseText(raw, &{{ field }}); err != nil { return out, err }
+}

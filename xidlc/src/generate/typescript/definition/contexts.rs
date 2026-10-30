@@ -66,6 +66,16 @@ pub(super) enum ZodCoercion {
 #[serde(tag = "kind", content = "data")]
 pub(crate) enum ZodSchema {
     Primitive(String),
+    /// One Unicode scalar value, including a non-BMP code point.
+    Character,
+    /// IDL width limits, rendered as decimal literals without host precision loss.
+    Integer {
+        minimum: String,
+        maximum: String,
+        maximum_exclusive: bool,
+        unsigned: bool,
+        coerce: bool,
+    },
     /// A complete schema expression rendered verbatim.
     Raw(String),
     /// Numeric scalar text validates a strict decimal grammar before coercing.

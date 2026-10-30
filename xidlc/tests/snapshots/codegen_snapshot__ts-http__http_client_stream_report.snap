@@ -200,7 +200,7 @@ import { xjson } from "xidl-typescript-codec";
         
             part_id: z.string(),
         
-            bytes: z.array(z.number().int().nonnegative())
+            bytes: z.array(z.number().min(0).max(255).refine(Number.isInteger, "expected an integer"))
         
     });
 
@@ -209,6 +209,6 @@ import { xjson } from "xidl-typescript-codec";
         
             upload_id: z.string(),
         
-            accepted: z.number().int().nonnegative()
+            accepted: z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")
         
     });

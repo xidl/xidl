@@ -12,4 +12,5 @@ Feature: Typed HTTP exception contracts
     Examples:
       | lang |
       | rust |
+      | go   |
       | ts   |

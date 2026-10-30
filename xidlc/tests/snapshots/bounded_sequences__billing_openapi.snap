@@ -96,6 +96,7 @@ expression: output
               "bytes": {
                 "items": {
                   "format": "int32",
+                  "maximum": 255,
                   "minimum": 0,
                   "type": "integer"
                 },
@@ -113,6 +114,8 @@ expression: output
       "billing.InvoiceIds": {
         "items": {
           "format": "int32",
+          "maximum": 2147483647,
+          "minimum": -2147483648,
           "type": "integer"
         },
         "maxItems": 2,
@@ -139,6 +142,8 @@ expression: output
         "properties": {
           "count": {
             "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
             "type": "integer"
           }
         },
@@ -255,6 +260,8 @@ expression: output
             "schema": {
               "items": {
                 "format": "int32",
+                "maximum": 2147483647,
+                "minimum": -2147483648,
                 "type": "integer"
               },
               "maxItems": 2,
@@ -429,6 +436,8 @@ expression: output
             "schema": {
               "items": {
                 "format": "int32",
+                "maximum": 2147483647,
+                "minimum": -2147483648,
                 "type": "integer"
               },
               "maxItems": 2,
@@ -588,6 +597,8 @@ expression: output
             "schema": {
               "items": {
                 "format": "int32",
+                "maximum": 2147483647,
+                "minimum": -2147483648,
                 "type": "integer"
               },
               "maxItems": 2,
@@ -642,6 +653,8 @@ expression: output
             "required": true,
             "schema": {
               "format": "int32",
+              "maximum": 2147483647,
+              "minimum": -2147483648,
               "type": "integer"
             }
           }

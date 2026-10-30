@@ -52,19 +52,27 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 	r.POST("/get_name", func(c *gin.Context) {
 
 		req := &HttpDefaultsServiceGetNameRequest{}
-
-		if value, err := xidlgohttp.QueryString(c.Request.URL.Query(), "name"); err == nil {
-			req.Name = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "name"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Name); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.GetName(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpDefaultsServiceGetNameFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -76,36 +84,27 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 	r.GET("/list_orders/:uid", func(c *gin.Context) {
 
 		req := &HttpDefaultsServiceListOrdersRequest{}
-
 		if raw, err := xidlgohttp.GinPathString(c, "uid"); err == nil {
-			if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil {
-				req.UserId = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.UserId); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
 		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "page"); err == nil {
-			if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil {
-				req.Page = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Page); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
 		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "size"); err == nil {
-			if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil {
-				req.Size = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Size); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
@@ -114,10 +113,16 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 		}
 		resp, err := svc.ListOrders(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpDefaultsServiceListOrdersFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -137,10 +142,16 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 		req.Req = body
 		resp, err := svc.CreateUser(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpDefaultsServiceCreateUserFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -161,10 +172,16 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 		req.Age = body.Age
 		resp, err := svc.SearchUser(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpDefaultsServiceSearchUserFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -176,31 +193,36 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 	r.GET("/v1/users/:id", func(c *gin.Context) {
 
 		req := &HttpDefaultsServiceGetUserRequest{}
-
 		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil {
-				req.Id = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Id); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.QueryString(c.Request.URL.Query(), "lang"); err == nil {
-			req.Lang = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "lang"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Lang); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.GetUser(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpDefaultsServiceGetUserFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -212,31 +234,36 @@ func RegisterHttpDefaultsServiceHandler(r gin.IRouter, svc HttpDefaultsServiceSe
 	r.POST("/get_user_alias/:id", func(c *gin.Context) {
 
 		req := &HttpDefaultsServiceGetUserAliasRequest{}
-
 		if raw, err := xidlgohttp.GinPathString(c, "id"); err == nil {
-			if value, parseErr := xidlgohttp.ParseUint32(raw); parseErr == nil {
-				req.UserId = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.UserId); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.QueryString(c.Request.URL.Query(), "lang"); err == nil {
-			req.Locale = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "lang"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Locale); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.GetUserAlias(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeHttpDefaultsServiceGetUserAliasFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -263,8 +290,13 @@ func NewHttpDefaultsServiceClient(baseURL string, httpClient *http.Client, auth 
 func (c *HttpDefaultsServiceClient) GetName(ctx context.Context, req *HttpDefaultsServiceGetNameRequest) (*HttpDefaultsServiceGetNameResponse, error) {
 	requestURL := c.baseURL + formatHttpDefaultsServiceGetNamePath(req)
 	query := url.Values{}
-
-	query.Set("name", req.Name)
+	{
+		raw, err := xidlgohttp.FormatText(req.Name)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("name", raw)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
@@ -278,8 +310,9 @@ func (c *HttpDefaultsServiceClient) GetName(ctx context.Context, req *HttpDefaul
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpDefaultsServiceGetNameResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpDefaultsServiceGetNameFailure)
 	}
 	decoded, err := decodeHttpDefaultsServiceGetNameResponse(resp)
 	if err != nil {
@@ -291,10 +324,20 @@ func (c *HttpDefaultsServiceClient) GetName(ctx context.Context, req *HttpDefaul
 func (c *HttpDefaultsServiceClient) ListOrders(ctx context.Context, req *HttpDefaultsServiceListOrdersRequest) (*HttpDefaultsServiceListOrdersResponse, error) {
 	requestURL := c.baseURL + formatHttpDefaultsServiceListOrdersPath(req)
 	query := url.Values{}
-
-	query.Set("page", xidlgohttp.FormatUint32(req.Page))
-
-	query.Set("size", xidlgohttp.FormatUint32(req.Size))
+	{
+		raw, err := xidlgohttp.FormatText(req.Page)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("page", raw)
+	}
+	{
+		raw, err := xidlgohttp.FormatText(req.Size)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("size", raw)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
@@ -308,8 +351,9 @@ func (c *HttpDefaultsServiceClient) ListOrders(ctx context.Context, req *HttpDef
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpDefaultsServiceListOrdersResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpDefaultsServiceListOrdersFailure)
 	}
 	decoded, err := decodeHttpDefaultsServiceListOrdersResponse(resp)
 	if err != nil {
@@ -336,8 +380,9 @@ func (c *HttpDefaultsServiceClient) CreateUser(ctx context.Context, req *HttpDef
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpDefaultsServiceCreateUserResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpDefaultsServiceCreateUserFailure)
 	}
 	decoded, err := decodeHttpDefaultsServiceCreateUserResponse(resp)
 	if err != nil {
@@ -367,8 +412,9 @@ func (c *HttpDefaultsServiceClient) SearchUser(ctx context.Context, req *HttpDef
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpDefaultsServiceSearchUserResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpDefaultsServiceSearchUserFailure)
 	}
 	decoded, err := decodeHttpDefaultsServiceSearchUserResponse(resp)
 	if err != nil {
@@ -380,8 +426,13 @@ func (c *HttpDefaultsServiceClient) SearchUser(ctx context.Context, req *HttpDef
 func (c *HttpDefaultsServiceClient) GetUser(ctx context.Context, req *HttpDefaultsServiceGetUserRequest) (*HttpDefaultsServiceGetUserResponse, error) {
 	requestURL := c.baseURL + formatHttpDefaultsServiceGetUserPath(req)
 	query := url.Values{}
-
-	query.Set("lang", req.Lang)
+	{
+		raw, err := xidlgohttp.FormatText(req.Lang)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("lang", raw)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
@@ -395,8 +446,9 @@ func (c *HttpDefaultsServiceClient) GetUser(ctx context.Context, req *HttpDefaul
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpDefaultsServiceGetUserResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpDefaultsServiceGetUserFailure)
 	}
 	decoded, err := decodeHttpDefaultsServiceGetUserResponse(resp)
 	if err != nil {
@@ -408,8 +460,13 @@ func (c *HttpDefaultsServiceClient) GetUser(ctx context.Context, req *HttpDefaul
 func (c *HttpDefaultsServiceClient) GetUserAlias(ctx context.Context, req *HttpDefaultsServiceGetUserAliasRequest) (*HttpDefaultsServiceGetUserAliasResponse, error) {
 	requestURL := c.baseURL + formatHttpDefaultsServiceGetUserAliasPath(req)
 	query := url.Values{}
-
-	query.Set("lang", req.Locale)
+	{
+		raw, err := xidlgohttp.FormatText(req.Locale)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("lang", raw)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
@@ -423,8 +480,9 @@ func (c *HttpDefaultsServiceClient) GetUserAlias(ctx context.Context, req *HttpD
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *HttpDefaultsServiceGetUserAliasResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpDefaultsServiceGetUserAliasFailure)
 	}
 	decoded, err := decodeHttpDefaultsServiceGetUserAliasResponse(resp)
 	if err != nil {
@@ -465,6 +523,16 @@ func decodeHttpDefaultsServiceGetNameResponse(resp *http.Response) (HttpDefaults
 	return out, nil
 }
 
+func encodeHttpDefaultsServiceGetNameFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpDefaultsServiceGetNameFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpDefaultsServiceListOrdersRequest struct {
 	UserId uint32 `xjson:"user_id" form:"user_id"`
 	Page   uint32 `xjson:"page" form:"page"`
@@ -501,6 +569,16 @@ func decodeHttpDefaultsServiceListOrdersResponse(resp *http.Response) (HttpDefau
 	return out, nil
 }
 
+func encodeHttpDefaultsServiceListOrdersFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpDefaultsServiceListOrdersFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpDefaultsServiceCreateUserRequest struct {
 	Req CreateUserRequest `xjson:"req" form:"req"`
 }
@@ -531,6 +609,16 @@ func decodeHttpDefaultsServiceCreateUserResponse(resp *http.Response) (HttpDefau
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeHttpDefaultsServiceCreateUserFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpDefaultsServiceCreateUserFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type HttpDefaultsServiceSearchUserRequest struct {
@@ -571,6 +659,16 @@ func decodeHttpDefaultsServiceSearchUserResponse(resp *http.Response) (HttpDefau
 	return out, nil
 }
 
+func encodeHttpDefaultsServiceSearchUserFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpDefaultsServiceSearchUserFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpDefaultsServiceGetUserRequest struct {
 	Id   uint32 `xjson:"id" form:"id"`
 	Lang string `xjson:"lang" form:"lang"`
@@ -606,6 +704,16 @@ func decodeHttpDefaultsServiceGetUserResponse(resp *http.Response) (HttpDefaults
 	return out, nil
 }
 
+func encodeHttpDefaultsServiceGetUserFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpDefaultsServiceGetUserFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type HttpDefaultsServiceGetUserAliasRequest struct {
 	UserId uint32 `xjson:"user_id" form:"user_id"`
 	Locale string `xjson:"locale" form:"locale"`
@@ -639,4 +747,14 @@ func decodeHttpDefaultsServiceGetUserAliasResponse(resp *http.Response) (HttpDef
 	}
 	out.Return = body
 	return out, nil
+}
+
+func encodeHttpDefaultsServiceGetUserAliasFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeHttpDefaultsServiceGetUserAliasFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }

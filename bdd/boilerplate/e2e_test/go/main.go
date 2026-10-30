@@ -412,7 +412,7 @@ func (s *MyE2EHttpScopeMatrix) OverrideProducesOnly(ctx context.Context, req *E2
 }
 func (s *MyE2EHttpScopeMatrix) OverrideBothMedia(ctx context.Context, req *E2EHttpScopeMatrixOverrideBothMediaRequest) (*E2EHttpScopeMatrixOverrideBothMediaResponse, error) {
 	return &E2EHttpScopeMatrixOverrideBothMediaResponse{
-		Return:          StructHttpBody{Name: req.Name, Tags: []string{fmt.Sprintf("age:%s", formatOptInt(req.Age))}},
+		Return:         StructHttpBody{Name: req.Name, Tags: []string{fmt.Sprintf("age:%s", formatOptInt(req.Age))}},
 		NormalizedName: "OVERRIDDEN",
 	}, nil
 }
@@ -477,7 +477,7 @@ func main() {
 		attr2:  []string{"attr2"},
 		attr4:  EnumSimple1V1,
 		attr5:  StructEmpty{},
-		attr61: UnionSimple{Tag: "V1", Value: map[string]any{"data": 1}},
+		attr61: NewUnionSimpleCase1(1),
 	}
 	RegisterE2EAttributeHandler(r, attr)
 

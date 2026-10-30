@@ -1,29 +1,5 @@
-{%- if optional %}
-    {%- if ty == "string" %}
-        if {{ field }} != nil { query.Set("{{ wire_name }}", *{{ field }}) }
-    {%- elif ty == "uint32" %}
-        if {{ field }} != nil { query.Set("{{ wire_name }}", xidlgohttp.FormatUint32(*{{ field }})) }
-    {%- elif ty == "int32" %}
-        if {{ field }} != nil { query.Set("{{ wire_name }}", xidlgohttp.FormatInt32(*{{ field }})) }
-    {%- elif ty == "uint64" %}
-        if {{ field }} != nil { query.Set("{{ wire_name }}", xidlgohttp.FormatUint64(*{{ field }})) }
-    {%- elif ty == "int64" %}
-        if {{ field }} != nil { query.Set("{{ wire_name }}", xidlgohttp.FormatInt64(*{{ field }})) }
-    {%- elif ty == "bool" %}
-        if {{ field }} != nil { query.Set("{{ wire_name }}", xidlgohttp.FormatBool(*{{ field }})) }
-    {%- endif %}
-{%- else %}
-    {%- if ty == "string" %}
-        query.Set("{{ wire_name }}", {{ field }})
-    {%- elif ty == "uint32" %}
-        query.Set("{{ wire_name }}", xidlgohttp.FormatUint32({{ field }}))
-    {%- elif ty == "int32" %}
-        query.Set("{{ wire_name }}", xidlgohttp.FormatInt32({{ field }}))
-    {%- elif ty == "uint64" %}
-        query.Set("{{ wire_name }}", xidlgohttp.FormatUint64({{ field }}))
-    {%- elif ty == "int64" %}
-        query.Set("{{ wire_name }}", xidlgohttp.FormatInt64({{ field }}))
-    {%- elif ty == "bool" %}
-        query.Set("{{ wire_name }}", xidlgohttp.FormatBool({{ field }}))
-    {%- endif %}
-{%- endif %}
+{% if optional %}if {{ field }} != nil {% endif %}{
+    raw, err := xidlgohttp.FormatText({{ field }})
+    if err != nil { return nil, err }
+    query.Set("{{ wire_name }}", raw)
+}

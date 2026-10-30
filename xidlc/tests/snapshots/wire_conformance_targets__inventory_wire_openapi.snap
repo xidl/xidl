@@ -1,0 +1,582 @@
+---
+source: xidlc/tests/wire_conformance_targets.rs
+expression: output
+---
+=== openapi_wire_probe.json ===
+{
+  "components": {
+    "schemas": {
+      "Conflict": {
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "sku_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "sku_id",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "Error": {
+        "properties": {
+          "code": {
+            "type": "integer"
+          },
+          "details": {
+            "type": "object"
+          },
+          "msg": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg"
+        ],
+        "type": "object"
+      },
+      "catalog.Availability": {
+        "enum": [
+          "inStock",
+          "soldOut"
+        ],
+        "type": "string"
+      },
+      "catalog.Change": {
+        "oneOf": [
+          {
+            "properties": {
+              "data": {
+                "$ref": "#/components/schemas/catalog.Item"
+              },
+              "tag": {
+                "enum": [
+                  "0",
+                  "1"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "tag",
+              "data"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "data": {
+                "items": {
+                  "$ref": "#/components/schemas/catalog.Item"
+                },
+                "type": "array"
+              },
+              "tag": {
+                "enum": [
+                  "2"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "tag",
+              "data"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "data": {
+                "type": "string"
+              },
+              "tag": {
+                "enum": [
+                  "default"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "tag",
+              "data"
+            ],
+            "type": "object"
+          }
+        ]
+      },
+      "catalog.Item": {
+        "properties": {
+          "availability": {
+            "$ref": "#/components/schemas/catalog.Availability"
+          },
+          "initial": {
+            "maxLength": 1,
+            "minLength": 1,
+            "pattern": "^[^\\uD800-\\uDFFF]$",
+            "type": "string"
+          },
+          "letters": {
+            "items": {
+              "maxLength": 1,
+              "minLength": 1,
+              "pattern": "^[^\\uD800-\\uDFFF]$",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "mark": {
+            "maxLength": 1,
+            "minLength": 1,
+            "pattern": "^[^\\uD800-\\uDFFF]$",
+            "type": "string"
+          },
+          "memo": {
+            "type": "string"
+          },
+          "revision": {
+            "format": "int64",
+            "maximum": 9223372036854775807,
+            "minimum": -9223372036854775808,
+            "type": "integer"
+          },
+          "sku_id": {
+            "type": "string"
+          },
+          "stockGrid": {
+            "items": {
+              "items": {
+                "format": "int32",
+                "maximum": 2147483647,
+                "minimum": -2147483648,
+                "type": "integer"
+              },
+              "maxItems": 3,
+              "minItems": 3,
+              "type": "array"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "thumbnail": {
+            "items": {
+              "format": "int32",
+              "maximum": 255,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "sku_id",
+          "availability",
+          "stockGrid",
+          "thumbnail",
+          "revision",
+          "initial",
+          "mark",
+          "letters"
+        ],
+        "type": "object"
+      },
+      "catalog.LabelChange": {
+        "oneOf": [
+          {
+            "properties": {
+              "data": {
+                "type": "string"
+              },
+              "tag": {
+                "enum": [
+                  "'\"'"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "tag",
+              "data"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "data": {
+                "type": "string"
+              },
+              "tag": {
+                "enum": [
+                  "'\\\\'"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "tag",
+              "data"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "data": {
+                "type": "string"
+              },
+              "tag": {
+                "enum": [
+                  "'\\n'"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "tag",
+              "data"
+            ],
+            "type": "object"
+          },
+          {
+            "properties": {
+              "data": {
+                "type": "string"
+              },
+              "tag": {
+                "enum": [
+                  "'A'",
+                  "default"
+                ],
+                "type": "string"
+              }
+            },
+            "required": [
+              "tag",
+              "data"
+            ],
+            "type": "object"
+          }
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "xidl",
+    "version": "0.1.0"
+  },
+  "openapi": "3.2.0",
+  "paths": {
+    "/bindings": {
+      "get": {
+        "operationId": "Store.bindings",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "count",
+            "required": true,
+            "schema": {
+              "format": "int32",
+              "maximum": 2147483647,
+              "minimum": -2147483648,
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-Initial",
+            "required": true,
+            "schema": {
+              "maxLength": 1,
+              "minLength": 1,
+              "pattern": "^[^\\uD800-\\uDFFF]$",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "session",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "OK",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "X-Count": {
+                "schema": {
+                  "format": "int32",
+                  "maximum": 2147483647,
+                  "minimum": -2147483648,
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      }
+    },
+    "/changes": {
+      "post": {
+        "operationId": "Store.apply",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/catalog.Change"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/catalog.Change"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      }
+    },
+    "/feed/{state}": {
+      "get": {
+        "operationId": "Store.feed",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "state",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "text/event-stream": {
+                "itemSchema": {
+                  "$ref": "#/components/schemas/catalog.Change"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Conflict"
+                }
+              }
+            },
+            "description": "Error: Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      }
+    },
+    "/items": {
+      "post": {
+        "operationId": "Store.echo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/catalog.Item"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/catalog.Item"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Conflict"
+                }
+              }
+            },
+            "description": "Error: Conflict"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      }
+    },
+    "/labels": {
+      "post": {
+        "operationId": "Store.label",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/catalog.LabelChange"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/catalog.LabelChange"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "tags": [
+          "Store"
+        ]
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Store"
+    }
+  ]
+}

@@ -13,6 +13,8 @@ use std::path::Path;
 use xidl_parser::hir;
 use xidl_parser::hir::ParserProperties;
 
+#[cfg(feature = "gen-go-rest")]
+pub(crate) use definition::{go_export_name, go_field_name, go_type};
 pub(crate) use packages::{GoImport, GoPackages};
 
 pub fn generate_with_properties(

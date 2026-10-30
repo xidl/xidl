@@ -1,6 +1,7 @@
 package xidlgohttp
 
 import (
+	"encoding"
 	"errors"
 	"io"
 	"net/url"
@@ -200,6 +201,17 @@ func assignReflectValue(dst reflect.Value, values []string) error {
 		}
 		return assignReflectValue(dst.Elem(), values)
 	}
+	if dst.Kind() == reflect.Array {
+		if len(values) != dst.Len() {
+			return errors.New("fixed text array has an invalid element count")
+		}
+		for i, item := range values {
+			if err := assignScalar(dst.Index(i), item); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
 	if dst.Kind() == reflect.Slice && dst.Type().Elem().Kind() != reflect.Uint8 {
 		slice := reflect.MakeSlice(dst.Type(), 0, len(values))
 		for _, item := range values {
@@ -216,23 +228,28 @@ func assignReflectValue(dst reflect.Value, values []string) error {
 }
 
 func assignScalar(dst reflect.Value, value string) error {
+	if dst.CanAddr() {
+		if decoder, ok := dst.Addr().Interface().(encoding.TextUnmarshaler); ok {
+			return decoder.UnmarshalText([]byte(value))
+		}
+	}
 	switch dst.Kind() {
 	case reflect.String:
 		dst.SetString(value)
 	case reflect.Bool:
-		parsed, err := strconv.ParseBool(value)
+		parsed, err := ParseBool(value)
 		if err != nil {
 			return err
 		}
 		dst.SetBool(parsed)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		parsed, err := strconv.ParseInt(value, 10, 64)
+		parsed, err := strconv.ParseInt(value, 10, dst.Type().Bits())
 		if err != nil {
 			return err
 		}
 		dst.SetInt(parsed)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		parsed, err := strconv.ParseUint(value, 10, 64)
+		parsed, err := strconv.ParseUint(value, 10, dst.Type().Bits())
 		if err != nil {
 			return err
 		}
@@ -256,7 +273,13 @@ func formatReflectValue(value reflect.Value) ([]string, error) {
 		}
 		return formatReflectValue(value.Elem())
 	}
-	if value.Kind() == reflect.Slice && value.Type().Elem().Kind() != reflect.Uint8 {
+	if value.CanInterface() {
+		if encoder, ok := value.Interface().(encoding.TextMarshaler); ok {
+			data, err := encoder.MarshalText()
+			return []string{string(data)}, err
+		}
+	}
+	if value.Kind() == reflect.Array || value.Kind() == reflect.Slice {
 		out := make([]string, 0, value.Len())
 		for i := 0; i < value.Len(); i++ {
 			items, err := formatReflectValue(value.Index(i))

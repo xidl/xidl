@@ -43,9 +43,11 @@ func RegisterHttpStreamApiHandler(r gin.IRouter, svc HttpStreamApiService) {
 		c.Request = c.Request.WithContext(ctx)
 
 		req := &HttpStreamApiAlertsRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "district"); err == nil {
-			req.District = value
+		if raw, err := xidlgohttp.GinPathString(c, "district"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.District); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
@@ -69,7 +71,16 @@ func RegisterHttpStreamApiHandler(r gin.IRouter, svc HttpStreamApiService) {
 		resp, err := svc.UploadAsset(c.Request.Context(), stream)
 		if err != nil {
 			failure := encodeHttpStreamApiUploadAssetFailure(err)
-			c.Data(failure.Status, "application/json", failure.Body)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
+			} else {
+				c.Data(failure.Status, "application/json", failure.Body)
+			}
 			return
 		}
 
@@ -106,7 +117,7 @@ func (c *HttpStreamApiClient) Alerts(ctx context.Context, req *HttpStreamApiAler
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		defer resp.Body.Close()
-		return nil, xidlgohttp.DecodeStreamHTTPError(resp, decodeHttpStreamApiAlertsFailure)
+		return nil, xidlgohttp.ReadHTTPError(resp, decodeHttpStreamApiAlertsFailure)
 	}
 	return xidlgohttp.NewSSEStreamReader[string](resp.Body).WithContext(ctx).WithErrorDecoder(decodeHttpStreamApiAlertsFailure), nil
 }
@@ -121,7 +132,7 @@ func (c *HttpStreamApiClient) UploadAsset(ctx context.Context) (*xidlgohttp.Clie
 	stream := xidlgohttp.NewClientStreamWriter[HttpStreamApiUploadAssetRequest, HttpStreamApiUploadAssetResponse](ctx, c.httpClient, httpReq, func(resp *http.Response) (HttpStreamApiUploadAssetResponse, error) {
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 			var zero HttpStreamApiUploadAssetResponse
-			return zero, xidlgohttp.DecodeStreamHTTPError(resp, decodeHttpStreamApiUploadAssetFailure)
+			return zero, xidlgohttp.ReadHTTPError(resp, decodeHttpStreamApiUploadAssetFailure)
 		}
 		decoded, err := decodeHttpStreamApiUploadAssetResponse(resp)
 		return decoded, err
@@ -159,14 +170,15 @@ func decodeHttpStreamApiAlertsResponse(resp *http.Response) (HttpStreamApiAlerts
 	out := HttpStreamApiAlertsResponse{}
 	return out, nil
 }
-func encodeHttpStreamApiAlertsFailure(err error) xidlgohttp.StreamFailure {
 
-	return xidlgohttp.EncodeStreamError(err)
+func encodeHttpStreamApiAlertsFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
 }
 
-func decodeHttpStreamApiAlertsFailure(failure xidlgohttp.StreamFailure) error {
+func decodeHttpStreamApiAlertsFailure(failure xidlgohttp.HTTPFailure) error {
 
-	return xidlgohttp.DecodeStreamError(failure)
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type HttpStreamApiUploadAssetRequest struct {
@@ -203,12 +215,13 @@ func decodeHttpStreamApiUploadAssetResponse(resp *http.Response) (HttpStreamApiU
 	out.Return = body
 	return out, nil
 }
-func encodeHttpStreamApiUploadAssetFailure(err error) xidlgohttp.StreamFailure {
 
-	return xidlgohttp.EncodeStreamError(err)
+func encodeHttpStreamApiUploadAssetFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
 }
 
-func decodeHttpStreamApiUploadAssetFailure(failure xidlgohttp.StreamFailure) error {
+func decodeHttpStreamApiUploadAssetFailure(failure xidlgohttp.HTTPFailure) error {
 
-	return xidlgohttp.DecodeStreamError(failure)
+	return xidlgohttp.DecodeHTTPError(failure)
 }

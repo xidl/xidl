@@ -11,10 +11,10 @@ import (
 "net/http"
 "net/url"
 "strings"
-{% if blocks.stream_raises %}
+{% if blocks.has_exceptions %}
 "errors"
 {% endif %}
-{% if blocks.stream_error_body %}
+{% if blocks.has_exception_body %}
 json "github.com/xidl/xidl/golang/xidl-go-codec"
 {% endif %}
 

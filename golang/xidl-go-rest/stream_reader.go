@@ -14,7 +14,7 @@ import (
 type streamReader struct {
 	body        io.ReadCloser
 	outcome     StreamOutcome
-	decodeError func(StreamFailure) error
+	decodeError func(HTTPFailure) error
 	ctx         context.Context
 	closeOnce   sync.Once
 	closeError  error
@@ -47,7 +47,7 @@ func (r *streamReader) interrupted(err error) error {
 	return &StreamInterruptedError{Cause: err}
 }
 func (r *streamReader) failure(raw []byte) error {
-	var failure StreamFailure
+	var failure HTTPFailure
 	// Preserve explicit JSON null separately from an absent error body.
 	if err := stdjson.Unmarshal(raw, &failure); err != nil {
 		return r.interrupted(err)
@@ -65,9 +65,9 @@ type ServerStreamReader[T any] struct {
 }
 
 func NewNDJSONStreamReader[T any](body io.ReadCloser) *ServerStreamReader[T] {
-	return &ServerStreamReader[T]{streamReader: &streamReader{body: body, decodeError: DecodeStreamError}, dec: json.NewDecoder(body)}
+	return &ServerStreamReader[T]{streamReader: &streamReader{body: body, decodeError: DecodeHTTPError}, dec: json.NewDecoder(body)}
 }
-func (r *ServerStreamReader[T]) WithErrorDecoder(decode func(StreamFailure) error) *ServerStreamReader[T] {
+func (r *ServerStreamReader[T]) WithErrorDecoder(decode func(HTTPFailure) error) *ServerStreamReader[T] {
 	r.decodeError = decode
 	return r
 }
@@ -115,7 +115,7 @@ type SSEStreamReader[T any] struct {
 }
 
 func NewSSEStreamReader[T any](body io.ReadCloser) *SSEStreamReader[T] {
-	return &SSEStreamReader[T]{streamReader: &streamReader{body: body, decodeError: DecodeStreamError}, lines: bufio.NewReader(body)}
+	return &SSEStreamReader[T]{streamReader: &streamReader{body: body, decodeError: DecodeHTTPError}, lines: bufio.NewReader(body)}
 }
 
 // WithContext distinguishes explicit cancellation from a broken transport.
@@ -123,7 +123,7 @@ func (r *SSEStreamReader[T]) WithContext(ctx context.Context) *SSEStreamReader[T
 	r.ctx = ctx
 	return r
 }
-func (r *SSEStreamReader[T]) WithErrorDecoder(decode func(StreamFailure) error) *SSEStreamReader[T] {
+func (r *SSEStreamReader[T]) WithErrorDecoder(decode func(HTTPFailure) error) *SSEStreamReader[T] {
 	r.decodeError = decode
 	return r
 }

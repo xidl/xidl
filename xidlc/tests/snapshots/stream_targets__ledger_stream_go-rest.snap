@@ -39,9 +39,11 @@ func RegisterLedgerHandler(r gin.IRouter, svc LedgerService) {
 	r.GET("/exports/:job", func(c *gin.Context) {
 
 		req := &LedgerExportRowsRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "job"); err == nil {
-			req.Job = value
+		if raw, err := xidlgohttp.GinPathString(c, "job"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Job); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
@@ -59,7 +61,16 @@ func RegisterLedgerHandler(r gin.IRouter, svc LedgerService) {
 		resp, err := svc.ImportRows(c.Request.Context(), stream)
 		if err != nil {
 			failure := encodeLedgerImportRowsFailure(err)
-			c.Data(failure.Status, "application/json", failure.Body)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
+			} else {
+				c.Data(failure.Status, "application/json", failure.Body)
+			}
 			return
 		}
 
@@ -95,7 +106,7 @@ func (c *LedgerClient) ExportRows(ctx context.Context, req *LedgerExportRowsRequ
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		defer resp.Body.Close()
-		return nil, xidlgohttp.DecodeStreamHTTPError(resp, decodeLedgerExportRowsFailure)
+		return nil, xidlgohttp.ReadHTTPError(resp, decodeLedgerExportRowsFailure)
 	}
 	return xidlgohttp.NewSSEStreamReader[ExportRow](resp.Body).WithContext(ctx).WithErrorDecoder(decodeLedgerExportRowsFailure), nil
 }
@@ -110,7 +121,7 @@ func (c *LedgerClient) ImportRows(ctx context.Context) (*xidlgohttp.ClientStream
 	stream := xidlgohttp.NewClientStreamWriter[LedgerImportRowsRequest, LedgerImportRowsResponse](ctx, c.httpClient, httpReq, func(resp *http.Response) (LedgerImportRowsResponse, error) {
 		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 			var zero LedgerImportRowsResponse
-			return zero, xidlgohttp.DecodeStreamHTTPError(resp, decodeLedgerImportRowsFailure)
+			return zero, xidlgohttp.ReadHTTPError(resp, decodeLedgerImportRowsFailure)
 		}
 		decoded, err := decodeLedgerImportRowsResponse(resp)
 		return decoded, err
@@ -146,65 +157,84 @@ func decodeLedgerExportRowsResponse(resp *http.Response) (LedgerExportRowsRespon
 	out := LedgerExportRowsResponse{}
 	return out, nil
 }
-func encodeLedgerExportRowsFailure(err error) xidlgohttp.StreamFailure {
+
+func encodeLedgerExportRowsFailure(err error) xidlgohttp.HTTPFailure {
 
 	var ex1 *Conflict
 	if errors.As(err, &ex1) {
-		body, encodingError := json.Marshal(ex1)
-		if encodingError != nil {
-			return xidlgohttp.EncodeStreamError(fmt.Errorf("LedgerExportRows exception encoding: %w", encodingError))
-		}
-		return xidlgohttp.StreamFailure{Status: 409, Body: body}
+		exception := ex1
+		failure := xidlgohttp.HTTPFailure{Status: 409, Headers: make(http.Header)}
 
+		body, encodingError := json.Marshal(struct {
+			Detail ConflictDetail `xjson:"detail"`
+		}{
+			Detail: exception.Detail,
+		})
+		if encodingError != nil {
+			return xidlgohttp.EncodeHTTPError(fmt.Errorf("LedgerExportRows exception encoding: %w", encodingError))
+		}
+		failure.Body = body
+
+		return failure
 	}
 
 	var ex2 *Retired
 	if errors.As(err, &ex2) {
-		return xidlgohttp.StreamFailure{Status: 410}
 
+		failure := xidlgohttp.HTTPFailure{Status: 410, Headers: make(http.Header)}
+
+		return failure
 	}
 
 	var ex3 *NotModified
 	if errors.As(err, &ex3) {
-		return xidlgohttp.StreamFailure{Status: 304}
 
+		failure := xidlgohttp.HTTPFailure{Status: 304, Headers: make(http.Header)}
+
+		return failure
 	}
 
-	return xidlgohttp.EncodeStreamError(err)
+	return xidlgohttp.EncodeHTTPError(err)
 }
 
-func decodeLedgerExportRowsFailure(failure xidlgohttp.StreamFailure) error {
+func decodeLedgerExportRowsFailure(failure xidlgohttp.HTTPFailure) error {
 
 	if failure.Status == 409 {
 		var exception Conflict
 
-		var fields map[string]json.RawMessage
-		if err := json.Unmarshal(failure.Body, &fields); err != nil || fields == nil {
-			return xidlgohttp.DecodeStreamError(failure)
+		var body struct {
+			Detail ConflictDetail `xjson:"detail"`
 		}
-		if value, ok := fields["detail"]; !ok || string(value) == "null" {
-			return xidlgohttp.DecodeStreamError(failure)
+		if err := json.Unmarshal(failure.Body, &body); err != nil {
+			return xidlgohttp.DecodeHTTPError(failure)
 		}
-		if err := json.Unmarshal(failure.Body, &exception); err != nil {
-			return xidlgohttp.DecodeStreamError(failure)
-		}
+		exception.Detail = body.Detail
 
+		if failure.Headers != nil {
+
+		}
 		return &exception
 	}
 
 	if failure.Status == 410 {
 		var exception Retired
 
+		if failure.Headers != nil {
+
+		}
 		return &exception
 	}
 
 	if failure.Status == 304 {
 		var exception NotModified
 
+		if failure.Headers != nil {
+
+		}
 		return &exception
 	}
 
-	return xidlgohttp.DecodeStreamError(failure)
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 type LedgerImportRowsRequest struct {
@@ -238,41 +268,50 @@ func decodeLedgerImportRowsResponse(resp *http.Response) (LedgerImportRowsRespon
 	out.Return = body
 	return out, nil
 }
-func encodeLedgerImportRowsFailure(err error) xidlgohttp.StreamFailure {
+
+func encodeLedgerImportRowsFailure(err error) xidlgohttp.HTTPFailure {
 
 	var ex1 *Conflict
 	if errors.As(err, &ex1) {
-		body, encodingError := json.Marshal(ex1)
-		if encodingError != nil {
-			return xidlgohttp.EncodeStreamError(fmt.Errorf("LedgerImportRows exception encoding: %w", encodingError))
-		}
-		return xidlgohttp.StreamFailure{Status: 409, Body: body}
+		exception := ex1
+		failure := xidlgohttp.HTTPFailure{Status: 409, Headers: make(http.Header)}
 
+		body, encodingError := json.Marshal(struct {
+			Detail ConflictDetail `xjson:"detail"`
+		}{
+			Detail: exception.Detail,
+		})
+		if encodingError != nil {
+			return xidlgohttp.EncodeHTTPError(fmt.Errorf("LedgerImportRows exception encoding: %w", encodingError))
+		}
+		failure.Body = body
+
+		return failure
 	}
 
-	return xidlgohttp.EncodeStreamError(err)
+	return xidlgohttp.EncodeHTTPError(err)
 }
 
-func decodeLedgerImportRowsFailure(failure xidlgohttp.StreamFailure) error {
+func decodeLedgerImportRowsFailure(failure xidlgohttp.HTTPFailure) error {
 
 	if failure.Status == 409 {
 		var exception Conflict
 
-		var fields map[string]json.RawMessage
-		if err := json.Unmarshal(failure.Body, &fields); err != nil || fields == nil {
-			return xidlgohttp.DecodeStreamError(failure)
+		var body struct {
+			Detail ConflictDetail `xjson:"detail"`
 		}
-		if value, ok := fields["detail"]; !ok || string(value) == "null" {
-			return xidlgohttp.DecodeStreamError(failure)
+		if err := json.Unmarshal(failure.Body, &body); err != nil {
+			return xidlgohttp.DecodeHTTPError(failure)
 		}
-		if err := json.Unmarshal(failure.Body, &exception); err != nil {
-			return xidlgohttp.DecodeStreamError(failure)
-		}
+		exception.Detail = body.Detail
 
+		if failure.Headers != nil {
+
+		}
 		return &exception
 	}
 
-	return xidlgohttp.DecodeStreamError(failure)
+	return xidlgohttp.DecodeHTTPError(failure)
 }
 
 === stream_lifecycle.go ===

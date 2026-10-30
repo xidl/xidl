@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	xidlgohttp "github.com/xidl/xidl/golang/xidl-go-rest"
 )
 
 type MyAllScenarios struct {
@@ -19,6 +20,10 @@ func (s *MyAllScenarios) GetItem(ctx context.Context, req *AllScenariosServiceGe
 	return &AllScenariosServiceGetItemResponse{Return: fmt.Sprintf("Item %d with %s and %s", req.Id, req.Filter, req.TraceId)}, nil
 }
 func (s *MyAllScenarios) CreateItem(ctx context.Context, req *AllScenariosServiceCreateItemRequest) (*AllScenariosServiceCreateItemResponse, error) {
+	message, active := req.Payload.AsMessage()
+	if req.Name == "" || !active || message == "" {
+		return nil, xidlgohttp.NewHttpError(400, "active message required")
+	}
 	return &AllScenariosServiceCreateItemResponse{Return: 42}, nil
 }
 func (s *MyAllScenarios) UpdateItem(ctx context.Context, req *AllScenariosServiceUpdateItemRequest) (*AllScenariosServiceUpdateItemResponse, error) {

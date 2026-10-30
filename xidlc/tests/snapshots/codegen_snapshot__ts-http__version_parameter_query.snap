@@ -1007,19 +1007,19 @@ import { xjson } from "xidl-typescript-codec";
     export namespace business {
 
         export const StoreGetRequestSchema = z.object({
-                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
+                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
                 search: z.coerce.string(),
                 theme: z.coerce.string(),
             });
         export type StoreGetRequest = z.infer<typeof StoreGetRequestSchema>;
 
         export const StoreRemoveRequestSchema = z.object({
-                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
+                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
             });
         export type StoreRemoveRequest = z.infer<typeof StoreRemoveRequestSchema>;
 
         export const StoreFailRequestSchema = z.object({
-                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
+                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
             });
         export type StoreFailRequest = z.infer<typeof StoreFailRequestSchema>;
 
@@ -1055,19 +1055,19 @@ import { xjson } from "xidl-typescript-codec";
     export namespace business {
 
         export const StoreGetRequestSchema = z.object({
-                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
+                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
                 search: z.coerce.string(),
                 theme: z.coerce.string(),
             });
         export type StoreGetRequest = z.infer<typeof StoreGetRequestSchema>;
 
         export const StoreRemoveRequestSchema = z.object({
-                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
+                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
             });
         export type StoreRemoveRequest = z.infer<typeof StoreRemoveRequestSchema>;
 
         export const StoreFailRequestSchema = z.object({
-                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
+                id: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
             });
         export type StoreFailRequest = z.infer<typeof StoreFailRequestSchema>;
 

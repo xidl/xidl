@@ -744,11 +744,16 @@ def step_impl(context):
         ],
     }
     hurl_files = idl_hurl_mapping.get(idl_name, [f"{idl_name}.hurl"])
+    context.hurl_reports = []
     for hurl_file_name in hurl_files:
+        report = os.path.join(context.temp_dir, hurl_file_name + "-report")
+        context.hurl_reports.append(report)
         hurl_file = os.path.join(os.getcwd(), "bdd", "features", "data", hurl_file_name)
         cmd = [
             "hurl",
             "--test",
+            "--report-json",
+            report,
             "--variable",
             f"base_url=http://127.0.0.1:{context.port}",
             hurl_file,
@@ -992,12 +997,7 @@ def step_impl(context, attr, value):
 @then('the client can create an item with name "{name}" and payload message "{msg}"')
 def step_impl(context, name, msg):
     url = f"http://127.0.0.1:{context.port}/items"
-    if context.lang == "rust":
-        payload = {"tag": "ACTIVE", "data": msg}
-    elif context.lang == "go":
-        payload = {"status": 0, "message": msg}
-    else:
-        payload = {"status": "ACTIVE", "message": msg}
+    payload = {"tag": "ACTIVE", "data": msg}
     resp = requests.post(url, json={"name": name, "payload": payload}, timeout=10)
     assert resp.status_code == 200, f"Got {resp.status_code}: {resp.text}"
 

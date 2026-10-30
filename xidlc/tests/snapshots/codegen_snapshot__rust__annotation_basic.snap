@@ -39,168 +39,124 @@ impl BM {
     pub const A: u32 = 1u32 << 0;
     pub const B: u32 = 1u32 << 1;
 }
+#[derive(Debug, Clone, PartialEq)]
 pub struct U {
-    tag: i32,
+    tag: Option<i32>,
     data: UData,
 }
-union UData {
-    a: core::mem::ManuallyDrop<i32>,
-    b: core::mem::ManuallyDrop<i32>,
-}
-impl Drop for U {
-    #[allow(unreachable_patterns)]
-    fn drop(&mut self) {
-        if matches!(self.tag, 0) {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.a);
-            }
-        } else {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.b);
-            }
-        }
-    }
-}
-impl Clone for U {
-    #[allow(clippy::clone_on_copy)]
-    #[allow(unreachable_patterns)]
-    fn clone(&self) -> Self {
-        if matches!(self.tag, 0) {
-            Self::new_a(self.as_a().clone())
-        } else {
-            Self::new_b(self.as_b().clone())
-        }
-    }
-}
-impl core::fmt::Debug for U {
-    #[allow(unreachable_patterns)]
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut d = f.debug_struct("U");
-        d.field("tag", &self.tag);
-        if matches!(self.tag, 0) {
-            d.field("a", self.as_a());
-        } else {
-            d.field("b", self.as_b());
-        }
-        d.finish()
-    }
-}
-impl PartialEq for U {
-    #[allow(unreachable_patterns)]
-    fn eq(&self, other: &Self) -> bool {
-        if self.tag != other.tag {
-            return false;
-        }
-        if matches!(self.tag, 0) {
-            self.as_a() == other.as_a()
-        } else {
-            self.as_b() == other.as_b()
-        }
-    }
+#[derive(Debug, Clone, PartialEq)]
+enum UData {
+    A(i32),
+    B(i32),
 }
 impl U {
     pub fn new_a(value: i32) -> Self {
         Self {
-            tag: 0,
-            data: UData {
-                a: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(0),
+            data: UData::A(value),
         }
     }
     pub fn is_a(&self) -> bool {
-        matches!(self.tag, 0)
+        matches!(& self.data, UData::A(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_a(&self) -> &i32 {
-        debug_assert!(self.is_a());
-        unsafe { &self.data.a }
+        match &self.data {
+            UData::A(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union U does not contain a"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_a_mut(&mut self) -> &mut i32 {
-        debug_assert!(self.is_a());
-        unsafe { &mut self.data.a }
+        match &mut self.data {
+            UData::A(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union U does not contain a"),
+        }
     }
     pub fn into_a(self) -> i32 {
-        debug_assert!(self.is_a());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.a)
+        match self.data {
+            UData::A(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union U does not contain a"),
         }
     }
     pub fn new_b(value: i32) -> Self {
         Self {
-            tag: i32::default(),
-            data: UData {
-                b: core::mem::ManuallyDrop::new(value),
-            },
+            tag: None,
+            data: UData::B(value),
         }
     }
     pub fn is_b(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(& self.data, UData::B(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_b(&self) -> &i32 {
-        debug_assert!(self.is_b());
-        unsafe { &self.data.b }
+        match &self.data {
+            UData::B(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union U does not contain b"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_b_mut(&mut self) -> &mut i32 {
-        debug_assert!(self.is_b());
-        unsafe { &mut self.data.b }
-    }
-    pub fn into_b(self) -> i32 {
-        debug_assert!(self.is_b());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.b)
+        match &mut self.data {
+            UData::B(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union U does not contain b"),
         }
     }
-    pub fn tag(&self) -> &i32 {
-        &self.tag
+    pub fn into_b(self) -> i32 {
+        match self.data {
+            UData::B(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union U does not contain b"),
+        }
+    }
+    /// The explicit discriminator, or None for the default case.
+    pub fn tag(&self) -> Option<&i32> {
+        self.tag.as_ref()
     }
 }
 impl Default for U {
     fn default() -> Self {
-        Self {
-            tag: i32::default(),
-            data: UData {
-                b: core::mem::ManuallyDrop::new(i32::default()),
-            },
-        }
+        Self::new_b(Default::default())
     }
 }
 #[derive(::serde::Serialize)]
-struct USerdeRef<'__a> {
-    tag: &'__a str,
-    data: USerdeRefData<'__a>,
+struct USerdeRef<'a> {
+    tag: &'a str,
+    data: USerdeRefData<'a>,
 }
-#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
-enum USerdeRefData<'__a> {
-    Case0(&'__a i32),
-    Case1(&'__a i32),
+enum USerdeRefData<'a> {
+    Case0(&'a i32),
+    Case1(&'a i32),
 }
 impl serde::Serialize for U {
-    #[allow(unreachable_patterns)]
-    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        __S: serde::Serializer,
+        S: serde::Serializer,
     {
-        let helper = if matches!(self.tag, 0) {
-            let tag = "0";
-            USerdeRef {
-                tag,
-                data: USerdeRefData::Case0(self.as_a()),
+        let helper = match &self.data {
+            UData::A(data) => {
+                let tag = "0";
+                USerdeRef {
+                    tag,
+                    data: USerdeRefData::Case0(data),
+                }
             }
-        } else {
-            let tag = "default";
-            USerdeRef {
-                tag,
-                data: USerdeRefData::Case1(self.as_b()),
+            UData::B(data) => {
+                let tag = "default";
+                USerdeRef {
+                    tag,
+                    data: USerdeRefData::Case1(data),
+                }
             }
         };
-        helper.serialize(__serializer)
+        helper.serialize(serializer)
     }
 }
 #[derive(::serde::Deserialize)]
@@ -217,26 +173,18 @@ impl<'de> serde::Deserialize<'de> for U {
         match helper.tag.as_str() {
             "0" => {
                 let value = ::serde_json::from_value::<i32>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!("union U payload decode failed for tag `0`: {err}"),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: 0,
-                    data: UData {
-                        a: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(0),
+                    data: UData::A(value),
                 })
             }
             "default" => {
                 let value = ::serde_json::from_value::<i32>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!("union U payload decode failed for tag `default`: {err}"),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: i32::default(),
-                    data: UData {
-                        b: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: None,
+                    data: UData::B(value),
                 })
             }
             _ => {

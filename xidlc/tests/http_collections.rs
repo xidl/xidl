@@ -92,8 +92,9 @@ fn text_position_request_schemas_coerce_typedef_collections() {
         "string typedefs expand inline; only JSON positions reference models"
     );
     assert!(
-        schema.contains(".pipe(z.number().int().nonnegative())"),
-        "unsigned scalar transports must reject minus signs"
+        schema.contains("z.string().regex(/^[+]?[0-9]+")
+            && schema.contains(".pipe(z.number().min(0).max(4294967295)"),
+        "unsigned scalar transports must reject minus signs and values outside uint32"
     );
     insta::assert_snapshot!("collection_iface_zod", schema);
 }

@@ -285,7 +285,7 @@ fn scoped_schemas_resolve_every_reference_in_its_declaration_module() {
         "#/components/schemas/models.nested.Later"
     );
     assert_eq!(
-        schemas["models.nested.Choice"]["oneOf"][0]["properties"]["local"]["$ref"],
+        schemas["models.nested.Choice"]["oneOf"][0]["properties"]["data"]["$ref"],
         "#/components/schemas/models.Item"
     );
     let response = &doc["paths"]["/scoped"]["get"]["responses"]["409"];

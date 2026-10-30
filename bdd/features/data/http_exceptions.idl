@@ -28,6 +28,13 @@ exception NotFound {
 @http(410)
 exception EmptyGone {};
 
+@http(418)
+exception Reserved {
+    @body string type;
+    @header("X-Select") string select;
+    @cookie("type") string TypeID;
+};
+
 struct FileMeta {
     string id;
     string etag;
@@ -37,12 +44,12 @@ struct FileMeta {
 interface Files {
     @get(path = "/files/{id}")
     FileMeta get_file(@path string id)
-        raises(NotModified, PreconditionFailed, NotFound, EmptyGone);
+        raises(NotModified, PreconditionFailed, NotFound, EmptyGone, Reserved);
 };
 
 module left {
     struct Detail { string message; };
-    @http(409) exception Failure { @body Detail detail; };
+    @http(409) exception Failure { @body ::left::Detail detail; };
 };
 module right {
     @http(422) exception Failure { @body string reason; };

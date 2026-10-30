@@ -102,9 +102,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["ids"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(z.number().int()).max(2)),
+            ["ids"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")).max(2)),
         
-            ["groups"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.array(z.number().int()).max(2)).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded"))),
+            ["groups"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.array(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")).max(2)).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded"))),
         
     })).transform((value) => ({
         
@@ -193,9 +193,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["ids"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(z.number().int()).max(2)),
+            ["ids"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")).max(2)),
         
-            ["groups"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.array(z.number().int()).max(2)).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded"))),
+            ["groups"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.unknown().superRefine(rejectPrototypeKey).pipe(z.record(z.string(), z.array(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")).max(2)).refine((value) => Object.keys(value).length <= 2, "map maximum length exceeded"))),
         
     })).transform((value) => ({
         

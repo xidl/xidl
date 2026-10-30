@@ -224,28 +224,28 @@ export type HttpEdgeCasesServiceHealthRequest = z.infer<typeof HttpEdgeCasesServ
 
     
 export const HttpEdgeCasesServiceGetUserRequestSchema = z.object({
-        uid: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        uid: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
         locale: z.coerce.string(),
     });
 export type HttpEdgeCasesServiceGetUserRequest = z.infer<typeof HttpEdgeCasesServiceGetUserRequestSchema>;
 
     
 export const HttpEdgeCasesServiceDedupUserRequestSchema = z.object({
-        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
     });
 export type HttpEdgeCasesServiceDedupUserRequest = z.infer<typeof HttpEdgeCasesServiceDedupUserRequestSchema>;
 
     
 export const HttpEdgeCasesServiceGetItemRequestSchema = z.object({
-        order_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
-        item_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        order_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
+        item_id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
     });
 export type HttpEdgeCasesServiceGetItemRequest = z.infer<typeof HttpEdgeCasesServiceGetItemRequestSchema>;
 
     
 export const HttpEdgeCasesServiceLookupRequestSchema = z.object({
         keyword: z.coerce.string(),
-        page_size: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        page_size: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
     });
 export type HttpEdgeCasesServiceLookupRequest = z.infer<typeof HttpEdgeCasesServiceLookupRequestSchema>;
 ===============

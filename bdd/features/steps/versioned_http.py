@@ -4,7 +4,6 @@ from dataclasses import dataclass
 import json
 import os
 from pathlib import Path
-import re
 import shutil
 import subprocess
 import time
@@ -12,6 +11,7 @@ import time
 from behave import given, then, when
 import requests
 
+from openapi_responses import OpenAPIResponses
 from server_process import start_server_process
 
 
@@ -59,7 +59,7 @@ def versioned_generate(context):
     package_name = context.versioned_app.package
     rust = output / "rust"
     typescript = output / "ts"
-    cli = root / "target/debug/xidlc"
+    cli = root / os.environ.get("CARGO_TARGET_DIR", "target") / "debug/xidlc"
 
     def generate(target, folder, *options):
         run(
@@ -170,8 +170,6 @@ def versioned_hurl(context):
 
 @then("every versioned Hurl response matches its generated OpenAPI contract")
 def versioned_openapi(context):
-    from jsonschema import Draft202012Validator
-
     documents = {
         document["info"]["version"]: document
         for path in (Path(context.temp_dir) / "openapi").glob("*.json")
@@ -203,42 +201,9 @@ def versioned_openapi(context):
                     assert response["status"] == 400
                     assert version_header not in headers
                     version = context.versioned_app.versions[-1]
-                document = documents[version]
-                path = requests.utils.urlparse(request["url"]).path
-                if path not in document["paths"]:
-                    matches = [
-                        template
-                        for template in document["paths"]
-                        if re.fullmatch(
-                            "/".join(
-                                "[^/]+"
-                                if segment.startswith("{")
-                                else re.escape(segment)
-                                for segment in template.split("/")
-                            ),
-                            path,
-                        )
-                    ]
-                    assert len(matches) == 1, (path, matches)
-                    path = matches[0]
-                operation = document["paths"][path][request["method"].lower()]
-                contract = operation["responses"][str(response["status"])]
-                for name, header in contract.get("headers", {}).items():
-                    if name.lower() in headers:
-                        Draft202012Validator(header["schema"]).validate(
-                            headers[name.lower()]
-                        )
-                body = (context.versioned_report / response["body"]).read_bytes()
-                if not contract.get("content"):
-                    assert body == b"", (request, response)
-                    continue
-                media_type = headers["content-type"].split(";", 1)[0].strip()
-                schema = contract["content"][media_type]["schema"]
-                body = json.loads(body)
-                validator = Draft202012Validator(
-                    {**schema, "components": document.get("components", {})}
+                OpenAPIResponses(context.versioned_report).validate(
+                    call, documents[version]
                 )
-                validator.validate(body)
 
 
 @then("independent Rust and TypeScript SDKs use the same versioned endpoint")

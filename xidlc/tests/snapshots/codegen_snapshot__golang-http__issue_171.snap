@@ -53,11 +53,18 @@ func RegisterIssue171ReproServiceHandler(r gin.IRouter, svc Issue171ReproService
 			return
 		}
 		req.Payload = body
-		if _, err := svc.FlattenAny(c.Request.Context(), req); err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+		_, err := svc.FlattenAny(c.Request.Context(), req)
+		if err != nil {
+			failure := encodeIssue171ReproServiceFlattenAnyFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -72,11 +79,18 @@ func RegisterIssue171ReproServiceHandler(r gin.IRouter, svc Issue171ReproService
 			return
 		}
 		req.Payload = body
-		if _, err := svc.FlattenStructWithAny(c.Request.Context(), req); err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+		_, err := svc.FlattenStructWithAny(c.Request.Context(), req)
+		if err != nil {
+			failure := encodeIssue171ReproServiceFlattenStructWithAnyFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -115,8 +129,9 @@ func (c *Issue171ReproServiceClient) FlattenAny(ctx context.Context, req *Issue1
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *Issue171ReproServiceFlattenAnyResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeIssue171ReproServiceFlattenAnyFailure)
 	}
 	decoded, err := decodeIssue171ReproServiceFlattenAnyResponse(resp)
 	if err != nil {
@@ -143,8 +158,9 @@ func (c *Issue171ReproServiceClient) FlattenStructWithAny(ctx context.Context, r
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *Issue171ReproServiceFlattenStructWithAnyResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeIssue171ReproServiceFlattenStructWithAnyFailure)
 	}
 	decoded, err := decodeIssue171ReproServiceFlattenStructWithAnyResponse(resp)
 	if err != nil {
@@ -179,6 +195,16 @@ func decodeIssue171ReproServiceFlattenAnyResponse(resp *http.Response) (Issue171
 	return out, nil
 }
 
+func encodeIssue171ReproServiceFlattenAnyFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeIssue171ReproServiceFlattenAnyFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type Issue171ReproServiceFlattenStructWithAnyRequest struct {
 	Payload Issue171StructWithAny `xjson:"payload" form:"payload"`
 }
@@ -203,4 +229,14 @@ func formatIssue171ReproServiceFlattenStructWithAnyPath(req *Issue171ReproServic
 func decodeIssue171ReproServiceFlattenStructWithAnyResponse(resp *http.Response) (Issue171ReproServiceFlattenStructWithAnyResponse, error) {
 	out := Issue171ReproServiceFlattenStructWithAnyResponse{}
 	return out, nil
+}
+
+func encodeIssue171ReproServiceFlattenStructWithAnyFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeIssue171ReproServiceFlattenStructWithAnyFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }

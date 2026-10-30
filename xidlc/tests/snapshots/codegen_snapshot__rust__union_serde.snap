@@ -23,227 +23,165 @@ pub enum Tag {
     V2,
     V3,
 }
+#[derive(Debug, Clone, PartialEq)]
 pub struct UnionValue {
-    tag: Tag,
+    tag: Option<Tag>,
     data: UnionValueData,
 }
-union UnionValueData {
-    case1: core::mem::ManuallyDrop<int>,
-    case2: core::mem::ManuallyDrop<Vec<String>>,
-    case3: core::mem::ManuallyDrop<::std::collections::BTreeMap<String, String>>,
-}
-impl Drop for UnionValue {
-    #[allow(unreachable_patterns)]
-    fn drop(&mut self) {
-        match self.tag {
-            Tag::V1 => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.case1);
-                }
-            }
-            Tag::V2 => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.case2);
-                }
-            }
-            Tag::V3 => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.case3);
-                }
-            }
-            _ => {}
-        }
-    }
-}
-impl Clone for UnionValue {
-    #[allow(clippy::clone_on_copy)]
-    #[allow(unreachable_patterns)]
-    fn clone(&self) -> Self {
-        match self.tag {
-            Tag::V1 => Self::new_case1(self.as_case1().clone()),
-            Tag::V2 => Self::new_case2(self.as_case2().clone()),
-            Tag::V3 => Self::new_case3(self.as_case3().clone()),
-            _ => unreachable!(),
-        }
-    }
-}
-impl core::fmt::Debug for UnionValue {
-    #[allow(unreachable_patterns)]
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut d = f.debug_struct("UnionValue");
-        d.field("tag", &self.tag);
-        match self.tag {
-            Tag::V1 => {
-                d.field("case1", self.as_case1());
-            }
-            Tag::V2 => {
-                d.field("case2", self.as_case2());
-            }
-            Tag::V3 => {
-                d.field("case3", self.as_case3());
-            }
-            _ => {}
-        }
-        d.finish()
-    }
-}
-impl PartialEq for UnionValue {
-    #[allow(unreachable_patterns)]
-    fn eq(&self, other: &Self) -> bool {
-        if self.tag != other.tag {
-            return false;
-        }
-        match self.tag {
-            Tag::V1 => self.as_case1() == other.as_case1(),
-            Tag::V2 => self.as_case2() == other.as_case2(),
-            Tag::V3 => self.as_case3() == other.as_case3(),
-            _ => false,
-        }
-    }
+#[derive(Debug, Clone, PartialEq)]
+enum UnionValueData {
+    Case1(int),
+    Case2(Vec<String>),
+    Case3(::std::collections::BTreeMap<String, String>),
 }
 impl UnionValue {
     pub fn new_case1(value: int) -> Self {
         Self {
-            tag: Tag::V1,
-            data: UnionValueData {
-                case1: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(Tag::V1),
+            data: UnionValueData::Case1(value),
         }
     }
     pub fn is_case1(&self) -> bool {
-        matches!(self.tag, Tag::V1)
+        matches!(& self.data, UnionValueData::Case1(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_case1(&self) -> &int {
-        debug_assert!(self.is_case1());
-        unsafe { &self.data.case1 }
+        match &self.data {
+            UnionValueData::Case1(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union UnionValue does not contain case1"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_case1_mut(&mut self) -> &mut int {
-        debug_assert!(self.is_case1());
-        unsafe { &mut self.data.case1 }
+        match &mut self.data {
+            UnionValueData::Case1(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union UnionValue does not contain case1"),
+        }
     }
     pub fn into_case1(self) -> int {
-        debug_assert!(self.is_case1());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.case1)
+        match self.data {
+            UnionValueData::Case1(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union UnionValue does not contain case1"),
         }
     }
     pub fn new_case2(value: Vec<String>) -> Self {
         Self {
-            tag: Tag::V2,
-            data: UnionValueData {
-                case2: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(Tag::V2),
+            data: UnionValueData::Case2(value),
         }
     }
     pub fn is_case2(&self) -> bool {
-        matches!(self.tag, Tag::V2)
+        matches!(& self.data, UnionValueData::Case2(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_case2(&self) -> &Vec<String> {
-        debug_assert!(self.is_case2());
-        unsafe { &self.data.case2 }
+        match &self.data {
+            UnionValueData::Case2(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union UnionValue does not contain case2"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_case2_mut(&mut self) -> &mut Vec<String> {
-        debug_assert!(self.is_case2());
-        unsafe { &mut self.data.case2 }
+        match &mut self.data {
+            UnionValueData::Case2(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union UnionValue does not contain case2"),
+        }
     }
     pub fn into_case2(self) -> Vec<String> {
-        debug_assert!(self.is_case2());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.case2)
+        match self.data {
+            UnionValueData::Case2(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union UnionValue does not contain case2"),
         }
     }
     pub fn new_case3(value: ::std::collections::BTreeMap<String, String>) -> Self {
         Self {
-            tag: Tag::V3,
-            data: UnionValueData {
-                case3: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(Tag::V3),
+            data: UnionValueData::Case3(value),
         }
     }
     pub fn is_case3(&self) -> bool {
-        matches!(self.tag, Tag::V3)
+        matches!(& self.data, UnionValueData::Case3(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_case3(&self) -> &::std::collections::BTreeMap<String, String> {
-        debug_assert!(self.is_case3());
-        unsafe { &self.data.case3 }
+        match &self.data {
+            UnionValueData::Case3(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union UnionValue does not contain case3"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_case3_mut(&mut self) -> &mut ::std::collections::BTreeMap<String, String> {
-        debug_assert!(self.is_case3());
-        unsafe { &mut self.data.case3 }
-    }
-    pub fn into_case3(self) -> ::std::collections::BTreeMap<String, String> {
-        debug_assert!(self.is_case3());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.case3)
+        match &mut self.data {
+            UnionValueData::Case3(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union UnionValue does not contain case3"),
         }
     }
-    pub fn tag(&self) -> &Tag {
-        &self.tag
+    pub fn into_case3(self) -> ::std::collections::BTreeMap<String, String> {
+        match self.data {
+            UnionValueData::Case3(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union UnionValue does not contain case3"),
+        }
+    }
+    /// The explicit discriminator, or None for the default case.
+    pub fn tag(&self) -> Option<&Tag> {
+        self.tag.as_ref()
     }
 }
 impl Default for UnionValue {
     fn default() -> Self {
-        Self {
-            tag: Tag::V1,
-            data: UnionValueData {
-                case1: core::mem::ManuallyDrop::new(int::default()),
-            },
-        }
+        Self::new_case1(Default::default())
     }
 }
 #[derive(::serde::Serialize)]
-struct UnionValueSerdeRef<'__a> {
-    tag: &'__a str,
-    data: UnionValueSerdeRefData<'__a>,
+struct UnionValueSerdeRef<'a> {
+    tag: &'a str,
+    data: UnionValueSerdeRefData<'a>,
 }
-#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
-enum UnionValueSerdeRefData<'__a> {
-    Case0(&'__a int),
-    Case1(&'__a Vec<String>),
-    Case2(&'__a ::std::collections::BTreeMap<String, String>),
+enum UnionValueSerdeRefData<'a> {
+    Case0(&'a int),
+    Case1(&'a Vec<String>),
+    Case2(&'a ::std::collections::BTreeMap<String, String>),
 }
 impl serde::Serialize for UnionValue {
-    #[allow(unreachable_patterns)]
-    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        __S: serde::Serializer,
+        S: serde::Serializer,
     {
-        let helper = match self.tag {
-            Tag::V1 => {
+        let helper = match &self.data {
+            UnionValueData::Case1(data) => {
                 let tag = "V1";
                 UnionValueSerdeRef {
                     tag,
-                    data: UnionValueSerdeRefData::Case0(self.as_case1()),
+                    data: UnionValueSerdeRefData::Case0(data),
                 }
             }
-            Tag::V2 => {
+            UnionValueData::Case2(data) => {
                 let tag = "V2";
                 UnionValueSerdeRef {
                     tag,
-                    data: UnionValueSerdeRefData::Case1(self.as_case2()),
+                    data: UnionValueSerdeRefData::Case1(data),
                 }
             }
-            Tag::V3 => {
+            UnionValueData::Case3(data) => {
                 let tag = "V3";
                 UnionValueSerdeRef {
                     tag,
-                    data: UnionValueSerdeRefData::Case2(self.as_case3()),
+                    data: UnionValueSerdeRefData::Case2(data),
                 }
             }
-            _ => unreachable!(),
         };
-        helper.serialize(__serializer)
+        helper.serialize(serializer)
     }
 }
 #[derive(::serde::Deserialize)]
@@ -260,46 +198,28 @@ impl<'de> serde::Deserialize<'de> for UnionValue {
         match helper.tag.as_str() {
             "V1" => {
                 let value = ::serde_json::from_value::<int>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union UnionValue payload decode failed for tag `V1`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Tag::V1,
-                    data: UnionValueData {
-                        case1: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(Tag::V1),
+                    data: UnionValueData::Case1(value),
                 })
             }
             "V2" => {
                 let value = ::serde_json::from_value::<Vec<String>>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union UnionValue payload decode failed for tag `V2`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Tag::V2,
-                    data: UnionValueData {
-                        case2: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(Tag::V2),
+                    data: UnionValueData::Case2(value),
                 })
             }
             "V3" => {
                 let value = ::serde_json::from_value::<
                     ::std::collections::BTreeMap<String, String>,
                 >(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union UnionValue payload decode failed for tag `V3`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: Tag::V3,
-                    data: UnionValueData {
-                        case3: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(Tag::V3),
+                    data: UnionValueData::Case3(value),
                 })
             }
             _ => {
@@ -314,217 +234,175 @@ impl<'de> serde::Deserialize<'de> for UnionValue {
         }
     }
 }
+#[derive(Debug, Clone, PartialEq)]
 pub struct IntTagValue {
-    tag: i32,
+    tag: Option<i32>,
     data: IntTagValueData,
 }
-union IntTagValueData {
-    one: core::mem::ManuallyDrop<String>,
-    two_or_three: core::mem::ManuallyDrop<int>,
-    fallback: core::mem::ManuallyDrop<bool>,
-}
-impl Drop for IntTagValue {
-    #[allow(unreachable_patterns)]
-    fn drop(&mut self) {
-        if matches!(self.tag, 1) {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.one);
-            }
-        } else if matches!(self.tag, 2 | 3) {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.two_or_three);
-            }
-        } else {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.fallback);
-            }
-        }
-    }
-}
-impl Clone for IntTagValue {
-    #[allow(clippy::clone_on_copy)]
-    #[allow(unreachable_patterns)]
-    fn clone(&self) -> Self {
-        if matches!(self.tag, 1) {
-            Self::new_one(self.as_one().clone())
-        } else if matches!(self.tag, 2 | 3) {
-            Self::new_two_or_three(self.as_two_or_three().clone())
-        } else {
-            Self::new_fallback(self.as_fallback().clone())
-        }
-    }
-}
-impl core::fmt::Debug for IntTagValue {
-    #[allow(unreachable_patterns)]
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut d = f.debug_struct("IntTagValue");
-        d.field("tag", &self.tag);
-        if matches!(self.tag, 1) {
-            d.field("one", self.as_one());
-        } else if matches!(self.tag, 2 | 3) {
-            d.field("two_or_three", self.as_two_or_three());
-        } else {
-            d.field("fallback", self.as_fallback());
-        }
-        d.finish()
-    }
-}
-impl PartialEq for IntTagValue {
-    #[allow(unreachable_patterns)]
-    fn eq(&self, other: &Self) -> bool {
-        if self.tag != other.tag {
-            return false;
-        }
-        if matches!(self.tag, 1) {
-            self.as_one() == other.as_one()
-        } else if matches!(self.tag, 2 | 3) {
-            self.as_two_or_three() == other.as_two_or_three()
-        } else {
-            self.as_fallback() == other.as_fallback()
-        }
-    }
+#[derive(Debug, Clone, PartialEq)]
+enum IntTagValueData {
+    One(String),
+    TwoOrThree(int),
+    Fallback(bool),
 }
 impl IntTagValue {
     pub fn new_one(value: String) -> Self {
         Self {
-            tag: 1,
-            data: IntTagValueData {
-                one: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(1),
+            data: IntTagValueData::One(value),
         }
     }
     pub fn is_one(&self) -> bool {
-        matches!(self.tag, 1)
+        matches!(& self.data, IntTagValueData::One(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_one(&self) -> &String {
-        debug_assert!(self.is_one());
-        unsafe { &self.data.one }
+        match &self.data {
+            IntTagValueData::One(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union IntTagValue does not contain one"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_one_mut(&mut self) -> &mut String {
-        debug_assert!(self.is_one());
-        unsafe { &mut self.data.one }
+        match &mut self.data {
+            IntTagValueData::One(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union IntTagValue does not contain one"),
+        }
     }
     pub fn into_one(self) -> String {
-        debug_assert!(self.is_one());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.one)
+        match self.data {
+            IntTagValueData::One(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union IntTagValue does not contain one"),
         }
     }
     pub fn new_two_or_three(value: int) -> Self {
         Self {
-            tag: 2,
-            data: IntTagValueData {
-                two_or_three: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(2),
+            data: IntTagValueData::TwoOrThree(value),
         }
     }
     pub fn is_two_or_three(&self) -> bool {
-        matches!(self.tag, 2 | 3)
+        matches!(& self.data, IntTagValueData::TwoOrThree(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_two_or_three(&self) -> &int {
-        debug_assert!(self.is_two_or_three());
-        unsafe { &self.data.two_or_three }
+        match &self.data {
+            IntTagValueData::TwoOrThree(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union IntTagValue does not contain two_or_three"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_two_or_three_mut(&mut self) -> &mut int {
-        debug_assert!(self.is_two_or_three());
-        unsafe { &mut self.data.two_or_three }
+        match &mut self.data {
+            IntTagValueData::TwoOrThree(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union IntTagValue does not contain two_or_three"),
+        }
     }
     pub fn into_two_or_three(self) -> int {
-        debug_assert!(self.is_two_or_three());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.two_or_three)
+        match self.data {
+            IntTagValueData::TwoOrThree(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union IntTagValue does not contain two_or_three"),
         }
     }
     pub fn new_fallback(value: bool) -> Self {
         Self {
-            tag: i32::default(),
-            data: IntTagValueData {
-                fallback: core::mem::ManuallyDrop::new(value),
-            },
+            tag: None,
+            data: IntTagValueData::Fallback(value),
         }
     }
     pub fn is_fallback(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(& self.data, IntTagValueData::Fallback(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_fallback(&self) -> &bool {
-        debug_assert!(self.is_fallback());
-        unsafe { &self.data.fallback }
+        match &self.data {
+            IntTagValueData::Fallback(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union IntTagValue does not contain fallback"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_fallback_mut(&mut self) -> &mut bool {
-        debug_assert!(self.is_fallback());
-        unsafe { &mut self.data.fallback }
-    }
-    pub fn into_fallback(self) -> bool {
-        debug_assert!(self.is_fallback());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.fallback)
+        match &mut self.data {
+            IntTagValueData::Fallback(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union IntTagValue does not contain fallback"),
         }
     }
-    pub fn tag(&self) -> &i32 {
-        &self.tag
+    pub fn into_fallback(self) -> bool {
+        match self.data {
+            IntTagValueData::Fallback(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union IntTagValue does not contain fallback"),
+        }
+    }
+    /// The explicit discriminator, or None for the default case.
+    pub fn tag(&self) -> Option<&i32> {
+        self.tag.as_ref()
     }
 }
 impl Default for IntTagValue {
     fn default() -> Self {
-        Self {
-            tag: i32::default(),
-            data: IntTagValueData {
-                fallback: core::mem::ManuallyDrop::new(bool::default()),
-            },
-        }
+        Self::new_fallback(Default::default())
     }
 }
 #[derive(::serde::Serialize)]
-struct IntTagValueSerdeRef<'__a> {
-    tag: &'__a str,
-    data: IntTagValueSerdeRefData<'__a>,
+struct IntTagValueSerdeRef<'a> {
+    tag: &'a str,
+    data: IntTagValueSerdeRefData<'a>,
 }
-#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
-enum IntTagValueSerdeRefData<'__a> {
-    Case0(&'__a String),
-    Case1(&'__a int),
-    Case2(&'__a bool),
+enum IntTagValueSerdeRefData<'a> {
+    Case0(&'a String),
+    Case1(&'a int),
+    Case2(&'a bool),
 }
 impl serde::Serialize for IntTagValue {
-    #[allow(unreachable_patterns)]
-    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        __S: serde::Serializer,
+        S: serde::Serializer,
     {
-        let helper = if matches!(self.tag, 1) {
-            let tag = "1";
-            IntTagValueSerdeRef {
-                tag,
-                data: IntTagValueSerdeRefData::Case0(self.as_one()),
+        let helper = match &self.data {
+            IntTagValueData::One(data) => {
+                let tag = "1";
+                IntTagValueSerdeRef {
+                    tag,
+                    data: IntTagValueSerdeRefData::Case0(data),
+                }
             }
-        } else if matches!(self.tag, 2 | 3) {
-            let tag = match self.tag {
-                2 => "2",
-                _ => "3",
-            };
-            IntTagValueSerdeRef {
-                tag,
-                data: IntTagValueSerdeRefData::Case1(self.as_two_or_three()),
+            IntTagValueData::TwoOrThree(data) => {
+                let tag = match self.tag.as_ref() {
+                    Some(2) => "2",
+                    Some(3) => "3",
+                    _ => {
+                        return Err(
+                            serde::ser::Error::custom(
+                                "union IntTagValue discriminator does not select two_or_three",
+                            ),
+                        );
+                    }
+                };
+                IntTagValueSerdeRef {
+                    tag,
+                    data: IntTagValueSerdeRefData::Case1(data),
+                }
             }
-        } else {
-            let tag = "default";
-            IntTagValueSerdeRef {
-                tag,
-                data: IntTagValueSerdeRefData::Case2(self.as_fallback()),
+            IntTagValueData::Fallback(data) => {
+                let tag = "default";
+                IntTagValueSerdeRef {
+                    tag,
+                    data: IntTagValueSerdeRefData::Case2(data),
+                }
             }
         };
-        helper.serialize(__serializer)
+        helper.serialize(serializer)
     }
 }
 #[derive(::serde::Deserialize)]
@@ -541,58 +419,34 @@ impl<'de> serde::Deserialize<'de> for IntTagValue {
         match helper.tag.as_str() {
             "1" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union IntTagValue payload decode failed for tag `1`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: 1,
-                    data: IntTagValueData {
-                        one: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(1),
+                    data: IntTagValueData::One(value),
                 })
             }
             "2" => {
                 let value = ::serde_json::from_value::<int>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union IntTagValue payload decode failed for tag `2`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: 2,
-                    data: IntTagValueData {
-                        two_or_three: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(2),
+                    data: IntTagValueData::TwoOrThree(value),
                 })
             }
             "3" => {
                 let value = ::serde_json::from_value::<int>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union IntTagValue payload decode failed for tag `3`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: 3,
-                    data: IntTagValueData {
-                        two_or_three: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(3),
+                    data: IntTagValueData::TwoOrThree(value),
                 })
             }
             "default" => {
                 let value = ::serde_json::from_value::<bool>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union IntTagValue payload decode failed for tag `default`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: i32::default(),
-                    data: IntTagValueData {
-                        fallback: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: None,
+                    data: IntTagValueData::Fallback(value),
                 })
             }
             _ => {
@@ -608,180 +462,124 @@ impl<'de> serde::Deserialize<'de> for IntTagValue {
         }
     }
 }
+#[derive(Debug, Clone, PartialEq)]
 pub struct BoolTagValue {
-    tag: bool,
+    tag: Option<bool>,
     data: BoolTagValueData,
 }
-union BoolTagValueData {
-    yes: core::mem::ManuallyDrop<String>,
-    no: core::mem::ManuallyDrop<String>,
-}
-impl Drop for BoolTagValue {
-    #[allow(unreachable_patterns)]
-    fn drop(&mut self) {
-        match self.tag {
-            true => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.yes);
-                }
-            }
-            false => {
-                unsafe {
-                    core::mem::ManuallyDrop::drop(&mut self.data.no);
-                }
-            }
-            _ => {}
-        }
-    }
-}
-impl Clone for BoolTagValue {
-    #[allow(clippy::clone_on_copy)]
-    #[allow(unreachable_patterns)]
-    fn clone(&self) -> Self {
-        match self.tag {
-            true => Self::new_yes(self.as_yes().clone()),
-            false => Self::new_no(self.as_no().clone()),
-            _ => unreachable!(),
-        }
-    }
-}
-impl core::fmt::Debug for BoolTagValue {
-    #[allow(unreachable_patterns)]
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut d = f.debug_struct("BoolTagValue");
-        d.field("tag", &self.tag);
-        match self.tag {
-            true => {
-                d.field("yes", self.as_yes());
-            }
-            false => {
-                d.field("no", self.as_no());
-            }
-            _ => {}
-        }
-        d.finish()
-    }
-}
-impl PartialEq for BoolTagValue {
-    #[allow(unreachable_patterns)]
-    fn eq(&self, other: &Self) -> bool {
-        if self.tag != other.tag {
-            return false;
-        }
-        match self.tag {
-            true => self.as_yes() == other.as_yes(),
-            false => self.as_no() == other.as_no(),
-            _ => false,
-        }
-    }
+#[derive(Debug, Clone, PartialEq)]
+enum BoolTagValueData {
+    Yes(String),
+    No(String),
 }
 impl BoolTagValue {
     pub fn new_yes(value: String) -> Self {
         Self {
-            tag: true,
-            data: BoolTagValueData {
-                yes: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(true),
+            data: BoolTagValueData::Yes(value),
         }
     }
     pub fn is_yes(&self) -> bool {
-        self.tag
+        matches!(& self.data, BoolTagValueData::Yes(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_yes(&self) -> &String {
-        debug_assert!(self.is_yes());
-        unsafe { &self.data.yes }
+        match &self.data {
+            BoolTagValueData::Yes(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union BoolTagValue does not contain yes"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_yes_mut(&mut self) -> &mut String {
-        debug_assert!(self.is_yes());
-        unsafe { &mut self.data.yes }
+        match &mut self.data {
+            BoolTagValueData::Yes(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union BoolTagValue does not contain yes"),
+        }
     }
     pub fn into_yes(self) -> String {
-        debug_assert!(self.is_yes());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.yes)
+        match self.data {
+            BoolTagValueData::Yes(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union BoolTagValue does not contain yes"),
         }
     }
     pub fn new_no(value: String) -> Self {
         Self {
-            tag: false,
-            data: BoolTagValueData {
-                no: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some(false),
+            data: BoolTagValueData::No(value),
         }
     }
     pub fn is_no(&self) -> bool {
-        !self.tag
+        matches!(& self.data, BoolTagValueData::No(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_no(&self) -> &String {
-        debug_assert!(self.is_no());
-        unsafe { &self.data.no }
+        match &self.data {
+            BoolTagValueData::No(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union BoolTagValue does not contain no"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_no_mut(&mut self) -> &mut String {
-        debug_assert!(self.is_no());
-        unsafe { &mut self.data.no }
-    }
-    pub fn into_no(self) -> String {
-        debug_assert!(self.is_no());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.no)
+        match &mut self.data {
+            BoolTagValueData::No(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union BoolTagValue does not contain no"),
         }
     }
-    pub fn tag(&self) -> &bool {
-        &self.tag
+    pub fn into_no(self) -> String {
+        match self.data {
+            BoolTagValueData::No(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union BoolTagValue does not contain no"),
+        }
+    }
+    /// The explicit discriminator, or None for the default case.
+    pub fn tag(&self) -> Option<&bool> {
+        self.tag.as_ref()
     }
 }
 impl Default for BoolTagValue {
     fn default() -> Self {
-        Self {
-            tag: true,
-            data: BoolTagValueData {
-                yes: core::mem::ManuallyDrop::new(String::default()),
-            },
-        }
+        Self::new_yes(Default::default())
     }
 }
 #[derive(::serde::Serialize)]
-struct BoolTagValueSerdeRef<'__a> {
-    tag: &'__a str,
-    data: BoolTagValueSerdeRefData<'__a>,
+struct BoolTagValueSerdeRef<'a> {
+    tag: &'a str,
+    data: BoolTagValueSerdeRefData<'a>,
 }
-#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
-enum BoolTagValueSerdeRefData<'__a> {
-    Case0(&'__a String),
-    Case1(&'__a String),
+enum BoolTagValueSerdeRefData<'a> {
+    Case0(&'a String),
+    Case1(&'a String),
 }
 impl serde::Serialize for BoolTagValue {
-    #[allow(unreachable_patterns)]
-    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        __S: serde::Serializer,
+        S: serde::Serializer,
     {
-        let helper = match self.tag {
-            true => {
+        let helper = match &self.data {
+            BoolTagValueData::Yes(data) => {
                 let tag = "true";
                 BoolTagValueSerdeRef {
                     tag,
-                    data: BoolTagValueSerdeRefData::Case0(self.as_yes()),
+                    data: BoolTagValueSerdeRefData::Case0(data),
                 }
             }
-            false => {
+            BoolTagValueData::No(data) => {
                 let tag = "false";
                 BoolTagValueSerdeRef {
                     tag,
-                    data: BoolTagValueSerdeRefData::Case1(self.as_no()),
+                    data: BoolTagValueSerdeRefData::Case1(data),
                 }
             }
-            _ => unreachable!(),
         };
-        helper.serialize(__serializer)
+        helper.serialize(serializer)
     }
 }
 #[derive(::serde::Deserialize)]
@@ -798,30 +596,18 @@ impl<'de> serde::Deserialize<'de> for BoolTagValue {
         match helper.tag.as_str() {
             "true" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union BoolTagValue payload decode failed for tag `true`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: true,
-                    data: BoolTagValueData {
-                        yes: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(true),
+                    data: BoolTagValueData::Yes(value),
                 })
             }
             "false" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union BoolTagValue payload decode failed for tag `false`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: false,
-                    data: BoolTagValueData {
-                        no: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some(false),
+                    data: BoolTagValueData::No(value),
                 })
             }
             _ => {
@@ -837,214 +623,165 @@ impl<'de> serde::Deserialize<'de> for BoolTagValue {
         }
     }
 }
+#[derive(Debug, Clone, PartialEq)]
 pub struct CharTagValue {
-    tag: char,
+    tag: Option<char>,
     data: CharTagValueData,
 }
-union CharTagValueData {
-    ex: core::mem::ManuallyDrop<String>,
-    why: core::mem::ManuallyDrop<String>,
-    other: core::mem::ManuallyDrop<String>,
-}
-impl Drop for CharTagValue {
-    #[allow(unreachable_patterns)]
-    fn drop(&mut self) {
-        if matches!(self.tag, 'x') {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.ex);
-            }
-        } else if matches!(self.tag, 'y') {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.why);
-            }
-        } else {
-            unsafe {
-                core::mem::ManuallyDrop::drop(&mut self.data.other);
-            }
-        }
-    }
-}
-impl Clone for CharTagValue {
-    #[allow(clippy::clone_on_copy)]
-    #[allow(unreachable_patterns)]
-    fn clone(&self) -> Self {
-        if matches!(self.tag, 'x') {
-            Self::new_ex(self.as_ex().clone())
-        } else if matches!(self.tag, 'y') {
-            Self::new_why(self.as_why().clone())
-        } else {
-            Self::new_other(self.as_other().clone())
-        }
-    }
-}
-impl core::fmt::Debug for CharTagValue {
-    #[allow(unreachable_patterns)]
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        let mut d = f.debug_struct("CharTagValue");
-        d.field("tag", &self.tag);
-        if matches!(self.tag, 'x') {
-            d.field("ex", self.as_ex());
-        } else if matches!(self.tag, 'y') {
-            d.field("why", self.as_why());
-        } else {
-            d.field("other", self.as_other());
-        }
-        d.finish()
-    }
-}
-impl PartialEq for CharTagValue {
-    #[allow(unreachable_patterns)]
-    fn eq(&self, other: &Self) -> bool {
-        if self.tag != other.tag {
-            return false;
-        }
-        if matches!(self.tag, 'x') {
-            self.as_ex() == other.as_ex()
-        } else if matches!(self.tag, 'y') {
-            self.as_why() == other.as_why()
-        } else {
-            self.as_other() == other.as_other()
-        }
-    }
+#[derive(Debug, Clone, PartialEq)]
+enum CharTagValueData {
+    Ex(String),
+    Why(String),
+    Other(String),
 }
 impl CharTagValue {
     pub fn new_ex(value: String) -> Self {
         Self {
-            tag: 'x',
-            data: CharTagValueData {
-                ex: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some('x'),
+            data: CharTagValueData::Ex(value),
         }
     }
     pub fn is_ex(&self) -> bool {
-        matches!(self.tag, 'x')
+        matches!(& self.data, CharTagValueData::Ex(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_ex(&self) -> &String {
-        debug_assert!(self.is_ex());
-        unsafe { &self.data.ex }
+        match &self.data {
+            CharTagValueData::Ex(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union CharTagValue does not contain ex"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_ex_mut(&mut self) -> &mut String {
-        debug_assert!(self.is_ex());
-        unsafe { &mut self.data.ex }
+        match &mut self.data {
+            CharTagValueData::Ex(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union CharTagValue does not contain ex"),
+        }
     }
     pub fn into_ex(self) -> String {
-        debug_assert!(self.is_ex());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.ex)
+        match self.data {
+            CharTagValueData::Ex(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union CharTagValue does not contain ex"),
         }
     }
     pub fn new_why(value: String) -> Self {
         Self {
-            tag: 'y',
-            data: CharTagValueData {
-                why: core::mem::ManuallyDrop::new(value),
-            },
+            tag: Some('y'),
+            data: CharTagValueData::Why(value),
         }
     }
     pub fn is_why(&self) -> bool {
-        matches!(self.tag, 'y')
+        matches!(& self.data, CharTagValueData::Why(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_why(&self) -> &String {
-        debug_assert!(self.is_why());
-        unsafe { &self.data.why }
+        match &self.data {
+            CharTagValueData::Why(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union CharTagValue does not contain why"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_why_mut(&mut self) -> &mut String {
-        debug_assert!(self.is_why());
-        unsafe { &mut self.data.why }
+        match &mut self.data {
+            CharTagValueData::Why(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union CharTagValue does not contain why"),
+        }
     }
     pub fn into_why(self) -> String {
-        debug_assert!(self.is_why());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.why)
+        match self.data {
+            CharTagValueData::Why(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union CharTagValue does not contain why"),
         }
     }
     pub fn new_other(value: String) -> Self {
         Self {
-            tag: char::default(),
-            data: CharTagValueData {
-                other: core::mem::ManuallyDrop::new(value),
-            },
+            tag: None,
+            data: CharTagValueData::Other(value),
         }
     }
     pub fn is_other(&self) -> bool {
-        matches!(self.tag, _)
+        matches!(& self.data, CharTagValueData::Other(_))
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_other(&self) -> &String {
-        debug_assert!(self.is_other());
-        unsafe { &self.data.other }
+        match &self.data {
+            CharTagValueData::Other(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union CharTagValue does not contain other"),
+        }
     }
     #[allow(clippy::borrowed_box)]
     pub fn as_other_mut(&mut self) -> &mut String {
-        debug_assert!(self.is_other());
-        unsafe { &mut self.data.other }
-    }
-    pub fn into_other(self) -> String {
-        debug_assert!(self.is_other());
-        unsafe {
-            let mut forget = core::mem::ManuallyDrop::new(self);
-            core::mem::ManuallyDrop::take(&mut forget.data.other)
+        match &mut self.data {
+            CharTagValueData::Other(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union CharTagValue does not contain other"),
         }
     }
-    pub fn tag(&self) -> &char {
-        &self.tag
+    pub fn into_other(self) -> String {
+        match self.data {
+            CharTagValueData::Other(value) => value,
+            #[allow(unreachable_patterns)]
+            _ => panic!("union CharTagValue does not contain other"),
+        }
+    }
+    /// The explicit discriminator, or None for the default case.
+    pub fn tag(&self) -> Option<&char> {
+        self.tag.as_ref()
     }
 }
 impl Default for CharTagValue {
     fn default() -> Self {
-        Self {
-            tag: char::default(),
-            data: CharTagValueData {
-                other: core::mem::ManuallyDrop::new(String::default()),
-            },
-        }
+        Self::new_other(Default::default())
     }
 }
 #[derive(::serde::Serialize)]
-struct CharTagValueSerdeRef<'__a> {
-    tag: &'__a str,
-    data: CharTagValueSerdeRefData<'__a>,
+struct CharTagValueSerdeRef<'a> {
+    tag: &'a str,
+    data: CharTagValueSerdeRefData<'a>,
 }
-#[allow(clippy::borrowed_box)]
 #[derive(::serde::Serialize)]
 #[serde(untagged)]
-enum CharTagValueSerdeRefData<'__a> {
-    Case0(&'__a String),
-    Case1(&'__a String),
-    Case2(&'__a String),
+enum CharTagValueSerdeRefData<'a> {
+    Case0(&'a String),
+    Case1(&'a String),
+    Case2(&'a String),
 }
 impl serde::Serialize for CharTagValue {
-    #[allow(unreachable_patterns)]
-    fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        __S: serde::Serializer,
+        S: serde::Serializer,
     {
-        let helper = if matches!(self.tag, 'x') {
-            let tag = "'x'";
-            CharTagValueSerdeRef {
-                tag,
-                data: CharTagValueSerdeRefData::Case0(self.as_ex()),
+        let helper = match &self.data {
+            CharTagValueData::Ex(data) => {
+                let tag = "'x'";
+                CharTagValueSerdeRef {
+                    tag,
+                    data: CharTagValueSerdeRefData::Case0(data),
+                }
             }
-        } else if matches!(self.tag, 'y') {
-            let tag = "'y'";
-            CharTagValueSerdeRef {
-                tag,
-                data: CharTagValueSerdeRefData::Case1(self.as_why()),
+            CharTagValueData::Why(data) => {
+                let tag = "'y'";
+                CharTagValueSerdeRef {
+                    tag,
+                    data: CharTagValueSerdeRefData::Case1(data),
+                }
             }
-        } else {
-            let tag = "default";
-            CharTagValueSerdeRef {
-                tag,
-                data: CharTagValueSerdeRefData::Case2(self.as_other()),
+            CharTagValueData::Other(data) => {
+                let tag = "default";
+                CharTagValueSerdeRef {
+                    tag,
+                    data: CharTagValueSerdeRefData::Case2(data),
+                }
             }
         };
-        helper.serialize(__serializer)
+        helper.serialize(serializer)
     }
 }
 #[derive(::serde::Deserialize)]
@@ -1061,44 +798,26 @@ impl<'de> serde::Deserialize<'de> for CharTagValue {
         match helper.tag.as_str() {
             "'x'" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union CharTagValue payload decode failed for tag `'x'`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: 'x',
-                    data: CharTagValueData {
-                        ex: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some('x'),
+                    data: CharTagValueData::Ex(value),
                 })
             }
             "'y'" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union CharTagValue payload decode failed for tag `'y'`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: 'y',
-                    data: CharTagValueData {
-                        why: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: Some('y'),
+                    data: CharTagValueData::Why(value),
                 })
             }
             "default" => {
                 let value = ::serde_json::from_value::<String>(helper.data)
-                    .map_err(|err| serde::de::Error::custom(
-                        format!(
-                            "union CharTagValue payload decode failed for tag `default`: {err}"
-                        ),
-                    ))?;
+                    .map_err(serde::de::Error::custom)?;
                 Ok(Self {
-                    tag: char::default(),
-                    data: CharTagValueData {
-                        other: core::mem::ManuallyDrop::new(value),
-                    },
+                    tag: None,
+                    data: CharTagValueData::Other(value),
                 })
             }
             _ => {

@@ -92,57 +92,21 @@ pub(super) fn render_unary_handler(
     method: &MethodMeta,
     renderer: &GoRestRenderer,
 ) -> IdlcResult<()> {
-    if method.response_body_struct.is_some()
+    let has_response = method.response_body_struct.is_some()
         || method.response_body_direct_field.is_some()
         || !method.response_header_params.is_empty()
-        || !method.response_cookie_params.is_empty()
-    {
-        writeln!(
-            out,
-            "\t\tresp, err := svc.{}(c.Request.Context(), req)",
-            method.method_name
-        )
-        .unwrap();
-        writeln!(out, "\t\tif err != nil {{").unwrap();
-        writeln!(
-            out,
-            "\t\t\tif httpErr, ok := err.(*xidlgohttp.HttpError); ok {{"
-        )
-        .unwrap();
-        writeln!(
-            out,
-            "\t\t\t\txidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)"
-        )
-        .unwrap();
-        writeln!(out, "\t\t\t}} else {{").unwrap();
-        writeln!(out, "\t\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())").unwrap();
-        writeln!(out, "\t\t\t}}").unwrap();
-        writeln!(out, "\t\t\treturn").unwrap();
-        writeln!(out, "\t\t}}").unwrap();
-
+        || !method.response_cookie_params.is_empty();
+    let binding = if has_response { "resp" } else { "_" };
+    writeln!(
+        out,
+        "\t\t{binding}, err := svc.{}(c.Request.Context(), req)",
+        method.method_name
+    )
+    .unwrap();
+    super::exceptions::ExceptionCodec::new(method).render_server_error(out, renderer)?;
+    if has_response {
         render_response_write(out, method, "resp", renderer)?;
     } else {
-        writeln!(
-            out,
-            "\t\tif _, err := svc.{}(c.Request.Context(), req); err != nil {{",
-            method.method_name
-        )
-        .unwrap();
-        writeln!(
-            out,
-            "\t\t\tif httpErr, ok := err.(*xidlgohttp.HttpError); ok {{"
-        )
-        .unwrap();
-        writeln!(
-            out,
-            "\t\t\t\txidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)"
-        )
-        .unwrap();
-        writeln!(out, "\t\t\t}} else {{").unwrap();
-        writeln!(out, "\t\t\t\txidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())").unwrap();
-        writeln!(out, "\t\t\t}}").unwrap();
-        writeln!(out, "\t\t\treturn").unwrap();
-        writeln!(out, "\t\t}}").unwrap();
         writeln!(out, "\t\tc.Status(http.StatusNoContent)").unwrap();
     }
     Ok(())

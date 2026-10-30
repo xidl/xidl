@@ -58,10 +58,16 @@ func RegisterRestMediaTypesApiHandler(r gin.IRouter, svc RestMediaTypesApiServic
 		req.Age = body.Age
 		resp, err := svc.SubmitProfile(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeRestMediaTypesApiSubmitProfileFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -81,19 +87,27 @@ func RegisterRestMediaTypesApiHandler(r gin.IRouter, svc RestMediaTypesApiServic
 		}
 
 		req := &RestMediaTypesApiGetMsgpackUserRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "user_id"); err == nil {
-			req.UserId = value
+		if raw, err := xidlgohttp.GinPathString(c, "user_id"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.UserId); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
 		resp, err := svc.GetMsgpackUser(c.Request.Context(), req)
 		if err != nil {
-			if httpErr, ok := err.(*xidlgohttp.HttpError); ok {
-				xidlgohttp.GinWriteJSONError(c, httpErr.Status, httpErr.Code, httpErr.Message)
+			failure := encodeRestMediaTypesApiGetMsgpackUserFailure(err)
+			for name, values := range failure.Headers {
+				for _, value := range values {
+					c.Writer.Header().Add(name, value)
+				}
+			}
+			if len(failure.Body) == 0 {
+				c.Status(failure.Status)
 			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+				c.Data(failure.Status, "application/json", failure.Body)
 			}
 			return
 		}
@@ -142,8 +156,9 @@ func (c *RestMediaTypesApiClient) SubmitProfile(ctx context.Context, req *RestMe
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *RestMediaTypesApiSubmitProfileResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeRestMediaTypesApiSubmitProfileFailure)
 	}
 	decoded, err := decodeRestMediaTypesApiSubmitProfileResponse(resp)
 	if err != nil {
@@ -164,8 +179,9 @@ func (c *RestMediaTypesApiClient) GetMsgpackUser(ctx context.Context, req *RestM
 		return nil, err
 	}
 	defer resp.Body.Close()
-	if resp.StatusCode >= 400 {
-		return nil, fmt.Errorf("http %d", resp.StatusCode)
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		var zero *RestMediaTypesApiGetMsgpackUserResponse
+		return zero, xidlgohttp.ReadHTTPError(resp, decodeRestMediaTypesApiGetMsgpackUserFailure)
 	}
 	decoded, err := decodeRestMediaTypesApiGetMsgpackUserResponse(resp)
 	if err != nil {
@@ -219,6 +235,16 @@ func decodeRestMediaTypesApiSubmitProfileResponse(resp *http.Response) (RestMedi
 	return out, nil
 }
 
+func encodeRestMediaTypesApiSubmitProfileFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeRestMediaTypesApiSubmitProfileFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
+}
+
 type RestMediaTypesApiGetMsgpackUserRequest struct {
 	UserId string `xjson:"user_id" form:"user_id"`
 }
@@ -258,4 +284,14 @@ func decodeRestMediaTypesApiGetMsgpackUserResponse(resp *http.Response) (RestMed
 	out.Return = body.Return
 	out.Score = body.Score
 	return out, nil
+}
+
+func encodeRestMediaTypesApiGetMsgpackUserFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
+}
+
+func decodeRestMediaTypesApiGetMsgpackUserFailure(failure xidlgohttp.HTTPFailure) error {
+
+	return xidlgohttp.DecodeHTTPError(failure)
 }

@@ -52,6 +52,7 @@ pub(super) struct EnumMemberTemplate {
 pub(super) struct EnumTemplate {
     pub(super) name: String,
     pub(super) members: String,
+    pub(super) values: Vec<String>,
 }
 
 #[derive(Serialize)]

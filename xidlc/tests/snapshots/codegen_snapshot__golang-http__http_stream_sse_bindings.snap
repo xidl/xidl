@@ -44,26 +44,27 @@ func RegisterHttpStreamSseBindingsServiceHandler(r gin.IRouter, svc HttpStreamSs
 	r.GET("/files/*path", func(c *gin.Context) {
 
 		req := &HttpStreamSseBindingsServiceTailFileRequest{}
-
-		if value, err := xidlgohttp.GinPathString(c, "path"); err == nil {
-			req.Path = value
+		if raw, err := xidlgohttp.GinPathString(c, "path"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Path); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
-		if value, err := xidlgohttp.QueryString(c.Request.URL.Query(), "lang"); err == nil {
-			req.Lang = value
+		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "lang"); err == nil {
+			if err := xidlgohttp.ParseText(raw, &req.Lang); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+				return
+			}
 		} else {
 			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 			return
 		}
-
 		if raw, err := xidlgohttp.QueryString(c.Request.URL.Query(), "follow"); err == nil {
-			if value, parseErr := xidlgohttp.ParseBool(raw); parseErr == nil {
-				req.Follow = value
-			} else {
-				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, parseErr.Error())
+			if err := xidlgohttp.ParseText(raw, &req.Follow); err != nil {
+				xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
 				return
 			}
 		} else {
@@ -95,10 +96,20 @@ func NewHttpStreamSseBindingsServiceClient(baseURL string, httpClient *http.Clie
 func (c *HttpStreamSseBindingsServiceClient) TailFile(ctx context.Context, req *HttpStreamSseBindingsServiceTailFileRequest) (*xidlgohttp.SSEStreamReader[[]string], error) {
 	requestURL := c.baseURL + formatHttpStreamSseBindingsServiceTailFilePath(req)
 	query := url.Values{}
-
-	query.Set("lang", req.Lang)
-
-	query.Set("follow", xidlgohttp.FormatBool(req.Follow))
+	{
+		raw, err := xidlgohttp.FormatText(req.Lang)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("lang", raw)
+	}
+	{
+		raw, err := xidlgohttp.FormatText(req.Follow)
+		if err != nil {
+			return nil, err
+		}
+		query.Set("follow", raw)
+	}
 	if encoded := query.Encode(); encoded != "" {
 		requestURL += "?" + encoded
 	}
@@ -113,7 +124,7 @@ func (c *HttpStreamSseBindingsServiceClient) TailFile(ctx context.Context, req *
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		defer resp.Body.Close()
-		return nil, xidlgohttp.DecodeStreamHTTPError(resp, decodeHttpStreamSseBindingsServiceTailFileFailure)
+		return nil, xidlgohttp.ReadHTTPError(resp, decodeHttpStreamSseBindingsServiceTailFileFailure)
 	}
 	return xidlgohttp.NewSSEStreamReader[[]string](resp.Body).WithContext(ctx).WithErrorDecoder(decodeHttpStreamSseBindingsServiceTailFileFailure), nil
 }
@@ -148,12 +159,13 @@ func decodeHttpStreamSseBindingsServiceTailFileResponse(resp *http.Response) (Ht
 	out := HttpStreamSseBindingsServiceTailFileResponse{}
 	return out, nil
 }
-func encodeHttpStreamSseBindingsServiceTailFileFailure(err error) xidlgohttp.StreamFailure {
 
-	return xidlgohttp.EncodeStreamError(err)
+func encodeHttpStreamSseBindingsServiceTailFileFailure(err error) xidlgohttp.HTTPFailure {
+
+	return xidlgohttp.EncodeHTTPError(err)
 }
 
-func decodeHttpStreamSseBindingsServiceTailFileFailure(failure xidlgohttp.StreamFailure) error {
+func decodeHttpStreamSseBindingsServiceTailFileFailure(failure xidlgohttp.HTTPFailure) error {
 
-	return xidlgohttp.DecodeStreamError(failure)
+	return xidlgohttp.DecodeHTTPError(failure)
 }

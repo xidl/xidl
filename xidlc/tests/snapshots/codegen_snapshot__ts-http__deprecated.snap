@@ -233,7 +233,7 @@ export namespace legacy {
          * @deprecated After 2027-01-01T23:59:59Z.
          */
 
-    export type Payload = { text: string } | { media: Message };
+    export type Payload = { tag: "1", data: string } | { tag: "2", data: Message };
     /**
      * @deprecated
      */
@@ -630,7 +630,7 @@ export namespace legacy {
         });
     export const ChannelSchema = z.enum(["sms", "mms"]);
 
-        export const PayloadSchema = z.union([z.object({ text: z.string() }), z.object({ media: MessageSchema })]);
+        export const PayloadSchema = z.union([z.object({ tag: z.enum(["1"]), data: z.string() }), z.object({ tag: z.enum(["2"]), data: MessageSchema })]);
 
         export const GoneSchema = z.object({
             
@@ -647,7 +647,7 @@ export namespace legacy {
             
                 message: legacy.MessageSchema,
             
-                attempts: z.number().int()
+                attempts: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")
             
         });
     export const KindSchema = z.enum(["plain", "rich"]);

@@ -40,188 +40,128 @@ pub mod legacy {
         mms,
     }
     #[deprecated(note = "Deprecated. After 2027-01-01T23:59:59Z.")]
+    #[derive(Debug, Clone, PartialEq)]
     pub struct Payload {
-        tag: i32,
+        tag: Option<i32>,
         data: PayloadData,
     }
     #[allow(deprecated)]
-    union PayloadData {
-        text: core::mem::ManuallyDrop<String>,
-        media: core::mem::ManuallyDrop<Message>,
-    }
-    #[allow(deprecated)]
-    impl Drop for Payload {
-        #[allow(unreachable_patterns)]
-        fn drop(&mut self) {
-            match self.tag {
-                1 => {
-                    unsafe {
-                        core::mem::ManuallyDrop::drop(&mut self.data.text);
-                    }
-                }
-                2 => {
-                    unsafe {
-                        core::mem::ManuallyDrop::drop(&mut self.data.media);
-                    }
-                }
-                _ => {}
-            }
-        }
-    }
-    #[allow(deprecated)]
-    impl Clone for Payload {
-        #[allow(clippy::clone_on_copy)]
-        #[allow(unreachable_patterns)]
-        fn clone(&self) -> Self {
-            match self.tag {
-                1 => Self::new_text(self.as_text().clone()),
-                2 => Self::new_media(self.as_media().clone()),
-                _ => unreachable!(),
-            }
-        }
-    }
-    #[allow(deprecated)]
-    impl core::fmt::Debug for Payload {
-        #[allow(unreachable_patterns)]
-        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-            let mut d = f.debug_struct("Payload");
-            d.field("tag", &self.tag);
-            match self.tag {
-                1 => {
-                    d.field("text", self.as_text());
-                }
-                2 => {
-                    d.field("media", self.as_media());
-                }
-                _ => {}
-            }
-            d.finish()
-        }
-    }
-    #[allow(deprecated)]
-    impl PartialEq for Payload {
-        #[allow(unreachable_patterns)]
-        fn eq(&self, other: &Self) -> bool {
-            if self.tag != other.tag {
-                return false;
-            }
-            match self.tag {
-                1 => self.as_text() == other.as_text(),
-                2 => self.as_media() == other.as_media(),
-                _ => false,
-            }
-        }
+    #[derive(Debug, Clone, PartialEq)]
+    enum PayloadData {
+        Text(String),
+        Media(Message),
     }
     #[allow(deprecated)]
     impl Payload {
         pub fn new_text(value: String) -> Self {
             Self {
-                tag: 1,
-                data: PayloadData {
-                    text: core::mem::ManuallyDrop::new(value),
-                },
+                tag: Some(1),
+                data: PayloadData::Text(value),
             }
         }
         pub fn is_text(&self) -> bool {
-            matches!(self.tag, 1)
+            matches!(& self.data, PayloadData::Text(_))
         }
         #[allow(clippy::borrowed_box)]
         pub fn as_text(&self) -> &String {
-            debug_assert!(self.is_text());
-            unsafe { &self.data.text }
+            match &self.data {
+                PayloadData::Text(value) => value,
+                #[allow(unreachable_patterns)]
+                _ => panic!("union Payload does not contain text"),
+            }
         }
         #[allow(clippy::borrowed_box)]
         pub fn as_text_mut(&mut self) -> &mut String {
-            debug_assert!(self.is_text());
-            unsafe { &mut self.data.text }
+            match &mut self.data {
+                PayloadData::Text(value) => value,
+                #[allow(unreachable_patterns)]
+                _ => panic!("union Payload does not contain text"),
+            }
         }
         pub fn into_text(self) -> String {
-            debug_assert!(self.is_text());
-            unsafe {
-                let mut forget = core::mem::ManuallyDrop::new(self);
-                core::mem::ManuallyDrop::take(&mut forget.data.text)
+            match self.data {
+                PayloadData::Text(value) => value,
+                #[allow(unreachable_patterns)]
+                _ => panic!("union Payload does not contain text"),
             }
         }
         pub fn new_media(value: Message) -> Self {
             Self {
-                tag: 2,
-                data: PayloadData {
-                    media: core::mem::ManuallyDrop::new(value),
-                },
+                tag: Some(2),
+                data: PayloadData::Media(value),
             }
         }
         pub fn is_media(&self) -> bool {
-            matches!(self.tag, 2)
+            matches!(& self.data, PayloadData::Media(_))
         }
         #[allow(clippy::borrowed_box)]
         pub fn as_media(&self) -> &Message {
-            debug_assert!(self.is_media());
-            unsafe { &self.data.media }
+            match &self.data {
+                PayloadData::Media(value) => value,
+                #[allow(unreachable_patterns)]
+                _ => panic!("union Payload does not contain media"),
+            }
         }
         #[allow(clippy::borrowed_box)]
         pub fn as_media_mut(&mut self) -> &mut Message {
-            debug_assert!(self.is_media());
-            unsafe { &mut self.data.media }
-        }
-        pub fn into_media(self) -> Message {
-            debug_assert!(self.is_media());
-            unsafe {
-                let mut forget = core::mem::ManuallyDrop::new(self);
-                core::mem::ManuallyDrop::take(&mut forget.data.media)
+            match &mut self.data {
+                PayloadData::Media(value) => value,
+                #[allow(unreachable_patterns)]
+                _ => panic!("union Payload does not contain media"),
             }
         }
-        pub fn tag(&self) -> &i32 {
-            &self.tag
+        pub fn into_media(self) -> Message {
+            match self.data {
+                PayloadData::Media(value) => value,
+                #[allow(unreachable_patterns)]
+                _ => panic!("union Payload does not contain media"),
+            }
+        }
+        /// The explicit discriminator, or None for the default case.
+        pub fn tag(&self) -> Option<&i32> {
+            self.tag.as_ref()
         }
     }
     #[allow(deprecated)]
     impl Default for Payload {
         fn default() -> Self {
-            Self {
-                tag: 1,
-                data: PayloadData {
-                    text: core::mem::ManuallyDrop::new(String::default()),
-                },
-            }
+            Self::new_text(Default::default())
         }
     }
     #[derive(::serde::Serialize)]
-    struct PayloadSerdeRef<'__a> {
-        tag: &'__a str,
-        data: PayloadSerdeRefData<'__a>,
+    struct PayloadSerdeRef<'a> {
+        tag: &'a str,
+        data: PayloadSerdeRefData<'a>,
     }
-    #[allow(clippy::borrowed_box)]
     #[derive(::serde::Serialize)]
     #[serde(untagged)]
-    enum PayloadSerdeRefData<'__a> {
-        Case0(&'__a String),
-        Case1(&'__a Message),
+    enum PayloadSerdeRefData<'a> {
+        Case0(&'a String),
+        Case1(&'a Message),
     }
     #[allow(deprecated)]
     impl serde::Serialize for Payload {
-        #[allow(unreachable_patterns)]
-        fn serialize<__S>(&self, __serializer: __S) -> Result<__S::Ok, __S::Error>
+        fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
         where
-            __S: serde::Serializer,
+            S: serde::Serializer,
         {
-            let helper = match self.tag {
-                1 => {
+            let helper = match &self.data {
+                PayloadData::Text(data) => {
                     let tag = "1";
                     PayloadSerdeRef {
                         tag,
-                        data: PayloadSerdeRefData::Case0(self.as_text()),
+                        data: PayloadSerdeRefData::Case0(data),
                     }
                 }
-                2 => {
+                PayloadData::Media(data) => {
                     let tag = "2";
                     PayloadSerdeRef {
                         tag,
-                        data: PayloadSerdeRefData::Case1(self.as_media()),
+                        data: PayloadSerdeRefData::Case1(data),
                     }
                 }
-                _ => unreachable!(),
             };
-            helper.serialize(__serializer)
+            helper.serialize(serializer)
         }
     }
     #[derive(::serde::Deserialize)]
@@ -239,30 +179,18 @@ pub mod legacy {
             match helper.tag.as_str() {
                 "1" => {
                     let value = ::serde_json::from_value::<String>(helper.data)
-                        .map_err(|err| serde::de::Error::custom(
-                            format!(
-                                "union Payload payload decode failed for tag `1`: {err}"
-                            ),
-                        ))?;
+                        .map_err(serde::de::Error::custom)?;
                     Ok(Self {
-                        tag: 1,
-                        data: PayloadData {
-                            text: core::mem::ManuallyDrop::new(value),
-                        },
+                        tag: Some(1),
+                        data: PayloadData::Text(value),
                     })
                 }
                 "2" => {
                     let value = ::serde_json::from_value::<Message>(helper.data)
-                        .map_err(|err| serde::de::Error::custom(
-                            format!(
-                                "union Payload payload decode failed for tag `2`: {err}"
-                            ),
-                        ))?;
+                        .map_err(serde::de::Error::custom)?;
                     Ok(Self {
-                        tag: 2,
-                        data: PayloadData {
-                            media: core::mem::ManuallyDrop::new(value),
-                        },
+                        tag: Some(2),
+                        data: PayloadData::Media(value),
                     })
                 }
                 _ => {

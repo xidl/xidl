@@ -23,7 +23,7 @@ func TestMarshalBasic(t *testing.T) {
 		{[]int{1, 2, 3}, "[1,2,3]"},
 		{[2]string{"a", "b"}, `["a","b"]`},
 		{map[string]int{"b": 2, "a": 1}, `{"a":1,"b":2}`},
-		{[]byte("base64"), `"YmFzZTY0"`},
+		{[]byte("base64"), `[98,97,115,101,54,52]`},
 	}
 
 	for _, tc := range tests {
@@ -42,7 +42,7 @@ type SimpleStruct struct {
 	A int    `xjson:"a"`
 	B string `xjson:"b,omitempty"`
 	C bool   `xjson:"-"`
-	D int    `xjson:",string"`
+	D int    `xjson:"d,string"`
 }
 
 type EmbeddedStruct struct {
@@ -72,7 +72,7 @@ func TestMarshalStruct(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Marshal failed: %v", err)
 	}
-	want := `{"a":10,"D":"42"}` // B is omitempty and empty, C is skipped, D is string option
+	want := `{"a":10,"d":"42"}` // B is omitempty and empty, C is skipped, D is string option
 	if string(got) != want {
 		t.Errorf("Marshal(SimpleStruct) = %s, want %s", got, want)
 	}
@@ -85,7 +85,7 @@ func TestMarshalStruct(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Marshal failed: %v", err)
 	}
-	want = `{"a":1,"b":"test","D":"2","e":5.5}`
+	want = `{"a":1,"b":"test","d":"2","e":5.5}`
 	if string(got) != want {
 		t.Errorf("Marshal(EmbeddedStruct) = %s, want %s", got, want)
 	}
@@ -98,7 +98,7 @@ func TestMarshalStruct(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Marshal failed: %v", err)
 	}
-	want = `{"D":"0","a":"shadow"}`
+	want = `{"d":"0","a":"shadow"}`
 	if string(got) != want {
 		t.Errorf("Marshal(ConflictOuter) = %s, want %s", got, want)
 	}
@@ -228,7 +228,7 @@ func TestUnmarshalBasic(t *testing.T) {
 
 	t.Run("nested pointer allocation", func(t *testing.T) {
 		var v **SimpleStruct
-		if err := Unmarshal([]byte(`{"a":5}`), &v); err != nil || v == nil || *v == nil || (*v).A != 5 {
+		if err := Unmarshal([]byte(`{"a":5,"d":"0"}`), &v); err != nil || v == nil || *v == nil || (*v).A != 5 {
 			t.Errorf("Unmarshal into nested pointer failed: %v, %v", v, err)
 		}
 	})
@@ -244,15 +244,18 @@ func TestUnmarshalStruct(t *testing.T) {
 		t.Errorf("Unmarshal got %+v", s)
 	}
 
-	// Test case insensitive match
-	data2 := []byte(`{"A":101,"B":"ok"}`)
-	var s2 SimpleStruct
-	if err := Unmarshal(data2, &s2); err != nil {
-		t.Fatalf("Unmarshal failed: %v", err)
+	// IDL wire names are exact, while ordinary JSON field matching stays independent.
+	var malformed SimpleStruct
+	if err := Unmarshal([]byte(`{"A":101,"B":"ok","d":"0"}`), &malformed); err == nil {
+		t.Fatal("accepted non-canonical IDL wire names")
 	}
-	if s2.A != 101 || s2.B != "ok" {
-		t.Errorf("Case insensitive match got %+v", s2)
+	var ordinary struct {
+		A int `json:"a"`
 	}
+	if err := Unmarshal([]byte(`{"A":101}`), &ordinary); err != nil || ordinary.A != 101 {
+		t.Fatalf("ordinary JSON field: %v", err)
+	}
+
 }
 
 type customTextMarshaler struct {

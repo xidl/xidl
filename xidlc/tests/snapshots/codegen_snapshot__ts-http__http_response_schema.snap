@@ -100,7 +100,8 @@ import {
             throw await parseXidlError(resp);
             
         }
-        return await decodeResponseBody<types.Area>(resp, "application/json", this.codecs);
+        const responseBody = await decodeOptionalResponseBody(resp, "application/json", this.codecs);
+        return ifaceSchemas.models.AreaSchema.parse(deserialize(responseBody, ifaceSchemas.models.AreaSchema)) as types.Area;
     }
     
             async count_shapes(): Promise<number> {
@@ -139,7 +140,7 @@ export interface Shape {
 }
 
 
-export type Area = { circle: number } | { square: number } | { fallback: number };
+export type Area = { tag: "kind_round", data: number } | { tag: "kind_square", data: number } | { tag: "default", data: number };
 export {};
 ===============
 http_response_schema.iface.d.ts
@@ -268,6 +269,7 @@ export const ShapesOperations = {
             bodyFields: [{ wireName: "return", key: "return" }],
             headers: [],
             cookies: [],
+            schema: ifaceSchemas.models.AreaSchema,
             stream: false,
             
         },
@@ -332,4 +334,4 @@ import { xjson } from "xidl-typescript-codec";
     });
 
     
-    export const AreaSchema = z.union([z.object({ circle: z.number().int().nonnegative() }), z.object({ square: z.number().int().nonnegative() }), z.object({ fallback: z.number().int().nonnegative() })]);
+    export const AreaSchema = z.union([z.object({ tag: z.enum(["kind_round"]), data: z.number().min(0).max(255).refine(Number.isInteger, "expected an integer") }), z.object({ tag: z.enum(["kind_square"]), data: z.number().min(0).max(255).refine(Number.isInteger, "expected an integer") }), z.object({ tag: z.enum(["default"]), data: z.number().min(0).max(255).refine(Number.isInteger, "expected an integer") })]);

@@ -142,7 +142,7 @@ import { xjson } from "xidl-typescript-codec";
 
     
 export const HttpQueryTemplateServiceGetUserRequestSchema = z.object({
-        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        id: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
         lang: z.coerce.string(),
         region: z.coerce.string(),
     });

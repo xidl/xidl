@@ -27,6 +27,7 @@ pub(crate) struct GoImport {
 pub(crate) struct GoPackages {
     packages: BTreeMap<String, Option<GoImport>>,
     referenced: RefCell<BTreeSet<String>>,
+    runtime: RefCell<BTreeMap<String, GoImport>>,
 }
 
 impl GoPackages {
@@ -62,6 +63,7 @@ impl GoPackages {
         Self {
             packages,
             referenced: RefCell::default(),
+            runtime: RefCell::default(),
         }
     }
 
@@ -94,9 +96,27 @@ impl GoPackages {
             .filter(|package| referenced.contains(&package.path))
             .cloned()
             .collect();
+        imports.extend(self.runtime.borrow().values().cloned());
         imports.sort_by(|left, right| left.path.cmp(&right.path));
         imports.dedup();
         imports
+    }
+
+    /// Registers a runtime or standard library used by this generated file.
+    pub(crate) fn require(&self, name: &str, path: &str) {
+        self.runtime.borrow_mut().insert(
+            path.into(),
+            GoImport {
+                name: name.into(),
+                path: path.into(),
+            },
+        );
+    }
+
+    /// A reusable IDL primitive supplied by the Go runtime.
+    pub(crate) fn runtime_type(&self, name: &str) -> String {
+        self.require("xidlgo", "github.com/xidl/xidl/golang/xidl-go");
+        format!("xidlgo.{name}")
     }
 
     /// Directory an IDL path lives in, when it has one.

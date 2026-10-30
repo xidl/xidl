@@ -1,6 +1,5 @@
 ---
 source: xidlc/tests/codegen_snapshot.rs
-assertion_line: 145
 expression: output
 ---
 ===============
@@ -34,15 +33,19 @@ openapi_unsigned_long.json
           },
           "signed_count": {
             "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
             "type": "integer"
           },
           "small": {
             "format": "int32",
+            "maximum": 65535,
             "minimum": 0,
             "type": "integer"
           },
           "wide": {
             "format": "int64",
+            "maximum": 18446744073709551615,
             "minimum": 0,
             "type": "integer"
           }

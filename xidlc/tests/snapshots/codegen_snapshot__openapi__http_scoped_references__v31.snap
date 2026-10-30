@@ -79,23 +79,37 @@ openapi_http_scoped_references.json
         "oneOf": [
           {
             "properties": {
-              "local": {
+              "data": {
                 "$ref": "#/components/schemas/models.Item"
+              },
+              "tag": {
+                "enum": [
+                  "0"
+                ],
+                "type": "string"
               }
             },
             "required": [
-              "local"
+              "tag",
+              "data"
             ],
             "type": "object"
           },
           {
             "properties": {
-              "root": {
+              "data": {
                 "$ref": "#/components/schemas/Item"
+              },
+              "tag": {
+                "enum": [
+                  "1"
+                ],
+                "type": "string"
               }
             },
             "required": [
-              "root"
+              "tag",
+              "data"
             ],
             "type": "object"
           }

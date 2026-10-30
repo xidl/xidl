@@ -14,7 +14,7 @@ import { xjson } from "xidl-typescript-codec";
 
     
 export const CollectionInputsReadRequestSchema = z.object({
-        values: z.array(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int())),
+        values: z.array(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"))),
         tags: z.array(z.coerce.string()),
         names: z.array(z.coerce.string()),
         labels: z.array(z.coerce.string()).optional(),
@@ -29,45 +29,45 @@ export type CollectionInputsSearchRequest = z.infer<typeof CollectionInputsSearc
 
     
 export const CollectionInputsNumbersRequestSchema = z.object({
-        count: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int()),
+        count: z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer")),
         ratio: z.union([z.number(), z.string().regex(/^[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?(?![\s\S])/).transform(Number)]).pipe(z.number()),
-        units: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int().nonnegative()),
+        units: z.union([z.number(), z.string().regex(/^[+]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")),
         threshold: z.union([z.number(), z.string().regex(/^[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?(?![\s\S])/).transform(Number)]).pipe(z.number()).optional(),
     });
 export type CollectionInputsNumbersRequest = z.infer<typeof CollectionInputsNumbersRequestSchema>;
 
     
 export const CollectionInputsLettersRequestSchema = z.object({
-        letters: z.array(z.string()),
+        letters: z.array(z.string().regex(/^[^\uD800-\uDFFF](?![\s\S])/u)),
     });
 export type CollectionInputsLettersRequest = z.infer<typeof CollectionInputsLettersRequestSchema>;
 
     
 export const CollectionInputsLetterAliasesRequestSchema = z.object({
-        letters: z.array(z.string()),
+        letters: z.array(z.string().regex(/^[^\uD800-\uDFFF](?![\s\S])/u)),
     });
 export type CollectionInputsLetterAliasesRequest = z.infer<typeof CollectionInputsLetterAliasesRequestSchema>;
 
     
 export const CollectionInputsWideLettersRequestSchema = z.object({
-        letters: z.array(z.string()),
+        letters: z.array(z.string().regex(/^[^\uD800-\uDFFF](?![\s\S])/u)),
     });
 export type CollectionInputsWideLettersRequest = z.infer<typeof CollectionInputsWideLettersRequestSchema>;
 
     
 export const CollectionInputsInitialRequestSchema = z.object({
-        letter: z.string(),
+        letter: z.string().regex(/^[^\uD800-\uDFFF](?![\s\S])/u),
     });
 export type CollectionInputsInitialRequest = z.infer<typeof CollectionInputsInitialRequestSchema>;
 
     
 export const CollectionInputsCookieLettersRequestSchema = z.object({
-        letters: z.array(z.string()),
+        letters: z.array(z.string().regex(/^[^\uD800-\uDFFF](?![\s\S])/u)),
     });
 export type CollectionInputsCookieLettersRequest = z.infer<typeof CollectionInputsCookieLettersRequestSchema>;
 
     
 export const CollectionInputsStreamRequestSchema = z.object({
-        values: z.array(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().int())).optional(),
+        values: z.array(z.union([z.number(), z.string().regex(/^[+-]?[0-9]+(?![\s\S])/).transform(Number)]).pipe(z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer"))).optional(),
     });
 export type CollectionInputsStreamRequest = z.infer<typeof CollectionInputsStreamRequestSchema>;

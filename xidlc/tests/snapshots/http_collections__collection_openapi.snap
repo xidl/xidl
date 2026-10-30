@@ -28,6 +28,8 @@ expression: document
           "values": {
             "items": {
               "format": "int32",
+              "maximum": 2147483647,
+              "minimum": -2147483648,
               "type": "integer"
             },
             "type": "array"
@@ -62,6 +64,8 @@ expression: document
         "properties": {
           "count": {
             "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
             "type": "integer"
           },
           "ratio": {
@@ -99,6 +103,8 @@ expression: document
           "values": {
             "items": {
               "format": "int32",
+              "maximum": 2147483647,
+              "minimum": -2147483648,
               "type": "integer"
             },
             "type": "array"
@@ -108,6 +114,8 @@ expression: document
       },
       "transport.Count": {
         "format": "int32",
+        "maximum": 2147483647,
+        "minimum": -2147483648,
         "type": "integer"
       },
       "transport.Counts": {
@@ -126,6 +134,9 @@ expression: document
         "type": "array"
       },
       "transport.Letter": {
+        "maxLength": 1,
+        "minLength": 1,
+        "pattern": "^[^\\uD800-\\uDFFF]$",
         "type": "string"
       },
       "transport.Letters": {
@@ -138,6 +149,9 @@ expression: document
         "$ref": "#/components/schemas/transport.Labels"
       },
       "transport.WideLetter": {
+        "maxLength": 1,
+        "minLength": 1,
+        "pattern": "^[^\\uD800-\\uDFFF]$",
         "type": "string"
       }
     }
@@ -159,6 +173,8 @@ expression: document
             "schema": {
               "items": {
                 "format": "int32",
+                "maximum": 2147483647,
+                "minimum": -2147483648,
                 "type": "integer"
               },
               "type": "array"
@@ -245,6 +261,9 @@ expression: document
             "required": false,
             "schema": {
               "items": {
+                "maxLength": 1,
+                "minLength": 1,
+                "pattern": "^[^\\uD800-\\uDFFF]$",
                 "type": "string"
               },
               "type": "array"
@@ -257,6 +276,9 @@ expression: document
               "application/json": {
                 "schema": {
                   "items": {
+                    "maxLength": 1,
+                    "minLength": 1,
+                    "pattern": "^[^\\uD800-\\uDFFF]$",
                     "type": "string"
                   },
                   "type": "array"
@@ -300,6 +322,9 @@ expression: document
             "name": "letter",
             "required": true,
             "schema": {
+              "maxLength": 1,
+              "minLength": 1,
+              "pattern": "^[^\\uD800-\\uDFFF]$",
               "type": "string"
             }
           }
@@ -309,6 +334,9 @@ expression: document
             "content": {
               "text/plain": {
                 "schema": {
+                  "maxLength": 1,
+                  "minLength": 1,
+                  "pattern": "^[^\\uD800-\\uDFFF]$",
                   "type": "string"
                 }
               }
@@ -351,6 +379,9 @@ expression: document
             "required": false,
             "schema": {
               "items": {
+                "maxLength": 1,
+                "minLength": 1,
+                "pattern": "^[^\\uD800-\\uDFFF]$",
                 "type": "string"
               },
               "type": "array"
@@ -404,6 +435,9 @@ expression: document
             "required": false,
             "schema": {
               "items": {
+                "maxLength": 1,
+                "minLength": 1,
+                "pattern": "^[^\\uD800-\\uDFFF]$",
                 "type": "string"
               },
               "type": "array"
@@ -416,6 +450,9 @@ expression: document
               "application/json": {
                 "schema": {
                   "items": {
+                    "maxLength": 1,
+                    "minLength": 1,
+                    "pattern": "^[^\\uD800-\\uDFFF]$",
                     "type": "string"
                   },
                   "type": "array"
@@ -460,6 +497,8 @@ expression: document
             "required": true,
             "schema": {
               "format": "int32",
+              "maximum": 2147483647,
+              "minimum": -2147483648,
               "type": "integer"
             }
           },
@@ -591,6 +630,8 @@ expression: document
             "schema": {
               "items": {
                 "format": "int32",
+                "maximum": 2147483647,
+                "minimum": -2147483648,
                 "type": "integer"
               },
               "type": "array"
@@ -644,6 +685,9 @@ expression: document
             "required": false,
             "schema": {
               "items": {
+                "maxLength": 1,
+                "minLength": 1,
+                "pattern": "^[^\\uD800-\\uDFFF]$",
                 "type": "string"
               },
               "type": "array"

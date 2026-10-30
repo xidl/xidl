@@ -1,0 +1,64 @@
+// {{ name }} contains one payload selected by its IDL discriminator.
+type {{ name }} struct {
+    tag string
+    data any
+}
+
+func (value {{ name }}) Tag() string { return value.tag }
+
+{% for case in cases %}
+func New{{ name }}{{ case.name }}(data {{ case.ty }}) {{ name }} {
+    return {{ name }}{tag: {{ case.tags[0] | tojson }}, data: data}
+}
+
+func (value {{ name }}) As{{ case.name }}() ({{ case.ty }}, bool) {
+    switch value.tag {
+    case {% for tag in case.tags %}{{ tag | tojson }}{% if not loop.last %}, {% endif %}{% endfor %}:
+        {% if case.ty == "any" %}
+        return value.data, true
+        {% else %}
+        data, ok := value.data.({{ case.ty }})
+        return data, ok
+        {% endif %}
+    }
+    var zero {{ case.ty }}
+    return zero, false
+}
+{% endfor %}
+
+func (value {{ name }}) MarshalJSON() ([]byte, error) {
+    switch value.tag {
+    {% for case in cases %}
+    case {% for tag in case.tags %}{{ tag | tojson }}{% if not loop.last %}, {% endif %}{% endfor %}:
+        if _, ok := value.As{{ case.name }}(); !ok {
+            return nil, fmt.Errorf("union {{ name }} has an invalid payload for tag %q", value.tag)
+        }
+    {% endfor %}
+    default:
+        return nil, fmt.Errorf("union {{ name }} has an invalid tag %q", value.tag)
+    }
+    return json.Marshal(struct {
+        Tag string `json:"tag" xjson:"tag"`
+        Data any `json:"data" xjson:"data"`
+    }{Tag: value.tag, Data: value.data})
+}
+
+func (value *{{ name }}) UnmarshalJSON(data []byte) error {
+    var wire map[string]json.RawMessage
+    if err := json.Unmarshal(data, &wire); err != nil { return err }
+    var tag string
+    if err := json.Unmarshal(wire["tag"], &tag); err != nil { return fmt.Errorf("union {{ name }} tag: %w", err) }
+    payload, present := wire["data"]
+    if !present { return fmt.Errorf("union {{ name }} requires data") }
+    switch tag {
+    {% for case in cases %}
+    case {% for tag in case.tags %}{{ tag | tojson }}{% if not loop.last %}, {% endif %}{% endfor %}:
+        var decoded {{ case.ty }}
+        if err := json.Unmarshal(payload, &decoded); err != nil { return fmt.Errorf("union {{ name }} payload for tag %q: %w", tag, err) }
+        *value = {{ name }}{tag: tag, data: decoded}
+        return nil
+    {% endfor %}
+    default:
+        return fmt.Errorf("union {{ name }} has an invalid tag %q", tag)
+    }
+}

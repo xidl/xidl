@@ -65,7 +65,7 @@ func (w *ClientStreamWriter[TReq, TResp]) Write(value TReq) error {
 	if err != nil {
 		w.outcome = StreamFailed
 		w.cause = err
-		_ = w.encoder.Encode(map[string]any{"t": "error", "error": EncodeStreamError(err)})
+		_ = w.encoder.Encode(map[string]any{"t": "error", "error": EncodeHTTPError(err)})
 		_ = w.writer.Close()
 		return err
 	}

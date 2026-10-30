@@ -95,7 +95,7 @@ import {
                 throw error;
             }
             if (status === 412) {
-                const bodySchema = z.object({ "code": z.number().int().nonnegative(), "message": z.string(), "detail": z.string().optional(),  });
+                const bodySchema = z.object({ "code": z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer"), "message": z.string(), "detail": z.string().optional(),  });
                 if (rawBody == null || rawBody["code"] === undefined || rawBody["message"] === undefined) throw decodeXidlError(status, rawBody);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw decodeXidlError(status, rawBody);
@@ -124,7 +124,7 @@ import {
                 throw error;
             }
             if (status === 404) {
-                const bodySchema = z.object({ "code": z.number().int().nonnegative(), "msg": z.string(),  });
+                const bodySchema = z.object({ "code": z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer"), "msg": z.string(),  });
                 if (rawBody == null || rawBody["code"] === undefined || rawBody["msg"] === undefined) throw decodeXidlError(status, rawBody);
                 const decoded = bodySchema.safeParse(deserialize(rawBody, bodySchema));
                 if (!decoded.success) throw decodeXidlError(status, rawBody);
@@ -617,7 +617,7 @@ export const FilesOperations = {
                 
                         if (error instanceof $xidlErrors.PreconditionFailed) {
                             parseResponse(error, z.object({
-                                "code": z.number().int().nonnegative(), "msg": z.string(), "detail": z.string().optional(), 
+                                "code": z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer"), "msg": z.string(), "detail": z.string().optional(), 
                                 "etag": z.string(), "hints": z.array(z.string()).optional(), "session_id": z.string(), "retry_token": z.string().optional(), "attempts": z.array(z.string()).optional(), 
                             }));
                             const headers = new Headers();
@@ -627,14 +627,14 @@ export const FilesOperations = {
                             return {
                                 status: 412,
                                 headers,
-                                body: { "code": serialize(error.code, z.number().int().nonnegative()), "message": serialize(error.msg, z.string()), "detail": serialize(error.detail, z.string().optional()), },
+                                body: { "code": serialize(error.code, z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")), "message": serialize(error.msg, z.string()), "detail": serialize(error.detail, z.string().optional()), },
                             };
                             
                     }
                 
                         if (error instanceof $xidlErrors.NotFound) {
                             parseResponse(error, z.object({
-                                "code": z.number().int().nonnegative(), "msg": z.string(), 
+                                "code": z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer"), "msg": z.string(), 
                                 
                             }));
                             const headers = new Headers();
@@ -644,7 +644,7 @@ export const FilesOperations = {
                             return {
                                 status: 404,
                                 headers,
-                                body: { "code": serialize(error.code, z.number().int().nonnegative()), "msg": serialize(error.msg, z.string()), },
+                                body: { "code": serialize(error.code, z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer")), "msg": serialize(error.msg, z.string()), },
                             };
                             
                     }
@@ -868,7 +868,7 @@ import { xjson } from "xidl-typescript-codec";
         
             attempts: xjson(z.array(z.string()).nullish().transform((value) => value ?? undefined), {"name":"attempt"}),
         
-            code: z.number().int().nonnegative(),
+            code: z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer"),
         
             msg: xjson(z.string(), {"name":"message"}),
         
@@ -879,7 +879,7 @@ import { xjson } from "xidl-typescript-codec";
     
     export const NotFoundSchema = z.object({
         
-            code: z.number().int().nonnegative(),
+            code: z.number().min(0).max(4294967295).refine(Number.isInteger, "expected an integer"),
         
             msg: z.string()
         

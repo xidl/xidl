@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { createRouter } from 'xidl-typescript-server';
-import type { Status } from './{{MODULE_NAME}}.js';
+import type { Metadata, Payload, Status } from './{{MODULE_NAME}}.js';
 import {
   type AllScenariosService,
   AllScenariosServiceOperations,
@@ -15,10 +15,12 @@ class MyAllScenarios implements AllScenariosService {
   ): Promise<string> {
     return `Item ${id} with ${filter} and ${trace_id}`;
   }
-  async create_item(name: string, payload: any): Promise<number> {
+  async create_item(name: string, payload: Payload): Promise<number> {
+    if (!name || payload.tag !== 'ACTIVE' || !payload.data)
+      throw new Error('active message required');
     return 42;
   }
-  async update_item(id: number, metadata: any[]): Promise<void> {}
+  async update_item(id: number, metadata: Metadata[]): Promise<void> {}
   async delete_item(id: number): Promise<void> {}
   async upload_form(key: string, value: string): Promise<void> {}
   async secure_data(): Promise<string> {

@@ -2,7 +2,7 @@ resp, err := c.httpClient.Do(httpReq)
 if err != nil { return nil, err }
 if resp.StatusCode < 200 || resp.StatusCode >= 300 {
     defer resp.Body.Close()
-    return nil, xidlgohttp.DecodeStreamHTTPError(resp, decode{{ prefix }}Failure)
+    return nil, xidlgohttp.ReadHTTPError(resp, decode{{ prefix }}Failure)
 }
 return xidlgohttp.NewSSEStreamReader[{{ item }}](resp.Body).WithContext(ctx).WithErrorDecoder(decode{{ prefix }}Failure), nil
 }

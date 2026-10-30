@@ -21,19 +21,13 @@ pub(crate) fn emit_request_bind(
         "Cookie" => format!("xidlgohttp.GinCookieString(c, {wire:?})"),
         _ => return Ok(()),
     };
-    if param.ty != "string" && param.ty != "uint32" && param.ty != "int32" && param.ty != "bool" {
-        return Ok(());
-    }
     let renderer = GoRestRenderer::new()?;
     out.push_str(&renderer.render_template(
         "request_bind.go.j2",
         &RequestBindTemplate {
             field: &field,
             call: &call,
-            ty: &param.ty,
-            optional: param.optional,
-            wire_name: &param.wire_name,
-            source_kind,
+            requires_presence: param.requires_presence,
         },
     )?);
     out.push('\n');
@@ -43,17 +37,11 @@ pub(crate) fn emit_request_bind(
 pub(crate) fn emit_bidi_request_bind(out: &mut String, param: &ParamMeta) -> IdlcResult<()> {
     let field = format!("req.{}", param.field_name);
     let wire = &param.wire_name;
-    let (call, source_kind) = match param.source {
-        ParamSource::Path => (format!("xidlgohttp.GinPathString(c, {wire:?})"), "Path"),
-        ParamSource::Query => (
-            format!("xidlgohttp.QueryString(c.Request.URL.Query(), {wire:?})"),
-            "Query",
-        ),
-        ParamSource::Header => (
-            format!("xidlgohttp.HeaderString(c.Request.Header, {wire:?})"),
-            "Header",
-        ),
-        ParamSource::Cookie => (format!("xidlgohttp.GinCookieString(c, {wire:?})"), "Cookie"),
+    let call = match param.source {
+        ParamSource::Path => format!("xidlgohttp.GinPathString(c, {wire:?})"),
+        ParamSource::Query => format!("xidlgohttp.QueryString(c.Request.URL.Query(), {wire:?})"),
+        ParamSource::Header => format!("xidlgohttp.HeaderString(c.Request.Header, {wire:?})"),
+        ParamSource::Cookie => format!("xidlgohttp.GinCookieString(c, {wire:?})"),
         ParamSource::Body => return Ok(()),
     };
     let renderer = GoRestRenderer::new()?;
@@ -62,10 +50,7 @@ pub(crate) fn emit_bidi_request_bind(out: &mut String, param: &ParamMeta) -> Idl
         &RequestBindTemplate {
             field: &field,
             call: &call,
-            ty: &param.ty,
-            optional: param.optional,
-            wire_name: &param.wire_name,
-            source_kind,
+            requires_presence: param.requires_presence,
         },
     )?);
     out.push('\n');
@@ -73,17 +58,15 @@ pub(crate) fn emit_bidi_request_bind(out: &mut String, param: &ParamMeta) -> Idl
 }
 
 pub(crate) fn emit_query_encode(out: &mut String, param: &ParamMeta) -> IdlcResult<()> {
-    emit_encode(out, param, "query_encode.go.j2", supports_query_encode)
+    emit_encode(out, param, "query_encode.go.j2")
 }
 
 pub(crate) fn emit_header_encode(out: &mut String, param: &ParamMeta) -> IdlcResult<()> {
-    emit_encode(out, param, "header_encode.go.j2", |ty| {
-        ty == "string" || ty == "uint32"
-    })
+    emit_encode(out, param, "header_encode.go.j2")
 }
 
 pub(crate) fn emit_cookie_encode(out: &mut String, param: &ParamMeta) -> IdlcResult<()> {
-    emit_encode(out, param, "cookie_encode.go.j2", |ty| ty == "string")
+    emit_encode(out, param, "cookie_encode.go.j2")
 }
 
 pub(crate) fn emit_response_header_encode(
@@ -92,9 +75,7 @@ pub(crate) fn emit_response_header_encode(
     value: &str,
 ) -> IdlcResult<()> {
     let field = format!("{value}.{}", param.field_name);
-    emit_response_encode(out, param, &field, "response_header_encode.go.j2", |ty| {
-        ty == "string" || ty == "uint32"
-    })
+    emit_response_encode(out, param, &field, "response_header_encode.go.j2")
 }
 
 pub(crate) fn emit_response_cookie_encode(
@@ -103,14 +84,12 @@ pub(crate) fn emit_response_cookie_encode(
     value: &str,
 ) -> IdlcResult<()> {
     let field = format!("{value}.{}", param.field_name);
-    emit_response_encode(out, param, &field, "response_cookie_encode.go.j2", |ty| {
-        ty == "string"
-    })
+    emit_response_encode(out, param, &field, "response_cookie_encode.go.j2")
 }
 
 pub(crate) fn emit_response_header_decode(out: &mut String, param: &ParamMeta) -> IdlcResult<()> {
     let field = format!("out.{}", param.field_name);
-    if param.ty == "string" || param.ty == "uint32" {
+    {
         let renderer = GoRestRenderer::new()?;
         out.push_str(&renderer.render_template(
             "response_header_decode.go.j2",
@@ -126,7 +105,7 @@ pub(crate) fn emit_response_header_decode(out: &mut String, param: &ParamMeta) -
 }
 
 pub(crate) fn emit_response_cookie_decode(out: &mut String, param: &ParamMeta) -> IdlcResult<()> {
-    if param.ty == "string" {
+    {
         let renderer = GoRestRenderer::new()?;
         out.push_str(&renderer.render_template(
             "response_cookie_decode.go.j2",
@@ -141,15 +120,7 @@ pub(crate) fn emit_response_cookie_decode(out: &mut String, param: &ParamMeta) -
     Ok(())
 }
 
-fn emit_encode(
-    out: &mut String,
-    param: &ParamMeta,
-    template: &str,
-    supports: impl Fn(&str) -> bool,
-) -> IdlcResult<()> {
-    if !supports(&param.ty) {
-        return Ok(());
-    }
+fn emit_encode(out: &mut String, param: &ParamMeta, template: &str) -> IdlcResult<()> {
     let renderer = GoRestRenderer::new()?;
     let field = format!("req.{}", param.field_name);
     out.push_str(&renderer.render_template(
@@ -170,11 +141,7 @@ fn emit_response_encode(
     param: &ParamMeta,
     field: &str,
     template: &str,
-    supports: impl Fn(&str) -> bool,
 ) -> IdlcResult<()> {
-    if !supports(&param.ty) {
-        return Ok(());
-    }
     let renderer = GoRestRenderer::new()?;
     out.push_str(&renderer.render_template(
         template,
@@ -186,8 +153,4 @@ fn emit_response_encode(
     )?);
     out.push('\n');
     Ok(())
-}
-
-fn supports_query_encode(ty: &str) -> bool {
-    matches!(ty, "string" | "*string" | "uint32" | "int32" | "bool")
 }

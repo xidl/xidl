@@ -32,6 +32,8 @@ openapi_deprecated.json
             "deprecated": true,
             "description": "Deprecated. Since 2026-01-01T00:00:00Z. After 2026-12-31T23:59:59Z.",
             "format": "int32",
+            "maximum": 2147483647,
+            "minimum": -2147483648,
             "type": "integer"
           },
           "fallback": {
@@ -108,23 +110,37 @@ openapi_deprecated.json
         "oneOf": [
           {
             "properties": {
-              "text": {
+              "data": {
+                "type": "string"
+              },
+              "tag": {
+                "enum": [
+                  "1"
+                ],
                 "type": "string"
               }
             },
             "required": [
-              "text"
+              "tag",
+              "data"
             ],
             "type": "object"
           },
           {
             "properties": {
-              "media": {
+              "data": {
                 "$ref": "#/components/schemas/legacy.Message"
+              },
+              "tag": {
+                "enum": [
+                  "2"
+                ],
+                "type": "string"
               }
             },
             "required": [
-              "media"
+              "tag",
+              "data"
             ],
             "type": "object"
           }
