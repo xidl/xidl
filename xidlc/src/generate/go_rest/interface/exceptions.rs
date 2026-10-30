@@ -50,20 +50,16 @@ impl ExceptionContext {
                     is_root: false,
                     name,
                 };
-                let imported = context.packages.reference(&scoped);
                 Ok(Self {
-                    name: imported.unwrap_or_else(|| {
-                        crate::generate::go::go_export_name(
-                            &reference.module_path,
-                            &reference.ident,
-                        )
-                    }),
+                    name: context.scope(&[]).reference(&scoped),
                     status: exception.status,
                     has_body: !exception.body.is_empty(),
                     body: exception
                         .body
                         .iter()
-                        .map(|field| ExceptionField::new(field, context))
+                        .map(|field| {
+                            ExceptionField::new(field, context.scope(&exception.module_path))
+                        })
                         .collect(),
                     headers: exception
                         .headers
@@ -90,8 +86,8 @@ struct ExceptionField {
 }
 
 impl ExceptionField {
-    fn new(field: &HttpExceptionField, context: &GoRestRenderContext<'_>) -> Self {
-        let ty = crate::generate::go::go_type(&field.ty, &context.packages);
+    fn new(field: &HttpExceptionField, scope: crate::generate::go::GoScope<'_>) -> Self {
+        let ty = scope.type_ref(&field.ty);
         Self {
             field: crate::generate::go::go_field_name(&field.field),
             wire: field.wire_name.clone(),

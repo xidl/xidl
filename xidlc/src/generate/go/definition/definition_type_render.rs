@@ -8,7 +8,7 @@ use super::definition_templates::{
     EnumMemberTemplate, EnumTemplate, ExceptionTemplate, FieldTemplate, StructTemplate,
     TypeDeclTemplate, render_enum_member_block, render_field_block,
 };
-use super::definition_types::{constr_type_name, go_scoped_name, type_with_decl};
+use super::definition_types::{constr_type_name, type_with_decl};
 
 pub(super) fn render_type_dcl(
     ctx: &mut GoRenderContext,
@@ -42,7 +42,7 @@ pub(super) fn render_exception(
         "exception.go.j2",
         &ExceptionTemplate {
             name,
-            fields: render_field_block(ctx, field_templates(&def.member, &[], &ctx.packages))?,
+            fields: render_field_block(ctx, field_templates(&def.member, &[], ctx.scope(prefix)))?,
         },
     )
 }
@@ -56,7 +56,7 @@ fn render_typedef(
         hir::TypedefType::TypeSpec(ty) => {
             for decl in &def.decl {
                 let name = go_field_name(declarator_name(decl));
-                let base = type_with_decl(ty, decl, &ctx.packages);
+                let base = type_with_decl(ty, decl, ctx.scope(prefix));
                 ctx.push_template(
                     "type_decl.go.j2",
                     &TypeDeclTemplate {
@@ -126,15 +126,20 @@ fn render_struct(
     def: &hir::StructDcl,
     prefix: &[String],
 ) -> IdlcResult<()> {
-    render_field_struct(
-        ctx,
-        go_export_name(prefix, &def.ident),
-        &def.member,
-        &def.annotations,
-        def.parent
-            .first()
-            .map(|parent| format!("\t{}\n", go_scoped_name(parent, &ctx.packages)))
-            .unwrap_or_default(),
+    ctx.push_template(
+        "struct.go.j2",
+        &StructTemplate {
+            name: go_export_name(prefix, &def.ident),
+            embed: def
+                .parent
+                .first()
+                .map(|parent| format!("\t{}\n", ctx.scope(prefix).reference(parent)))
+                .unwrap_or_default(),
+            fields: render_field_block(
+                ctx,
+                field_templates(&def.member, &def.annotations, ctx.scope(prefix)),
+            )?,
+        },
     )
 }
 
@@ -194,30 +199,10 @@ fn render_simple_struct(
     )
 }
 
-fn render_field_struct(
-    ctx: &mut GoRenderContext,
-    name: String,
-    members: &[hir::Member],
-    container_annotations: &[hir::Annotation],
-    embed: String,
-) -> IdlcResult<()> {
-    ctx.push_template(
-        "struct.go.j2",
-        &StructTemplate {
-            name,
-            embed,
-            fields: render_field_block(
-                ctx,
-                field_templates(members, container_annotations, &ctx.packages),
-            )?,
-        },
-    )
-}
-
 fn field_templates(
     members: &[hir::Member],
     container_annotations: &[hir::Annotation],
-    packages: &crate::generate::go::GoPackages,
+    scope: crate::generate::go::GoScope<'_>,
 ) -> Vec<FieldTemplate> {
     let mut fields = Vec::new();
     for member in members {
@@ -226,7 +211,7 @@ fn field_templates(
         for decl in &member.ident {
             let raw_name = declarator_name(decl);
             let field = go_field_name(raw_name);
-            let mut ty = type_with_decl(&member.ty, decl, packages);
+            let mut ty = type_with_decl(&member.ty, decl, scope);
             if is_optional {
                 ty = pointer_type(&ty);
             }

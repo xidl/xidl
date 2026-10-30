@@ -1,11 +1,10 @@
 use crate::error::IdlcResult;
-use crate::generate::go::GoPackages;
-use crate::generate::go_rest::{
-    MethodMeta, ParamMeta, ParamSource, VersionParameterMeta, definition,
-};
+use crate::generate::go::GoScope;
+use crate::generate::go_rest::{GoRestRenderContext, MethodMeta, ParamMeta, ParamSource};
 use convert_case::{Case, Casing};
 use xidl_parser::rest_hir::{
-    HttpOperation, HttpOutputSource, HttpRequestBodyShape, HttpResponseBodyShape,
+    HttpInterface, HttpOperation, HttpOutputSource, HttpRequestBodyShape, HttpResponseBodyShape,
+    HttpSignatureParam,
 };
 
 use super::interface_meta_support::{deprecated_context, http_method, validate_stream_support};
@@ -13,12 +12,15 @@ use super::interface_meta_support::{deprecated_context, http_method, validate_st
 pub(crate) fn build_method_meta(
     interface_name: &str,
     op: &HttpOperation,
-    packages: &GoPackages,
-    prefix: &[String],
-    version_parameter: Option<VersionParameterMeta>,
-    versioned_modules: bool,
+    interface: &HttpInterface,
+    context: &GoRestRenderContext<'_>,
 ) -> IdlcResult<MethodMeta> {
     validate_stream_support(op)?;
+    let versioned_modules = context.versioned_modules;
+    let version_parameter = context.version_parameter(&interface.module_path);
+    let mut path = interface.module_path.clone();
+    path.push(interface.name.clone());
+    let scope = context.scope(&path);
     let http_method = http_method(op.meta.method);
     let deprecated = deprecated_context(op);
     let (security, basic_realm) = match &op.meta.security {
@@ -42,7 +44,7 @@ pub(crate) fn build_method_meta(
             xidl_parser::rest_hir::HttpSignatureParamDirection::In
                 | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
         ) {
-            let meta = build_param_meta(op, &p.name, packages, prefix, versioned_modules);
+            let meta = build_param_meta(op, p, scope);
             request_params.push(meta.clone());
             match meta.source {
                 ParamSource::Path => path_params.push(meta),
@@ -64,7 +66,7 @@ pub(crate) fn build_method_meta(
             xidl_parser::rest_hir::HttpSignatureParamDirection::Out
                 | xidl_parser::rest_hir::HttpSignatureParamDirection::InOut
         ) {
-            let meta = build_response_param_meta(op, &p.name, packages, prefix, versioned_modules);
+            let meta = build_response_param_meta(op, p, scope);
             match meta.source {
                 ParamSource::Header => response_header_params.push(meta),
                 ParamSource::Cookie => response_cookie_params.push(meta),
@@ -88,7 +90,7 @@ pub(crate) fn build_method_meta(
             } => (
                 None,
                 Some(source_param.to_case(Case::Pascal)),
-                Some(definition::go_type(ty, packages, prefix, versioned_modules)),
+                Some(scope.type_ref(ty)),
             ),
             _ => (None, None, None),
         };
@@ -97,28 +99,22 @@ pub(crate) fn build_method_meta(
         .signature
         .return_type
         .as_ref()
-        .map(|ty| definition::go_type(ty, packages, prefix, versioned_modules));
+        .map(|ty| scope.type_ref(ty));
 
     let (response_body_struct, response_body_direct_field, response_body_direct_ty) =
         match &op.http.response.body.shape {
             HttpResponseBodyShape::Object { .. } => {
                 (Some(format!("{struct_prefix}ResponseBody")), None, None)
             }
-            HttpResponseBodyShape::ReturnOnly { ty } => (
-                None,
-                Some("Return".to_string()),
-                Some(definition::go_type(ty, packages, prefix, versioned_modules)),
-            ),
+            HttpResponseBodyShape::ReturnOnly { ty } => {
+                (None, Some("Return".to_string()), Some(scope.type_ref(ty)))
+            }
             HttpResponseBodyShape::SingleValue { source, ty } => {
                 let name = match source {
                     HttpOutputSource::ReturnValue => "Return".to_string(),
                     HttpOutputSource::Param { name } => name.to_case(Case::Pascal),
                 };
-                (
-                    None,
-                    Some(name),
-                    Some(definition::go_type(ty, packages, prefix, versioned_modules)),
-                )
+                (None, Some(name), Some(scope.type_ref(ty)))
             }
             _ => (None, None, None),
         };
@@ -211,14 +207,8 @@ pub(crate) fn build_method_meta(
     })
 }
 
-fn build_param_meta(
-    op: &HttpOperation,
-    name: &str,
-    packages: &GoPackages,
-    prefix: &[String],
-    versioned_modules: bool,
-) -> ParamMeta {
-    let p = op.signature.params.iter().find(|p| p.name == name).unwrap();
+fn build_param_meta(op: &HttpOperation, p: &HttpSignatureParam, scope: GoScope<'_>) -> ParamMeta {
+    let name = p.name.as_str();
     let optional = p.is_optional;
     let flatten = p.is_flatten;
     let request = &op.http.request;
@@ -293,7 +283,7 @@ fn build_param_meta(
         field_name: name.to_case(Case::Pascal),
         raw_name: name.to_string(),
         wire_name,
-        ty: definition::go_type(&p.ty, packages, prefix, versioned_modules),
+        ty: scope.type_ref(&p.ty),
         optional,
         requires_presence,
         source,
@@ -302,12 +292,10 @@ fn build_param_meta(
 
 fn build_response_param_meta(
     op: &HttpOperation,
-    name: &str,
-    packages: &GoPackages,
-    prefix: &[String],
-    versioned_modules: bool,
+    p: &HttpSignatureParam,
+    scope: GoScope<'_>,
 ) -> ParamMeta {
-    let p = op.signature.params.iter().find(|p| p.name == name).unwrap();
+    let name = p.name.as_str();
     let (source, wire_name) = if let Some(b) =
         op.http.response.header.iter().find(|b| match &b.source {
             HttpOutputSource::Param { name: n } => n == name,
@@ -327,7 +315,7 @@ fn build_response_param_meta(
         field_name: name.to_case(Case::Pascal),
         raw_name: name.to_string(),
         wire_name,
-        ty: definition::go_type(&p.ty, packages, prefix, versioned_modules),
+        ty: scope.type_ref(&p.ty),
         optional: false,
         requires_presence: false,
         source,

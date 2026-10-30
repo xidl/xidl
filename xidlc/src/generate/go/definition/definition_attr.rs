@@ -3,27 +3,28 @@ use crate::generate::go::GoRenderContext;
 use xidl_parser::hir;
 
 use super::definition_names::go_capitalize;
+use super::definition_render::InterfaceContext;
 use super::definition_templates::{
     EmptyStructTemplate, FieldTemplate, MethodTemplate, StructTemplate, render_field_block,
 };
 
 pub(super) fn render_attr_types(
     ctx: &mut GoRenderContext,
-    interface_name: &str,
+    interface: &InterfaceContext<'_>,
     attr: &hir::AttrDcl,
 ) -> IdlcResult<Vec<MethodTemplate>> {
     let mut out = Vec::new();
     match &attr.decl {
         hir::AttrDclInner::ReadonlyAttrSpec(spec) => {
             for decl in spec.declarator.declarators() {
-                push_get_attr(ctx, &mut out, interface_name, &decl.0, &spec.ty)?;
+                out.push(get_attr(ctx, interface, &decl.0, &spec.ty)?);
             }
         }
         hir::AttrDclInner::AttrSpec(spec) => {
             if let hir::AttrDeclarator::SimpleDeclarator(values) = &spec.declarator {
                 for decl in values {
-                    push_get_attr(ctx, &mut out, interface_name, &decl.0, &spec.ty)?;
-                    push_set_attr(ctx, &mut out, interface_name, &decl.0, &spec.ty)?;
+                    out.push(get_attr(ctx, interface, &decl.0, &spec.ty)?);
+                    out.push(set_attr(ctx, interface, &decl.0, &spec.ty)?);
                 }
             }
         }
@@ -31,21 +32,20 @@ pub(super) fn render_attr_types(
     Ok(out)
 }
 
-fn push_get_attr(
+fn get_attr(
     ctx: &mut GoRenderContext,
-    out: &mut Vec<MethodTemplate>,
-    interface_name: &str,
+    interface: &InterfaceContext<'_>,
     raw: &str,
     ty: &hir::TypeSpec,
-) -> IdlcResult<()> {
+) -> IdlcResult<MethodTemplate> {
     let request_name = format!(
         "{}GetAttribute{}Request",
-        interface_name,
+        interface.name,
         go_capitalize(raw)
     );
     let response_name = format!(
         "{}GetAttribute{}Response",
-        interface_name,
+        interface.name,
         go_capitalize(raw)
     );
     ctx.push_template(
@@ -63,35 +63,33 @@ fn push_get_attr(
                 ctx,
                 vec![FieldTemplate {
                     name: "Return".to_string(),
-                    ty: ctx.type_ref(ty),
+                    ty: ctx.scope(&interface.scope).type_ref(ty),
                     tag: "return".to_string(),
                 }],
             )?,
         },
     )?;
-    out.push(MethodTemplate {
+    Ok(MethodTemplate {
         name: format!("GetAttribute{}", go_capitalize(raw)),
         request_name,
         response_name,
-    });
-    Ok(())
+    })
 }
 
-fn push_set_attr(
+fn set_attr(
     ctx: &mut GoRenderContext,
-    out: &mut Vec<MethodTemplate>,
-    interface_name: &str,
+    interface: &InterfaceContext<'_>,
     raw: &str,
     ty: &hir::TypeSpec,
-) -> IdlcResult<()> {
+) -> IdlcResult<MethodTemplate> {
     let request_name = format!(
         "{}SetAttribute{}Request",
-        interface_name,
+        interface.name,
         go_capitalize(raw)
     );
     let response_name = format!(
         "{}SetAttribute{}Response",
-        interface_name,
+        interface.name,
         go_capitalize(raw)
     );
     ctx.push_template(
@@ -103,7 +101,7 @@ fn push_set_attr(
                 ctx,
                 vec![FieldTemplate {
                     name: "Value".to_string(),
-                    ty: ctx.type_ref(ty),
+                    ty: ctx.scope(&interface.scope).type_ref(ty),
                     tag: "value".to_string(),
                 }],
             )?,
@@ -115,10 +113,9 @@ fn push_set_attr(
             name: response_name.clone(),
         },
     )?;
-    out.push(MethodTemplate {
+    Ok(MethodTemplate {
         name: format!("SetAttribute{}", go_capitalize(raw)),
         request_name,
         response_name,
-    });
-    Ok(())
+    })
 }

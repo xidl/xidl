@@ -6,7 +6,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use xidl_parser::hir;
 use xidl_parser::hir::ParserProperties;
 
-use super::definition::go_capitalize;
+use super::definition::go_export_name;
 use crate::generate::utils::go_package_name;
 
 /// One Go package a file reaches.
@@ -73,10 +73,8 @@ impl GoPackages {
         if rest.is_empty() || value.is_root {
             return None;
         }
-        let name = rest
-            .iter()
-            .map(|part| go_capitalize(part))
-            .collect::<String>();
+        let (ident, modules) = rest.split_last()?;
+        let name = go_export_name(modules, ident);
         match self.packages.get(first)? {
             Some(package) => {
                 self.referenced.borrow_mut().insert(package.path.clone());

@@ -1,0 +1,16 @@
+import "sources/origin.idl";
+#include "types.idl"
+
+module ledger {
+    @http(409)
+    exception Failure { @body Detail detail; };
+
+    @no_security
+    interface Entries {
+        typedef Detail View;
+        struct Envelope { Entry entry; View detail; };
+
+        @post(path = "/entries/{id}")
+        Envelope save(@path string id, @body Envelope value) raises(Failure);
+    };
+};

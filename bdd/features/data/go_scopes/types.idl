@@ -1,0 +1,35 @@
+struct Detail { long code; };
+typedef long Identifier;
+
+module ledger {
+    typedef string Identifier;
+    struct Detail { string message; };
+    enum State { open, locked };
+    const State Initial = State::open;
+    const unsigned long Width = 2;
+    typedef Detail Details[Width];
+    struct Base { Identifier id; };
+    struct Entry : Base {
+        Detail detail;
+        sequence<Detail> trail;
+        map<string, Detail> labels;
+        Details pair;
+        State state;
+        ::Detail root;
+        origin::httpAPI::Detail origin;
+    };
+    union Change switch(State) {
+        case State::open: Detail detail;
+        default: sequence<Detail> history;
+    };
+    module httpAPI {
+        typedef long Identifier;
+        struct Detail { long attempts; };
+        struct Receipt {
+            Identifier attempt;
+            ledger::Detail detail;
+            ::Detail root;
+            Entry entry;
+        };
+    };
+};

@@ -1,0 +1,3 @@
+module httpAPI {
+    struct Detail { string source; };
+};

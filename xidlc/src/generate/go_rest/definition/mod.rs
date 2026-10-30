@@ -3,88 +3,15 @@ mod definition_format;
 mod definition_templates;
 
 use convert_case::Casing;
-use xidl_parser::hir;
 
 use super::HttpMethod;
-use crate::generate::go::GoPackages;
 
 pub(crate) use self::definition_emit::{
     emit_bidi_request_bind, emit_cookie_encode, emit_header_encode, emit_query_encode,
     emit_request_bind, emit_response_cookie_decode, emit_response_cookie_encode,
     emit_response_header_decode, emit_response_header_encode,
 };
-pub(crate) use self::definition_format::{render_format_path_fn, strip_interfaces};
-
-pub(crate) fn go_type(
-    ty: &hir::TypeSpec,
-    packages: &GoPackages,
-    prefix: &[String],
-    versioned: bool,
-) -> String {
-    match ty {
-        hir::TypeSpec::IntegerType(value) => match value {
-            hir::IntegerType::Char => "int8".to_string(),
-            hir::IntegerType::UChar | hir::IntegerType::Octet | hir::IntegerType::U8 => {
-                "uint8".to_string()
-            }
-            hir::IntegerType::U16 => "uint16".to_string(),
-            hir::IntegerType::U32 => "uint32".to_string(),
-            hir::IntegerType::U64 => "uint64".to_string(),
-            hir::IntegerType::I8 => "int8".to_string(),
-            hir::IntegerType::I16 => "int16".to_string(),
-            hir::IntegerType::I32 => "int32".to_string(),
-            hir::IntegerType::I64 => "int64".to_string(),
-        },
-        hir::TypeSpec::FloatingPtType => "float64".to_string(),
-        hir::TypeSpec::CharType | hir::TypeSpec::WideCharType => packages.runtime_type("Char"),
-        hir::TypeSpec::Boolean => "bool".to_string(),
-        hir::TypeSpec::AnyType | hir::TypeSpec::ObjectType | hir::TypeSpec::ValueBaseType => {
-            "any".to_string()
-        }
-        hir::TypeSpec::ScopedName(value) => packages.reference(value).unwrap_or_else(|| {
-            if versioned {
-                scoped_type_name(value, prefix)
-            } else {
-                value
-                    .name
-                    .iter()
-                    .map(|part| part.to_case(convert_case::Case::Pascal))
-                    .collect::<Vec<_>>()
-                    .join("")
-            }
-        }),
-        hir::TypeSpec::SequenceType(seq) => {
-            format!("[]{}", go_type(&seq.ty, packages, prefix, versioned))
-        }
-        hir::TypeSpec::StringType(_) | hir::TypeSpec::WideStringType(_) => "string".to_string(),
-        hir::TypeSpec::FixedPtType(_) => "float64".to_string(),
-        hir::TypeSpec::MapType(map) => {
-            format!(
-                "map[{}]{}",
-                go_type(&map.key, packages, prefix, versioned),
-                go_type(&map.value, packages, prefix, versioned)
-            )
-        }
-        hir::TypeSpec::TemplateType(value) => value.ident.to_case(convert_case::Case::Pascal),
-    }
-}
-
-fn scoped_type_name(value: &hir::ScopedName, prefix: &[String]) -> String {
-    let mut parts = Vec::new();
-    if !value.is_root {
-        if value.name.len() == 1 {
-            parts.extend(prefix.iter().cloned());
-        } else if let Some(module) = prefix.first() {
-            parts.push(module.clone());
-        }
-    }
-    parts.extend(value.name.iter().cloned());
-    parts
-        .iter()
-        .map(|part| part.to_case(convert_case::Case::Pascal))
-        .collect::<Vec<_>>()
-        .join("")
-}
+pub(crate) use self::definition_format::{model_spec, render_format_path_fn};
 
 pub(crate) fn export_name(prefix: &[String], value: &str) -> String {
     prefix

@@ -46,14 +46,8 @@ pub(crate) fn render_interface(
             )
         })
         .map(|operation| {
-            let mut method = build_method_meta(
-                &interface_name,
-                operation,
-                &context.packages,
-                prefix,
-                context.version_parameter(prefix),
-                context.versioned_modules(),
-            )?;
+            let mut method =
+                build_method_meta(&interface_name, operation, http_interface, context)?;
             method.exceptions = ExceptionContext::collect(operation, context)?;
             Ok(method)
         })

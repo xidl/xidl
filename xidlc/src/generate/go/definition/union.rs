@@ -44,7 +44,7 @@ impl UnionTemplate {
                 name: go_export_name(&[], declarator_name(&case.element.value)),
                 ty: match &case.element.ty {
                     hir::ElementSpecTy::TypeSpec(ty) => {
-                        type_with_decl(ty, &case.element.value, &ctx.packages)
+                        type_with_decl(ty, &case.element.value, ctx.scope(&nested_scope))
                     }
                     hir::ElementSpecTy::ConstrTypeDcl(ty) => constr_type_name(ty, &nested_scope),
                 },

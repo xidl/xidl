@@ -1,3 +1,9 @@
+#[cfg(any(
+    feature = "gen-rust",
+    feature = "gen-typescript",
+    feature = "gen-openapi",
+    feature = "gen-openrpc"
+))]
 pub mod doc;
 #[cfg(feature = "gen-rust")]
 pub mod filter;
@@ -6,6 +12,7 @@ pub mod filter;
     feature = "gen-rust-axum-adapters",
     feature = "gen-typescript-rest",
     feature = "gen-typescript-rest-adapters",
+    feature = "gen-go",
     feature = "gen-openapi"
 ))]
 pub mod scope;
@@ -17,6 +24,12 @@ pub mod scope;
 ))]
 pub(crate) mod union_wire;
 
+#[cfg(any(
+    feature = "gen-rust",
+    feature = "gen-typescript",
+    feature = "gen-openapi",
+    feature = "gen-openrpc"
+))]
 pub use doc::doc_lines_from_annotations;
 #[cfg(feature = "gen-rust")]
 pub use filter::rust_format_filter;
@@ -34,6 +47,11 @@ use xidl_parser::hir;
 /// The rendered definitions already spell every reference, so a prefix that
 /// appears as `<prefix><separator>` is a unit the file reaches into. Targets
 /// that can bring the unit into scope turn each prefix into their own import.
+#[cfg(any(
+    feature = "gen-rust-axum",
+    feature = "gen-rust-jsonrpc",
+    feature = "gen-typescript"
+))]
 pub fn referenced_imports(
     properties: &xidl_parser::hir::ParserProperties,
     definitions: &[String],
