@@ -1,0 +1,298 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 780" width="100%" height="100%">
+  <defs>
+    <!-- Excalidraw sketchy arrowheads -->
+    <marker id="sketch-arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 1.5 2 L 7.5 5 L 1.5 8" fill="none" stroke="#292524" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+    </marker>
+    <marker id="sketch-arrow-red" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 1.5 2 L 7.5 5 L 1.5 8" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </marker>
+    <marker id="sketch-arrow-green" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 1.5 2 L 7.5 5 L 1.5 8" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+    </marker>
+
+    <!-- Subtle paper shadow -->
+    <filter id="box-shadow" x="-3%" y="-3%" width="106%" height="108%">
+      <feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#1C1917" flood-opacity="0.06" />
+    </filter>
+  </defs>
+
+  <style>
+    .hand-title {
+      font-family: 'Virgil', 'Segoe Print', 'Chalkboard SE', 'Comic Sans MS', cursive, sans-serif;
+      font-weight: 700;
+      fill: #1C1917;
+    }
+    .hand-label {
+      font-family: 'Virgil', 'Segoe Print', 'Chalkboard SE', 'Comic Sans MS', cursive, sans-serif;
+      fill: #292524;
+    }
+    .code-font {
+      font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'SFMono-Regular', Menlo, Consolas, monospace;
+      font-size: 11.5px;
+      font-weight: 500;
+    }
+  </style>
+
+  <!-- Background Canvas -->
+  <rect width="1180" height="780" rx="16" fill="#FAFAF9" stroke="#E7E5E4" stroke-width="1.5" />
+
+  <!-- Top Title -->
+  <text x="590" y="38" text-anchor="middle" class="hand-title" font-size="24">
+    Code to API  vs.  API to Code
+  </text>
+  <text x="590" y="60" text-anchor="middle" class="hand-label" font-size="13" fill="#78716C">
+    Traditional backend macro extraction vs. XIDL contract-first code generation
+  </text>
+
+  <!-- ============================================================ -->
+  <!-- 1. TOP LANE: Code to API (Backend First)                     -->
+  <!-- ============================================================ -->
+  <g transform="translate(30, 80)">
+    <!-- Container -->
+    <rect width="1120" height="325" rx="14" fill="#FFF8F8" stroke="#292524" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#box-shadow)" />
+
+    <!-- Lane Badge -->
+    <g transform="translate(25, -14)">
+      <rect width="250" height="28" rx="8" fill="#FEE2E2" stroke="#292524" stroke-width="1.8" />
+      <text x="125" y="19" text-anchor="middle" class="hand-title" font-size="14" fill="#991B1B">
+        1. Code to API (Backend First)
+      </text>
+    </g>
+
+    <!-- [Box 1]: Rust Backend with utoipa macros (Ends at x=485) -->
+    <g transform="translate(25, 26)">
+      <rect width="460" height="275" rx="10" fill="#FFFFFF" stroke="#292524" stroke-width="1.8" filter="url(#box-shadow)" />
+
+      <!-- Window header -->
+      <path d="M 0 10 Q 0 0 10 0 L 450 0 Q 460 0 460 10 L 460 30 L 0 30 Z" fill="#FEE2E2" stroke="#292524" stroke-width="1.8" />
+      <circle cx="16" cy="15" r="4.5" fill="#EF4444" stroke="#292524" stroke-width="1" />
+      <circle cx="28" cy="15" r="4.5" fill="#F59E0B" stroke="#292524" stroke-width="1" />
+      <circle cx="40" cy="15" r="4.5" fill="#10B981" stroke="#292524" stroke-width="1" />
+      <text x="60" y="19" class="code-font" font-weight="700" fill="#991B1B">backend: pet_api.rs (Rust + utoipa)</text>
+
+      <!-- Code lines with line-height=16px -->
+      <g transform="translate(18, 48)" class="code-font" fill="#1C1917">
+        <text y="0" xml:space="preserve"><tspan fill="#7C3AED">mod</tspan> pet_api {</text>
+        <text y="16" xml:space="preserve">  <tspan fill="#6B7280">/// Get pet by id</tspan></text>
+        <text y="32" xml:space="preserve">  <tspan fill="#DC2626">#[utoipa::path(</tspan></text>
+        <text y="48" xml:space="preserve">    get, path = <tspan fill="#059669">"/pets/{id}"</tspan>,</text>
+        <text y="64" xml:space="preserve">    responses(</text>
+        <text y="80" xml:space="preserve">      (status = <tspan fill="#D97706">200</tspan>, body = Pet),</text>
+        <text y="96" xml:space="preserve">      (status = NOT_FOUND)</text>
+        <text y="112" xml:space="preserve">    ),</text>
+        <text y="128" xml:space="preserve">    params((<tspan fill="#059669">"id"</tspan> = <tspan fill="#0284C7">u64</tspan>, Path))</text>
+        <text y="144" xml:space="preserve">  <tspan fill="#DC2626">)]</tspan></text>
+        <text y="160" xml:space="preserve">  <tspan fill="#7C3AED">async fn</tspan> <tspan fill="#2563EB">get_pet</tspan>(id: <tspan fill="#0284C7">u64</tspan>) -&gt; Result&lt;Pet, NotFound&gt; {</text>
+        <text y="176" xml:space="preserve">    Ok(Pet { id, name: <tspan fill="#059669">"lightning"</tspan>.into() })</text>
+        <text y="192" xml:space="preserve">  }</text>
+        <text y="208" xml:space="preserve">}</text>
+      </g>
+    </g>
+
+    <!-- Arrow: Rust -> OpenAPI (Centered between 485 and 635) -->
+    <path d="M 495 163.5 L 625 163.5" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" marker-end="url(#sketch-arrow-red)" />
+    <text x="560" y="150" text-anchor="middle" class="hand-label" font-size="12" fill="#DC2626">extracts</text>
+
+    <!-- [Box 2]: OpenAPI Spec Card (EXACTLY CENTERED: gap to left = 150px, gap to right = 150px) -->
+    <g transform="translate(635, 114)">
+      <rect width="160" height="100" rx="10" fill="#FFFFFF" stroke="#292524" stroke-width="1.8" filter="url(#box-shadow)" />
+
+      <!-- Card header -->
+      <path d="M 0 10 Q 0 0 10 0 L 150 0 Q 160 0 160 10 L 160 28 L 0 28 Z" fill="#FEE2E2" stroke="#292524" stroke-width="1.8" />
+      <circle cx="14" cy="14" r="4" fill="#EF4444" stroke="#292524" stroke-width="1" />
+      <circle cx="26" cy="14" r="4" fill="#F59E0B" stroke="#292524" stroke-width="1" />
+      <circle cx="38" cy="14" r="4" fill="#10B981" stroke="#292524" stroke-width="1" />
+      <text x="50" y="18" class="code-font" font-weight="700" fill="#991B1B">openapi.yaml</text>
+
+      <text x="80" y="66" text-anchor="middle" class="hand-label" font-size="15" font-weight="700" fill="#1C1917">OpenAPI Spec</text>
+    </g>
+
+    <!-- Branching arrows from OpenAPI (x=795) to Targets (x=945) -->
+    <!-- Line 1: to Go (with oapi-codegen) -->
+    <path d="M 805 140 C 850 140, 875 76, 935 76" fill="none" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round" marker-end="url(#sketch-arrow-red)" />
+    <rect x="828" y="75" width="85" height="20" rx="4" fill="#FFF1F2" stroke="#FDA4AF" stroke-width="1" />
+    <text x="870" y="89" text-anchor="middle" class="code-font" font-size="10.5" font-weight="700" fill="#BE123C">oapi-codegen</text>
+
+    <!-- Line 2: to TypeScript (with openapi-ts) -->
+    <path d="M 805 163.5 L 935 163.5" fill="none" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round" marker-end="url(#sketch-arrow-red)" />
+    <rect x="832" y="153.5" width="76" height="20" rx="4" fill="#FFF1F2" stroke="#FDA4AF" stroke-width="1" />
+    <text x="870" y="167.5" text-anchor="middle" class="code-font" font-size="10.5" font-weight="700" fill="#BE123C">openapi-ts</text>
+
+    <!-- Line 3: to Other SDKs (with generator-cli) -->
+    <path d="M 805 188 C 850 188, 875 252, 935 252" fill="none" stroke="#DC2626" stroke-width="1.8" stroke-linecap="round" marker-end="url(#sketch-arrow-red)" />
+    <rect x="828" y="230" width="85" height="20" rx="4" fill="#FFF1F2" stroke="#FDA4AF" stroke-width="1" />
+    <text x="870" y="244" text-anchor="middle" class="code-font" font-size="10.5" font-weight="700" fill="#BE123C">generator-cli</text>
+
+    <!-- Downstream Targets (starts at x=945) -->
+    <g transform="translate(945, 52)">
+      <!-- Go -->
+      <g transform="translate(0, 0)">
+        <rect width="150" height="48" rx="8" fill="#FFFFFF" stroke="#292524" stroke-width="1.8" filter="url(#box-shadow)" />
+        <text x="75" y="29" text-anchor="middle" class="hand-title" font-size="16" fill="#0284C7">Go</text>
+      </g>
+      <!-- TypeScript -->
+      <g transform="translate(0, 88)">
+        <rect width="150" height="48" rx="8" fill="#FFFFFF" stroke="#292524" stroke-width="1.8" filter="url(#box-shadow)" />
+        <text x="75" y="29" text-anchor="middle" class="hand-title" font-size="16" fill="#2563EB">TypeScript</text>
+      </g>
+      <!-- Other SDKs -->
+      <g transform="translate(0, 176)">
+        <rect width="150" height="48" rx="8" fill="#FFFFFF" stroke="#292524" stroke-width="1.8" filter="url(#box-shadow)" />
+        <text x="75" y="29" text-anchor="middle" class="hand-title" font-size="16" fill="#78716C">Other SDKs</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- 2. BOTTOM LANE: API to Code (XIDL First)                     -->
+  <!-- ============================================================ -->
+  <g transform="translate(30, 425)">
+    <!-- Container -->
+    <rect width="1120" height="325" rx="14" fill="#F4FBF7" stroke="#292524" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" filter="url(#box-shadow)" />
+
+    <!-- Lane Badge -->
+    <g transform="translate(25, -14)">
+      <rect width="250" height="28" rx="8" fill="#D1FAE5" stroke="#292524" stroke-width="1.8" />
+      <text x="125" y="19" text-anchor="middle" class="hand-title" font-size="14" fill="#065F46">
+        2. API to Code (XIDL First)
+      </text>
+    </g>
+
+    <!-- [Box 1]: api.idl (Single Contract) -->
+    <g transform="translate(25, 26)">
+      <rect width="460" height="275" rx="10" fill="#FFFFFF" stroke="#292524" stroke-width="1.8" filter="url(#box-shadow)" />
+
+      <!-- Window header -->
+      <path d="M 0 10 Q 0 0 10 0 L 450 0 Q 460 0 460 10 L 460 30 L 0 30 Z" fill="#D1FAE5" stroke="#292524" stroke-width="1.8" />
+      <circle cx="16" cy="15" r="4.5" fill="#EF4444" stroke="#292524" stroke-width="1" />
+      <circle cx="28" cy="15" r="4.5" fill="#F59E0B" stroke="#292524" stroke-width="1" />
+      <circle cx="40" cy="15" r="4.5" fill="#10B981" stroke="#292524" stroke-width="1" />
+      <text x="60" y="19" class="code-font" font-weight="700" fill="#065F46">api.idl (Single Contract)</text>
+
+      <!-- Code lines -->
+      <g transform="translate(18, 54)" class="code-font" fill="#1C1917">
+        <text y="0" xml:space="preserve"><tspan fill="#7C3AED">struct</tspan> <tspan fill="#1E293B">Pet</tspan> {</text>
+        <text y="18" xml:space="preserve">  <tspan fill="#0284C7">uint64</tspan> id;</text>
+        <text y="36" xml:space="preserve">  <tspan fill="#0284C7">string</tspan> name;</text>
+        <text y="54" xml:space="preserve">};</text>
+        <text y="82" xml:space="preserve"><tspan fill="#7C3AED">interface</tspan> <tspan fill="#1E293B">PetApi</tspan> {</text>
+        <text y="100" xml:space="preserve">  <tspan fill="#DC2626">@get(path = "/pets/{id}")</tspan></text>
+        <text y="118" xml:space="preserve">  Pet <tspan fill="#2563EB">get_pet_by_id</tspan>(</text>
+        <text y="136" xml:space="preserve">    <tspan fill="#DC2626">@path</tspan> <tspan fill="#0284C7">uint64</tspan> id</text>
+        <text y="154" xml:space="preserve">  );</text>
+        <text y="172" xml:space="preserve">};</text>
+      </g>
+    </g>
+
+    <!-- Arrow: IDL -> xidlc Chip -->
+    <path d="M 495 163 L 536 163" fill="none" stroke="#059669" stroke-width="2.2" stroke-linecap="round" marker-end="url(#sketch-arrow-green)" />
+
+    <!-- ========================================== -->
+    <!-- [xidlc CHIP COMPONENT]                     -->
+    <!-- ========================================== -->
+    <g transform="translate(548, 113)">
+      <!-- Left Pins -->
+      <rect x="-12" y="20" width="14" height="7" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+      <rect x="-12" y="38" width="14" height="7" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+      <rect x="-12" y="56" width="14" height="7" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+      <rect x="-12" y="74" width="14" height="7" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+
+      <!-- Right Pins -->
+      <rect x="98" y="20" width="14" height="7" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+      <rect x="98" y="38" width="14" height="7" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+      <rect x="98" y="56" width="14" height="7" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+      <rect x="98" y="74" width="14" height="7" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+
+      <!-- Top Pins -->
+      <rect x="20" y="-12" width="7" height="14" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+      <rect x="38" y="-12" width="7" height="14" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+      <rect x="56" y="-12" width="7" height="14" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+      <rect x="74" y="-12" width="7" height="14" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+
+      <!-- Bottom Pins -->
+      <rect x="20" y="98" width="7" height="14" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+      <rect x="38" y="98" width="7" height="14" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+      <rect x="56" y="98" width="7" height="14" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+      <rect x="74" y="98" width="7" height="14" rx="1.5" fill="#E2E8F0" stroke="#292524" stroke-width="1.5" />
+
+      <!-- Chip Package Body -->
+      <rect x="0" y="0" width="100" height="100" rx="12" fill="#18181B" stroke="#292524" stroke-width="2" filter="url(#box-shadow)" />
+
+      <!-- Inner Die / Core -->
+      <rect x="8" y="8" width="84" height="84" rx="8" fill="#27272A" stroke="#3F3F46" stroke-width="1" />
+
+      <!-- Pin 1 Index Notch -->
+      <circle cx="18" cy="18" r="3.5" fill="#52525B" />
+
+      <!-- Circuit Traces on Die -->
+      <path d="M 28 8 L 28 20 M 72 8 L 72 20 M 8 28 L 20 28 M 8 72 L 20 72" stroke="#3F3F46" stroke-width="1" />
+
+      <!-- Chip Center Text -->
+      <text x="50" y="58" text-anchor="middle" class="code-font" font-size="20" font-weight="700" fill="#FFFFFF">XIDL</text>
+    </g>
+
+    <!-- Branching green arrows from xidlc Chip -->
+    <path d="M 660 138 C 685 138, 685 86, 705 86" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" marker-end="url(#sketch-arrow-green)" />
+    <path d="M 660 163 C 685 163, 685 190, 705 190" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" marker-end="url(#sketch-arrow-green)" />
+    <path d="M 660 183 C 685 183, 685 248, 705 248" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" marker-end="url(#sketch-arrow-green)" />
+
+    <!-- Generated Outputs Container -->
+    <g transform="translate(715, 20)">
+      <!-- 1. Rust Backend -->
+      <g transform="translate(0, 0)">
+        <rect width="410" height="152" rx="10" fill="#FFFFFF" stroke="#292524" stroke-width="1.8" filter="url(#box-shadow)" />
+
+        <!-- Window header -->
+        <path d="M 0 10 Q 0 0 10 0 L 400 0 Q 410 0 410 10 L 410 26 L 0 26 Z" fill="#D1FAE5" stroke="#292524" stroke-width="1.8" />
+        <circle cx="14" cy="13" r="4" fill="#EF4444" stroke="#292524" stroke-width="1" />
+        <circle cx="25" cy="13" r="4" fill="#F59E0B" stroke="#292524" stroke-width="1" />
+        <circle cx="36" cy="13" r="4" fill="#10B981" stroke="#292524" stroke-width="1" />
+        <text x="52" y="17" class="code-font" font-weight="700" fill="#065F46">backend: pure Rust (zero macro!)</text>
+
+        <!-- Formatted Rust code -->
+        <g transform="translate(16, 44)" class="code-font" fill="#1C1917">
+          <text y="0" xml:space="preserve"><tspan fill="#7C3AED">impl</tspan> <tspan fill="#1E293B">PetApi</tspan> <tspan fill="#7C3AED">for</tspan> <tspan fill="#1E293B">PetApiImpl</tspan> {</text>
+          <text y="16" xml:space="preserve">  <tspan fill="#7C3AED">async fn</tspan> <tspan fill="#2563EB">get_pet_by_id</tspan>(</text>
+          <text y="32" xml:space="preserve">    &amp;self, id: <tspan fill="#0284C7">u64</tspan></text>
+          <text y="48" xml:space="preserve">  ) -&gt; Result&lt;Pet, Error&gt; {</text>
+          <text y="64" xml:space="preserve">    Ok(Pet { id, name: <tspan fill="#059669">"lightning"</tspan>.into() })</text>
+          <text y="80" xml:space="preserve">  }</text>
+          <text y="96" xml:space="preserve">}</text>
+        </g>
+      </g>
+
+      <!-- 2. Row: Go & TypeScript -->
+      <g transform="translate(0, 162)">
+        <!-- Go -->
+        <g transform="translate(0, 0)">
+          <rect width="195" height="44" rx="8" fill="#FFFFFF" stroke="#292524" stroke-width="1.8" filter="url(#box-shadow)" />
+          <text x="14" y="21" class="hand-title" font-size="14" fill="#0284C7">Go</text>
+          <text x="14" y="36" class="code-font" font-size="10.5" fill="#78716C">(server &amp; client)</text>
+        </g>
+        <!-- TypeScript -->
+        <g transform="translate(215, 0)">
+          <rect width="195" height="44" rx="8" fill="#FFFFFF" stroke="#292524" stroke-width="1.8" filter="url(#box-shadow)" />
+          <text x="14" y="21" class="hand-title" font-size="14" fill="#2563EB">TypeScript</text>
+          <text x="14" y="36" class="code-font" font-size="10.5" fill="#78716C">(server &amp; SDK)</text>
+        </g>
+      </g>
+
+      <!-- 3. Row: OpenAPI & Other targets -->
+      <g transform="translate(0, 216)">
+        <!-- OpenAPI & OpenRPC -->
+        <g transform="translate(0, 0)">
+          <rect width="250" height="44" rx="8" fill="#FFFFFF" stroke="#292524" stroke-width="1.8" filter="url(#box-shadow)" />
+          <text x="14" y="21" class="hand-title" font-size="14" fill="#059669">OpenAPI &amp; OpenRPC</text>
+          <text x="14" y="36" class="code-font" font-size="10.5" fill="#78716C">(synchronized specs)</text>
+        </g>
+        <!-- Other targets -->
+        <g transform="translate(265, 0)">
+          <rect width="145" height="44" rx="8" fill="#FFFFFF" stroke="#292524" stroke-width="1.8" filter="url(#box-shadow)" />
+          <text x="14" y="21" class="hand-title" font-size="14" fill="#78716C">xxx (Others)</text>
+          <text x="14" y="36" class="code-font" font-size="10.5" fill="#78716C">(Python/C++)</text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
