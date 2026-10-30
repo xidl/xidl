@@ -3,6 +3,7 @@
 @import "@astrojs/starlight-tailwind";
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
+@import "./xidlc-flow.css";
 
 @theme {
     /* Generated accent color palettes. */
