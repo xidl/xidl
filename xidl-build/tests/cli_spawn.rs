@@ -6,6 +6,7 @@
 
 use std::fs;
 use std::os::unix::fs::PermissionsExt;
+use std::path::Path;
 use xidl_build::Error;
 
 #[test]
@@ -49,13 +50,21 @@ fn cli_backend_invokes_xidlc_from_path() {
         .expect("stubbed xidlc CLI should succeed");
 
     let argv = fs::read_to_string(&argv_log).expect("stub did not record argv");
-    assert_eq!(
-        argv.trim(),
-        format!(
-            "gen --out-dir {} openapi {}",
-            out_dir.display(),
-            input.display()
-        )
+    let argv = argv.trim();
+    let expected_tail = format!(" openapi {}", input.display());
+    assert!(argv.ends_with(&expected_tail), "unexpected argv: {argv}");
+    let out_dir_arg = argv
+        .strip_prefix("gen --out-dir ")
+        .and_then(|rest| rest.strip_suffix(&expected_tail))
+        .unwrap_or_else(|| panic!("unexpected argv: {argv}"));
+    let staging = Path::new(out_dir_arg);
+    assert!(
+        staging.starts_with(&out_dir)
+            && staging
+                .file_name()
+                .and_then(|name| name.to_str())
+                .is_some_and(|name| name.starts_with(".xidl-build-stage-")),
+        "generation must target a staging directory inside out_dir, got {out_dir_arg}"
     );
     assert!(
         out_dir.join("city.json").exists(),

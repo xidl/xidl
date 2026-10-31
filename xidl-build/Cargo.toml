@@ -36,3 +36,4 @@ gen-openrpc = ["xidlc?/gen-openrpc"]
 
 [dependencies]
 xidlc = { version = "0.108.0", path = "../xidlc", default-features = false, optional = true }
+tempfile.workspace = true
