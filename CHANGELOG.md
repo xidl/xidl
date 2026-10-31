@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.109.0](https://github.com/xidl/xidl/compare/v0.108.0...v0.109.0) (2026-10-31)
+
+
+### Features
+
+* **http:** verify cross-target wire conformance ([42b1865](https://github.com/xidl/xidl/commit/42b18650ea24417cc7be60efbfb9042eea87a9f9))
+* **pre-commit:** install the xidlc hook from npm ([3fe2a99](https://github.com/xidl/xidl/commit/3fe2a998d11ab818bcfc388d138bc7b56c283fb7))
+* **stream:** preserve terminal outcomes and declared exceptions ([826f61a](https://github.com/xidl/xidl/commit/826f61a1b25ad07501c63173f1d81820a13fe2bb))
+
+
+### Bug Fixes
+
+* **build:** publish output_filename artifacts atomically ([8a9ad65](https://github.com/xidl/xidl/commit/8a9ad652dea76ea0357afdf5b03de7e778fe2241)), closes [#458](https://github.com/xidl/xidl/issues/458)
+* **go:** resolve module-local type references ([881f7a9](https://github.com/xidl/xidl/commit/881f7a980cc2568c9818fe10af69be133135fa08))
+* **http:** complete union adapters and conformance fixtures ([d4f92ba](https://github.com/xidl/xidl/commit/d4f92bac47929b4205ece2a9256932218464800f))
+* isolate build outputs and preserve imported Go names ([5ff603b](https://github.com/xidl/xidl/commit/5ff603b667c1b8f53d800d7731b31141848a0016))
+* **stream:** preserve projected HTTP exception semantics ([7b761ca](https://github.com/xidl/xidl/commit/7b761ca08f06f3e513ec77dd3590cfc8db122e76))
+
 ## [0.108.0](https://github.com/xidl/xidl/compare/v0.107.0...v0.108.0) (2026-10-29)
 
 
