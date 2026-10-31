@@ -36,7 +36,7 @@ gen-openrpc = ["xidlc?/gen-openrpc"]
 
 [dependencies]
 tempfile.workspace = true
-xidlc = { version = "0.108.0", path = "../xidlc", default-features = false, optional = true }
+xidlc = { version = "0.109.0", path = "../xidlc", default-features = false, optional = true }
 
 [dev-dependencies]
 serde_json.workspace = true

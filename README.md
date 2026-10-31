@@ -93,7 +93,7 @@ Use this repository as a `pre-commit` hook (Node.js installs the pinned
 ```yaml
 repos:
   - repo: https://github.com/xidl/xidl
-    rev: v0.108.0 # x-release-please-version
+    rev: v0.109.0 # x-release-please-version
     hooks:
       - id: xidlc-fmt
 ```

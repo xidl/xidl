@@ -3,5 +3,5 @@
   description: Format XIDL/IDL files with xidlc fmt.
   entry: xidlc fmt --inplace --lang idl
   language: node
-  additional_dependencies: [xidlc@0.108.0] # x-release-please-version
+  additional_dependencies: [xidlc@0.109.0] # x-release-please-version
   files: \.idl$
