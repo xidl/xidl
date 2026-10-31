@@ -90,6 +90,5 @@
 
 ## Pull Requests
 
-- Authors MUST consult `agents/pr.md` before opening or editing a pull
-  request.
+- Authors MUST consult `agents/pr.md` before opening or editing a pull request.
 - Pull requests MUST follow the specifications defined in `agents/pr.md`.
