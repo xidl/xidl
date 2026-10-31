@@ -86,10 +86,6 @@ export default defineConfig({
               link: '/guide/language-support/',
             },
             {
-              label: 'API Versioning',
-              link: '/guide/versioning/',
-            },
-            {
               label: 'Imported Units',
               link: '/guide/import/',
             },
@@ -97,11 +93,28 @@ export default defineConfig({
           label: 'Guide',
         },
         {
-          items: [{ autogenerate: { directory: 'docs' } }],
-          label: 'Reference',
-        },
-        {
-          items: [{ autogenerate: { directory: 'rest' } }],
+          items: [
+            { label: 'HTTP & REST Basics', link: '/rest/' },
+            { label: 'Serialization', link: '/rest/serialize/' },
+            { label: 'HTTP Streaming', link: '/rest/stream/' },
+            {
+              badge: 'PREVIEW',
+              label: 'HTTP Authentication',
+              link: '/rest/security/',
+            },
+            { label: 'Exceptions', link: '/rest/exceptions/' },
+            { label: 'Rust Axum Target', link: '/rest/rust-axum/' },
+            {
+              label: 'TypeScript REST Server',
+              link: '/rest/typescript-server/',
+            },
+            { label: 'OpenAPI Metadata', link: '/rest/openapi/' },
+            {
+              badge: 'PREVIEW',
+              items: [{ autogenerate: { directory: 'rest/versioning' } }],
+              label: 'API Versioning',
+            },
+          ],
           label: 'HTTP & REST',
         },
         {
@@ -109,9 +122,13 @@ export default defineConfig({
           label: 'JSON-RPC',
         },
         {
-          items: [{ autogenerate: { directory: 'rfc' } }],
+          items: [
+            { autogenerate: { directory: 'rfc' } },
+            { autogenerate: { directory: 'docs' } },
+          ],
           label: 'RFC',
         },
+
         {
           items: [{ autogenerate: { directory: 'ai' } }],
           label: 'AI',

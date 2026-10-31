@@ -1,0 +1,52 @@
+---
+title: "Renames and shape changes"
+description: "Handle renames and structural changes between versions"
+sidebar:
+  order: 5
+---
+
+A rename or a shape change is
+written as a **new member with a disjoint interval**; `@rename` keeps the wire
+name stable when needed:
+
+```idl
+struct Pet {
+    @added(Versions::v2)
+    @removed(Versions::v3)
+    int32 age;
+
+    @added(Versions::v4)
+    @rename("age")
+    int32 age2_;
+};
+```
+
+The compiler does not infer links between removed and added fields, even when
+only their names differ. Application hooks explicitly assign the new value and
+acknowledge the old input with `IGNORED`. The downcast hook obtains old facts
+from `StoredValues`, or returns `OMIT` for an absent optional fact. `NEEDS`
+continues to report the old wire name while a supported version reads it; a
+reader may obtain that fact directly from Head when the application knows the
+two fields have identical meaning.
+
+```idl
+struct Parcel {
+    @removed(Versions::v3) @optional string courier_note;
+    @added(Versions::v3) @optional string courier_remark;
+};
+```
+
+```ts
+// Parts of the application's generated VersionAdapters / StoredValues contract.
+parcelUpcastFromV2: source => ok({
+  courier_remark: source.courier_note,
+  courier_note: a.IGNORED,
+}),
+parcelDowncastToV2: (source, stored) => ok({
+  courier_note: stored.parcelCourierNote(source) ?? a.OMIT,
+}),
+parcelCourierNote: source => source.courier_remark,
+```
+
+Both a supplied value and its absence survive this application's round trip.
+The assignments are business decisions, not a generated matching rule.
