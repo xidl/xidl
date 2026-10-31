@@ -117,6 +117,11 @@ impl Builder {
     /// This currently only works for generators that emit exactly one known file:
     /// `openapi` (`openapi_{filename}.json`) and `openrpc` (`openrpc.json`).
     ///
+    /// Generation targets a private staging directory inside the output
+    /// directory, so concurrent builds sharing one output directory cannot
+    /// race on the default artifact name. The artifact is published at the
+    /// requested path with an atomic rename once generation succeeds.
+    ///
     /// Relative paths are resolved against the final output directory. Absolute
     /// paths are used as-is.
     pub fn with_output_filename(mut self, filename: impl Into<PathBuf>) -> Self {
@@ -177,7 +182,8 @@ impl Builder {
     /// in-process.
     ///
     /// When [`with_output_filename`](Self::with_output_filename) is set, the
-    /// generated artifact is renamed after successful code generation.
+    /// artifact is generated into a private staging directory and atomically
+    /// published under the requested filename after generation succeeds.
     ///
     /// # Errors
     ///
@@ -195,16 +201,41 @@ impl Builder {
                     .map_err(|err| Error::Config(format!("OUT_DIR is not set: {err}")))?,
             ),
         };
+        if self.output_filename.is_some() && out_dir == Path::new("-") {
+            return Err(Error::Config(
+                "with_output_filename is not supported when out_dir is '-'".to_string(),
+            ));
+        }
+        let inputs: Vec<PathBuf> = inputs.iter().map(|p| p.as_ref().to_path_buf()).collect();
+        // When an explicit output filename is requested, generate into a
+        // process-private staging directory inside `out_dir` so the default
+        // artifact name never becomes cross-process shared state (issue 458).
+        // The rename into the final directory is then atomic, because the
+        // staging directory shares `out_dir`'s filesystem.
+        let staging_dir: Option<tempfile::TempDir> = if self.output_filename.is_some() {
+            Self::default_artifact_name(&self.lang, &inputs)?;
+            Some(
+                tempfile::Builder::new()
+                    .prefix(".xidl-build-stage-")
+                    .tempdir_in(&out_dir)?,
+            )
+        } else {
+            None
+        };
+        let generation_dir = staging_dir
+            .as_ref()
+            .map(|dir| dir.path().to_path_buf())
+            .unwrap_or_else(|| out_dir.clone());
         let spec = GenerateSpec {
             lang: self.lang.clone(),
-            out_dir,
+            out_dir: generation_dir.clone(),
             client: self.client,
             server: self.server,
             mock: self.mock,
             api_version: self.api_version.clone(),
             api_versions: self.api_versions.clone(),
             openapi_version: self.openapi_version.clone(),
-            inputs: inputs.iter().map(|p| p.as_ref().to_path_buf()).collect(),
+            inputs,
         };
         #[cfg(feature = "bundle")]
         let result = BundleBackend.run(&spec);
@@ -212,7 +243,7 @@ impl Builder {
         let result = CliBackend.run(&spec);
         result?;
         if let Some(custom_name) = &self.output_filename {
-            self.apply_output_filename(&spec.out_dir, custom_name, &spec.inputs)?;
+            self.apply_output_filename(&generation_dir, &out_dir, custom_name, &spec.inputs)?;
         }
         Ok(())
     }
@@ -240,8 +271,33 @@ impl Builder {
         Ok(documents)
     }
 
+    fn default_artifact_name(lang: &str, inputs: &[PathBuf]) -> Result<String, Error> {
+        match lang {
+            "openapi" => {
+                let stem = inputs
+                    .first()
+                    .and_then(|p| p.file_stem())
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("openapi");
+                Ok(format!("openapi_{stem}.json"))
+            }
+            "openrpc" | "open-rpc" => {
+                let stem = inputs
+                    .first()
+                    .and_then(|p| p.file_stem())
+                    .and_then(|s| s.to_str())
+                    .unwrap_or("openrpc");
+                Ok(format!("openrpc_{stem}.json"))
+            }
+            _ => Err(Error::Config(format!(
+                "with_output_filename is only supported for openapi/openrpc generators, got '{lang}'"
+            ))),
+        }
+    }
+
     fn apply_output_filename(
         &self,
+        generation_dir: &Path,
         out_dir: &Path,
         custom_name: &Path,
         inputs: &[PathBuf],
@@ -252,42 +308,19 @@ impl Builder {
             ));
         }
 
-        let default_name = match self.lang.as_str() {
-            "openapi" => {
-                let stem = inputs
-                    .first()
-                    .and_then(|p| p.file_stem())
-                    .and_then(|s| s.to_str())
-                    .unwrap_or("openapi");
-                format!("openapi_{stem}.json")
-            }
-            "openrpc" | "open-rpc" => {
-                let stem = inputs
-                    .first()
-                    .and_then(|p| p.file_stem())
-                    .and_then(|s| s.to_str())
-                    .unwrap_or("openrpc");
-                format!("openrpc_{stem}.json")
-            }
-            _ => {
-                return Err(Error::Config(format!(
-                    "with_output_filename is only supported for openapi/openrpc generators, got '{}'",
-                    self.lang
-                )));
-            }
-        };
+        let default_name = Self::default_artifact_name(self.lang.as_str(), inputs)?;
 
-        let src = out_dir.join(&default_name);
+        let src = generation_dir.join(&default_name);
         let src = if src.exists() {
             src
         } else {
-            let documents = Self::versioned_documents(out_dir, &default_name)?;
+            let documents = Self::versioned_documents(generation_dir, &default_name)?;
             match documents.as_slice() {
                 [] => {
                     return Err(Error::Compile(format!(
                         "generated file '{}' does not exist in '{}'",
                         default_name,
-                        out_dir.display()
+                        generation_dir.display()
                     )));
                 }
                 [single] => single.clone(),
@@ -304,7 +337,6 @@ impl Builder {
                 }
             }
         };
-
         let dst = if custom_name.is_absolute() {
             custom_name.to_path_buf()
         } else {
