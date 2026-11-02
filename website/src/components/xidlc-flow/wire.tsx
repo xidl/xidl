@@ -99,28 +99,33 @@ const RUST_WIRE = createWireGeometry(
 );
 
 function Wire({
-  className = '',
   geometry,
   progress,
+  rust = false,
 }: {
-  className?: string;
   geometry: WireGeometry;
   progress: number;
+  rust?: boolean;
 }) {
   const dot = geometry.pointAt(progress);
-  const dotClassName = className ? `wire-dot ${className}` : 'wire-dot';
-  const wireClassName = className ? `wire ${className}` : 'wire';
 
   return (
     <>
       <path
-        className={wireClassName}
+        className={`fill-none stroke-2 [stroke-linecap:round] ${
+          rust ? 'stroke-flow-rust' : 'stroke-flow-muted'
+        }`}
         d={geometry.path}
         pathLength={1}
         strokeDasharray="1"
         strokeDashoffset={1 - progress}
       />
-      <circle className={dotClassName} cx={dot.x} cy={dot.y} r="5" />
+      <circle
+        className={rust ? 'fill-flow-rust' : 'fill-flow-ink'}
+        cx={dot.x}
+        cy={dot.y}
+        r="5"
+      />
     </>
   );
 }
@@ -129,7 +134,7 @@ export function FlowWires({ progress }: { progress: number }) {
   return (
     <>
       <Wire geometry={WEB_WIRE} progress={progress} />
-      <Wire className="rust" geometry={RUST_WIRE} progress={progress} />
+      <Wire geometry={RUST_WIRE} progress={progress} rust />
     </>
   );
 }

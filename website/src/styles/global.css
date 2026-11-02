@@ -3,9 +3,42 @@
 @import "@astrojs/starlight-tailwind";
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
-@import "./xidlc-flow.css";
 
 @theme {
+    --font-flow: "Geist", system-ui, sans-serif;
+    --font-flow-mono: "Geist Mono", monospace;
+
+    --color-flow-bg: light-dark(#eef0f3, #101216);
+    --color-flow-card: light-dark(#ffffff, #1d2025);
+    --color-flow-line: light-dark(#d8dbe0, #353841);
+    --color-flow-ink: light-dark(#15171b, #eef0f3);
+    --color-flow-muted: light-dark(#737883, #a3a8b4);
+    --color-flow-rust: light-dark(#c8452b, #f07a5f);
+    --color-flow-ok: light-dark(#17a058, #3ddc84);
+
+    --animate-xidlc-blink: xidlc-blink 1s steps(1) infinite;
+    --animate-xidlc-pulse: xidlc-pulse 1.1s ease-in-out infinite;
+    --animate-xidlc-spin: xidlc-spin 0.7s linear infinite;
+
+    @keyframes xidlc-blink {
+        50% {
+            opacity: 0;
+        }
+    }
+
+    @keyframes xidlc-pulse {
+        50% {
+            inset: -13px;
+            opacity: 0.35;
+        }
+    }
+
+    @keyframes xidlc-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
     /* Generated accent color palettes. */
     --color-accent-200: #b3c7ff;
     --color-accent-600: #364bff;
