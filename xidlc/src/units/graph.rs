@@ -68,10 +68,7 @@ impl UnitGraph {
                 if let Some(interface) = interface
                     && let Some(import) = import.as_object_mut()
                 {
-                    import.insert(
-                        "members".to_string(),
-                        interface.members().iter().cloned().collect(),
-                    );
+                    interface.enrich_import(import);
                 }
             }
         }

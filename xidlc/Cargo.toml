@@ -79,6 +79,7 @@ syn = "3.0"
 percent-encoding = { version = "2.3", optional = true }
 indexmap = { version = "2", features = ["serde"] }
 tsv_ts.workspace = true
+unescape_zero_copy = "=2.4.0"
 
 semver = "1.0"
 jiff = "0.2"

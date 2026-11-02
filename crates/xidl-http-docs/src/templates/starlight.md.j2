@@ -1,0 +1,28 @@
+---
+title: {{ title|tojson }}
+slug: {{ slug|tojson }}
+---
+
+{{ body }}
+
+---
+
+[View raw Markdown]({{ markdown_url }}) · [AI index]({{ llms_url }})
+{% if playground %}
+
+[Open version playground]({{ playground }}) · [Download OpenAPI]({{ specification }})
+{% endif %}
+{% if versions %}
+
+## Reference versions
+{% for link in versions %}
+- [{{ link.title|inline }}]({{ link.url }})
+{% endfor %}
+{% endif %}
+{% if related %}
+
+## Related version changes
+{% for link in related %}
+- [{{ link.title|inline }}]({{ link.url }})
+{% endfor %}
+{% endif %}

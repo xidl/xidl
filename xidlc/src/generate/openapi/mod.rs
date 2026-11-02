@@ -2,11 +2,14 @@ mod builder;
 mod context;
 mod naming;
 mod operation;
+mod projection;
 mod schema;
 mod scope;
 mod security;
 mod stream;
 mod units;
+
+pub use projection::OpenApiProjection;
 
 #[cfg(test)]
 mod tests;

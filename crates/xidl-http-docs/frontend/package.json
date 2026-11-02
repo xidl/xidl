@@ -1,0 +1,26 @@
+{
+  "dependencies": {
+    "@astrojs/markdown-remark": "7.3.5",
+    "@astrojs/markdown-satteri": "0.4.6",
+    "@astrojs/starlight": "0.42.8",
+    "@astrojs/starlight-tailwind": "5.0.0",
+    "@scalar/api-reference": "1.76.4",
+    "@scalar/starlight": "0.2.19",
+    "@tailwindcss/vite": "4.3.3",
+    "astro": "7.4.4",
+    "tailwindcss": "4.3.3"
+  },
+  "engines": {
+    "node": ">=24",
+    "pnpm": ">=11"
+  },
+  "name": "@xidl/http-docs-site",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/prepare-scalar.mjs && astro build",
+    "dev": "node scripts/prepare-scalar.mjs && astro dev",
+    "preview": "astro preview"
+  },
+  "type": "module",
+  "version": "0.0.0"
+}

@@ -1,0 +1,113 @@
+# {{ title|inline }}
+
+Comparing {{ from|inline }} → {{ to|inline }}.
+{% for link in playgrounds %}
+
+[{{ link.title|inline }}]({{ link.url }})
+{% endfor %}
+
+## Changes
+
+| API surface | Change | Before | After | Compatibility | Affected operations |
+| --- | --- | --- | --- | --- | --- |
+{% for fact in facts %}| [{{ fact.subject|inline }}](#{{ fact.anchor }}) | {{ fact.change }} | {{ fact.before_summary|inline }} | {{ fact.after_summary|inline }} | Needs review | {{ fact.uses|length }} versioned references |
+{% endfor %}
+
+## Author explanation
+
+### {{ author_title|inline }}
+
+Review: {{ "Author reviewed" if reviewed else "Needs review" }}.
+
+{{ author_body|markdown }}
+
+### Why / Impact
+
+{{ impact|markdown }}
+
+### Upgrade
+
+{{ upgrade|markdown }}
+
+---
+
+## Machine facts
+
+These facts compare the published wire surface of adjacent compiler projections.
+An added reachable type means it first appears in the published API surface;
+it does not imply a newly written source declaration. Shared types are listed
+once with their known referencing operations.
+{% for fact in facts %}
+
+### {{ fact.subject|inline }} — {{ fact.change }} {{ '{#' ~ fact.anchor ~ '}' }}
+
+**Compatibility:** {{ fact.assessment }}
+{% if fact.old %}
+- [Earlier: {{ fact.old.title|inline }}]({{ fact.old.url }})
+{% endif %}
+{% if fact.new %}
+- [Later: {{ fact.new.title|inline }}]({{ fact.new.url }})
+{% endif %}
+
+| State | Published contract |
+| --- | --- |
+| Before · {{ from|inline }} | {{ fact.before_summary|inline }} |
+| After · {{ to|inline }} | {{ fact.after_summary|inline }} |
+
+<details class="xidl-idl-details">
+<summary>Compare IDL · {{ fact.declaration|inline }}</summary>
+
+{% if fact.no_idl_changes %}
+
+No IDL changes for this declaration. Its effective HTTP contract changed;
+follow the reference links to review the related declarations and wire behavior.
+
+{% elif not fact.before and not fact.after %}
+
+This generated HTTP shape has no standalone IDL declaration. Follow its
+reference links to review the published contract.
+
+{% else %}
+
+<div class="xidl-version-comparison">
+<div>
+
+#### Before · {{ from|inline }}
+
+{% if fact.before %}
+```idl title="Before" wrap{% if fact.before_lines %} del={{ '{' ~ fact.before_lines ~ '}' }}{% endif %}
+{{ fact.before }}
+```
+{% else %}
+No declaration published in this version.
+{% endif %}
+
+</div>
+<div>
+
+#### After · {{ to|inline }}
+
+{% if fact.after %}
+```idl title="After" wrap{% if fact.after_lines %} ins={{ '{' ~ fact.after_lines ~ '}' }}{% endif %}
+{{ fact.after }}
+```
+{% else %}
+No declaration published in this version.
+{% endif %}
+
+</div>
+</div>
+{% endif %}
+</details>
+{% if fact.uses %}
+
+Known referencing operations:
+{% for link in fact.uses %}
+- [{{ link.title|inline }}]({{ link.url }})
+{% endfor %}
+{% endif %}
+{% else %}
+
+No published wire changes. Documentation and deprecation metadata are presented
+in the corresponding reference pages.
+{% endfor %}

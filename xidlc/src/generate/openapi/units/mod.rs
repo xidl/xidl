@@ -1,9 +1,12 @@
 //! Documents an OpenAPI document reaches through an import.
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use xidl_parser::hir;
 use xidl_parser::hir::ParserProperties;
+
+#[cfg(test)]
+mod tests;
 
 /// Prefixes of the units a document imports.
 ///
@@ -11,7 +14,7 @@ use xidl_parser::hir::ParserProperties;
 /// `$ref` to that document instead of a `$ref` inside the current one.
 #[derive(Debug, Default, Clone)]
 pub(crate) struct DocumentUnits {
-    prefixes: BTreeSet<String>,
+    prefixes: BTreeMap<String, BTreeSet<String>>,
 }
 
 impl DocumentUnits {
@@ -23,9 +26,18 @@ impl DocumentUnits {
             .map(|imports| {
                 imports
                     .iter()
-                    .filter_map(|import| import.get("prefix"))
-                    .filter_map(serde_json::Value::as_str)
-                    .map(str::to_string)
+                    .filter_map(|import| {
+                        let prefix = import.get("prefix")?.as_str()?.to_owned();
+                        let versions = import
+                            .get("versions")
+                            .and_then(serde_json::Value::as_array)
+                            .into_iter()
+                            .flatten()
+                            .filter_map(serde_json::Value::as_str)
+                            .map(str::to_owned)
+                            .collect();
+                        Some((prefix, versions))
+                    })
                     .collect()
             })
             .unwrap_or_default();
@@ -39,13 +51,16 @@ impl DocumentUnits {
     /// schema carry the version.
     pub(crate) fn reference(&self, name: &hir::ScopedName) -> Option<String> {
         let (prefix, rest) = name.name.split_first()?;
-        if rest.is_empty() || name.is_root || !self.prefixes.contains(prefix) {
+        if rest.is_empty() || name.is_root {
             return None;
         }
-        let (document, path) = match rest.len() {
-            1 => (format!("openapi_{prefix}.json"), rest[0].clone()),
-            _ => (format!("openapi_{prefix}.{}.json", rest[0]), rest.join(".")),
+        let versions = self.prefixes.get(prefix)?;
+        let document = if versions.contains(&rest[0]) {
+            format!("openapi_{prefix}.{}.json", rest[0])
+        } else {
+            format!("openapi_{prefix}.json")
         };
+        let path = rest.join(".");
         Some(format!("{document}#/components/schemas/{path}"))
     }
 }

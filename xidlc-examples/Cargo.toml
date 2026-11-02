@@ -29,7 +29,7 @@ clap = { workspace = true, features = ["derive"] }
 glob = "0.3.3"
 # Build scripts run before the workspace xidlc binary exists, so bundle the compiler.
 xidl-build = { workspace = true, features = ["bundle"] }
-xidlc.workspace = true
+xidlc = { workspace = true, default-features = true }
 
 [dev-dependencies]
 anyhow = "1.0"

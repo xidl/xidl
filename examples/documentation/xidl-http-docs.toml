@@ -1,0 +1,4 @@
+title = "Billing API"
+base_url = "/"
+notes = ["v1-to-v2.md"]
+strict = true

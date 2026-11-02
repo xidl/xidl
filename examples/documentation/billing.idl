@@ -1,0 +1,45 @@
+#pragma xidlc package "Billing API"
+
+@version(in = "header", name = "X-API-Version")
+enum ApiVersion {
+    @rename("2026-01-01") v1,
+    @rename("2026-04-01") v2
+};
+
+struct InvoicePayment {
+    /// Payment reference identifier.
+    string id;
+    /// Amount paid in the smallest currency unit.
+    int64 amount;
+};
+
+/// Invoice returned by the billing API.
+///
+/// Use the invoice **ID** for later lookups.
+///
+/// - Read payment details from the selected API version.
+/// - Amounts use minor currency units.
+///
+/// ```http
+/// GET /invoices/inv_001
+/// ```
+struct Invoice {
+    string id;
+    /// Single payment intent associated with older invoice contracts.
+    @removed(ApiVersion::v2)
+    string payment_intent;
+    /// Payments associated with the invoice.
+    @added(ApiVersion::v2)
+    sequence<InvoicePayment> payments;
+};
+
+/// Read invoices.
+interface Invoices {
+    /// Retrieve one invoice by ID.
+    @get(path = "/invoices/{id}")
+    Invoice retrieve(@path string id);
+
+    /// Retrieve invoices for one customer.
+    @get(path = "/customers/{customer}/invoices")
+    sequence<Invoice> list(@path string customer);
+};

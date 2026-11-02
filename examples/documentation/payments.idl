@@ -1,0 +1,14 @@
+#pragma xidlc package "Payments API"
+
+import "billing.idl@v2";
+
+/// Read payments using the billing API's published payment contract.
+interface Payments {
+    /// Retrieve one payment by ID.
+    @get(path = "/payments/{id}")
+    billing::InvoicePayment retrieve(@path string id);
+
+    /// Retrieve payments associated with one invoice.
+    @get(path = "/invoices/{invoice}/payments")
+    sequence<billing::InvoicePayment> list(@path string invoice);
+};

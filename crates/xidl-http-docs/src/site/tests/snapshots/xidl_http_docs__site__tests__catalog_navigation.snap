@@ -1,0 +1,84 @@
+---
+source: crates/xidl-http-docs/src/site/tests/mod.rs
+expression: "serde_json::from_str::<serde_json::Value>(&files[\"xidl-site.json\"]).unwrap()"
+---
+{
+  "base": "/reference/",
+  "playgrounds": [
+    {
+      "pathname": "/playground/catalog/v1/",
+      "specPath": "openapi/catalog/v1.json",
+      "title": "Catalog API · 2026-01",
+      "unit": "catalog",
+      "version": "v1"
+    },
+    {
+      "pathname": "/playground/catalog/v2/",
+      "specPath": "openapi/catalog/v2.json",
+      "title": "Catalog API · 2026-06",
+      "unit": "catalog",
+      "version": "v2"
+    }
+  ],
+  "sidebar": [
+    {
+      "label": "Overview",
+      "slug": "index"
+    },
+    {
+      "items": [
+        {
+          "label": "catalog: v1 → v2",
+          "slug": "changelog/catalog/v1-to-v2"
+        }
+      ],
+      "label": "Version changes"
+    },
+    {
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Catalog API — v1 (2026-01)",
+          "slug": "api/catalog/v1/index"
+        },
+        {
+          "label": "Catalog::read",
+          "slug": "api/catalog/v1/operations/Catalog~3a~3aread"
+        },
+        {
+          "label": "Error",
+          "slug": "api/catalog/v1/types/Error"
+        },
+        {
+          "label": "_Product",
+          "slug": "api/catalog/v1/types/_Product"
+        }
+      ],
+      "label": "catalog / v1"
+    },
+    {
+      "collapsed": true,
+      "items": [
+        {
+          "label": "Catalog API — v2 (2026-06)",
+          "slug": "api/catalog/v2/index"
+        },
+        {
+          "label": "Catalog::read",
+          "slug": "api/catalog/v2/operations/Catalog~3a~3aread"
+        },
+        {
+          "label": "Error",
+          "slug": "api/catalog/v2/types/Error"
+        },
+        {
+          "label": "_Product",
+          "slug": "api/catalog/v2/types/_Product"
+        }
+      ],
+      "label": "catalog / v2"
+    }
+  ],
+  "site": "https://docs.example.test",
+  "title": "Catalog API"
+}

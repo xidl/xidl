@@ -2,6 +2,8 @@ mod generate;
 pub(crate) mod lang;
 pub use generate::Generator;
 
+mod compilation;
+mod compilation_output;
 mod generate_session;
 mod out_file;
 
@@ -118,6 +120,23 @@ impl Driver {
         // Imports name other units, so the inputs are walked into a graph first
         // and every unit it reaches is generated exactly once.
         let graph = UnitGraph::build(resolved.files(), resolved.mounts())?;
+        let properties = generator.get_properties_for_lang()?;
+        if properties
+            .get("generation_scope")
+            .and_then(serde_json::Value::as_str)
+            == Some("compilation")
+        {
+            let mut compilation_props = properties;
+            compilation_props.extend(props);
+            let files = compilation::CompilationGeneration::new(&self.args.lang, resolved.files())?
+                .generate(&graph, compilation_props)?;
+            return if self.args.dry_run {
+                Ok(())
+            } else {
+                compilation_output::CompilationOutput::new(&self.args.out_dir, &self.args.lang)
+                    .write(files)
+            };
+        }
         for unit in graph.units() {
             let mut unit_props = props.clone();
             unit_props.insert(IMPORT_PROPERTY.to_string(), graph.import_property(unit));

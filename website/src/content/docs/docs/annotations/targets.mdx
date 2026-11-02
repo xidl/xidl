@@ -1,27 +1,30 @@
 ---
 title: "Documentation and Target Extensions"
-description: "Documentation strings, Rust derives, and the boundary between lint passthrough and generated behavior."
+description: "Markdown documentation comments, Rust derives, and the boundary between lint passthrough and generated behavior."
 sidebar:
   order: 5
 ---
 
-## `@doc`
+## Documentation comments
 
-Attach one string to an annotation-bearing declaration or member:
+Write ordinary Markdown in `///` comments before a declaration or member and
+its annotations:
 
 ```idl
-@doc("A public account identifier.")
+/// A public account identifier.
+///
+/// Stable across API versions.
 struct Account {
-    @doc(text = "Stable across API versions.") string id;
+    /// Stable account identifier.
+    string id;
 };
 ```
 
-The string can be positional or named `value`, `text`, or `doc`. Generators
-consume documentation through their documentation renderers, such as Rust doc
-comments, TypeScript JSDoc, and OpenAPI descriptions. Use one `@doc` per
-declaration: the shared renderer reads the first one rather than joining
-several annotations. It reads string literals, not string constant references.
-Documentation does not change validation, serialization, or version availability.
+The compiler preserves paragraphs, lists, inline code and fenced code blocks
+as documentation text. Generators consume this shared metadata through their
+documentation renderers, including HTTP reference Markdown, Rust doc comments,
+TypeScript JSDoc and OpenAPI descriptions. Documentation does not change
+validation, serialization or version availability.
 
 ## `@derive`
 

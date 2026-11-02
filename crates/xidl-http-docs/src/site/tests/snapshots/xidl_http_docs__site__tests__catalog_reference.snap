@@ -1,0 +1,101 @@
+---
+source: crates/xidl-http-docs/src/site/tests/mod.rs
+expression: "files[\"src/content/docs/api/catalog/v2/types/page-_Product.md\"]"
+---
+---
+title: "_Product"
+slug: "api/catalog/v2/types/_Product"
+---
+
+catalog · v2 · Type reference
+
+产品目录 💳
+
+Display names use **Markdown** and `UTF-8`.
+
+* Keep a stable product ID.
+* Read the name in the selected API version.
+
+## Fields
+
+### id { #field-id }
+
+Required · string
+
+No description provided.
+
+````json
+{
+  "type": "string"
+}
+````
+
+### name { #field-name }
+
+Required · string
+
+Public display name.
+
+````json
+{
+  "description": "Public display name.",
+  "type": "string"
+}
+````
+
+Declared defaults and constraints describe the IDL contract; they do not guarantee
+server-side validation or default filling.
+
+## Wire schema
+
+````json
+{
+  "description": "产品目录 💳\n\nDisplay names use **Markdown** and `UTF-8`.\n\n- Keep a stable product ID.\n- Read the name in the selected API version.",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "name": {
+      "description": "Public display name.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "name"
+  ],
+  "type": "object"
+}
+````
+
+## Referenced types
+
+No named types referenced.
+
+## Used by
+
+* [v2 catalog::Catalog::read](/reference/api/catalog/v2/operations/Catalog~3a~3aread/)
+
+---
+
+[View raw Markdown](/reference/api/catalog/v2/types/_Product.md) · [AI index](/reference/llms.txt)
+
+
+[Open version playground](/reference/playground/catalog/v2/) · [Download OpenAPI](/reference/openapi/catalog/v2.json)
+
+
+
+## Reference versions
+
+- [catalog / v1 · \_Product](/reference/api/catalog/v1/types/_Product/)
+
+- [catalog / v2 · \_Product](/reference/api/catalog/v2/types/_Product/)
+
+
+
+
+## Related version changes
+
+- [2026-01 → 2026-06 · \_Product.label](/reference/changelog/catalog/v1-to-v2/#change-_Product~2elabel)
+
+- [2026-01 → 2026-06 · \_Product.name](/reference/changelog/catalog/v1-to-v2/#change-_Product~2ename)

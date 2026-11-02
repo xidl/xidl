@@ -116,6 +116,31 @@ fn owner_replacement_enum_union_and_attributes_preserve_source_identity() {
 }
 
 #[test]
+fn readonly_multideclarators_keep_distinct_source_identities_across_versions() {
+    let map = map(r#"
+        @version enum V { v1, v2 };
+        interface Store {
+            @removed(V::v2) readonly attribute string status, hidden;
+            @added(V::v2) readonly attribute string status, hidden;
+        };
+    "#);
+    let step = &map.steps[0];
+    let status = &step.operations["Store.get_attribute_status"];
+    let hidden = &step.operations["Store.get_attribute_hidden"];
+    for change in [status, hidden] {
+        assert_eq!(change.change, ChangeKind::Changed);
+        assert_ne!(
+            change.from.as_ref().unwrap()["declaration_id"],
+            change.to.as_ref().unwrap()["declaration_id"]
+        );
+    }
+    assert_ne!(
+        status.from.as_ref().unwrap()["declaration_id"],
+        hidden.from.as_ref().unwrap()["declaration_id"]
+    );
+}
+
+#[test]
 fn declaration_tokens_ignore_trivia_and_cover_multideclarators_and_wire_names() {
     let source = r#"
         @version enum V { v1, v2 };
