@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.110.0](https://github.com/xidl/xidl/compare/v0.109.0...v0.110.0) (2026-11-02)
+
+
+### Features
+
+* **website:** add Remotion XIDL compiler flow ([dafb6b5](https://github.com/xidl/xidl/commit/dafb6b57d38d907655672ede5e97f7e74e6f7b9f))
+* **xidlc:** format typescript rest output with tsv_ts ([b71c71c](https://github.com/xidl/xidl/commit/b71c71c404a07d227ab186b308618489f8e651a0))
+
 ## [0.109.0](https://github.com/xidl/xidl/compare/v0.108.0...v0.109.0) (2026-10-31)
 
 
