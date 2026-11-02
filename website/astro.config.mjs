@@ -15,6 +15,7 @@ export default defineConfig({
     react(),
     starlight({
       components: {
+        Hero: './src/components/Hero.astro',
         SiteTitle: './src/components/SiteTitle.astro',
       },
       customCss: ['./src/styles/global.css'],

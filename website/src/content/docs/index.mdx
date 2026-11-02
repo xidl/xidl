@@ -17,28 +17,6 @@ hero:
       icon: external
 ---
 
-import XidlcFlow from "../../components/XidlcFlow.tsx";
-
-## Why XIDL
-
-A visual comparison of **Code-to-API** (extracting API specs from macro-heavy backend code) versus **API-to-Code** (generating backend implementations, clients, and specs from a single IDL):
-
-<img src="/assets/why-xidl.svg" alt="Code to API vs. API to Code" class="dark:sl-hidden" width="100%" />
-<img src="/assets/why-xidl-dark.svg" alt="Code to API vs. API to Code" class="light:sl-hidden" width="100%" />
-
-## What Can You Do With It
-
-<div data-xidlc-flow-source>
-  <XidlcFlow client:only="react" />
-  <noscript><p>The XIDL compiler workflow animation requires JavaScript.</p></noscript>
-</div>
-
-- Define HTTP APIs and generate `rust-axum` server/client code.
-- Define JSON-RPC interfaces and generate `rust-jsonrpc` bindings and `openrpc_<stem>.json`.
-- Generate OpenAPI from the same contract to avoid drift between implementation and documentation specifications.
-- Integrate the generation process into Rust `build.rs`, or generate products manually via `xidlc`.
-- Establish auditable, traceable, and explicit declarations for streaming APIs and security policies.
-
 ## Where to Start
 
 - First time with XIDL: See [Install & Quickstart](./guide/) and [Your First HTTP API](./guide/first-http-api/).
