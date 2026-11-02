@@ -53,7 +53,7 @@ union Artifact switch (ArtifactKind) {
     case ArtifactKind::File:
         ArtifactFile file;
 };
-// kind: RpcHir | RestHir | JsonRpcHir  (serde tag = "kind", content = "value")
+// kind: RpcHir | RestHir | JsonRpcHir | Compilation  (serde tag = "kind", content = "value")
 union CodegenInput switch (CodegenInputKind) {
     case CodegenInputKind::RpcHir:
         ::xidl_parser::hir::Specification rpc_hir;
@@ -61,6 +61,8 @@ union CodegenInput switch (CodegenInputKind) {
         ::xidl_parser::rest_hir::RestHirDocument rest_hir;
     case CodegenInputKind::JsonRpcHir:
         ::xidl_parser::jsonrpc_hir::JsonRpcHirDocument jsonrpc_hir;
+    case CodegenInputKind::Compilation:
+        ::xidlc::jsonrpc::CompilationInput compilation;
 };
 
 struct GenerateParams {
@@ -81,3 +83,10 @@ interface Codegen {
     );
 
 };
+// Compilation-scoped generators advertise generation_scope = "compilation" through
+// get_properties. The compiler then calls generate exactly once with a Compilation
+// CodegenInput (kind = "Compilation", value = CompilationInput) and expects File artifacts.
+// Existing generators remain unit-scoped and keep their existing input shape.
+// Compilation format 1 carries logical unit identities, resolved import aliases,
+// version-map facts and all selected typed inputs. Absolute source paths
+// are not identities. See jsonrpc/compilation.rs for the authoritative wire models.

@@ -1,0 +1,25 @@
+#pragma xidlc package "Catalog API"
+
+@version(in = "header", name = "X-Catalog-Version")
+enum ApiVersion { @rename("2026-01") v1, @rename("2026-06") v2 };
+
+/// 产品目录 💳
+///
+/// Display names use **Markdown** and `UTF-8`.
+///
+/// - Keep a stable product ID.
+/// - Read the name in the selected API version.
+struct _Product {
+    string id;
+    @removed(ApiVersion::v2) string label;
+    /// Public display name.
+    @added(ApiVersion::v2) string name;
+};
+
+interface Catalog {
+    /// Read a product by ID.
+    @get(path = "/products/{id}")
+    _Product read(@path string id);
+};
+
+struct Unpublished { string secret; };

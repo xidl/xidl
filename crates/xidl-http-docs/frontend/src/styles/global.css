@@ -1,0 +1,81 @@
+@layer base, starlight, theme, components, utilities;
+
+@import "@astrojs/starlight-tailwind";
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* Match the XIDL website; Starlight owns navigation, search and code controls. */
+@theme {
+    --color-accent-200: #c5cdff;
+    --color-accent-600: #364bff;
+    --color-accent-900: #182775;
+    --font-sans: ui-sans-serif, system-ui, sans-serif;
+    --font-mono:
+        ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+:root {
+    --sl-content-width: 70rem;
+    --sl-sidebar-width: 16rem;
+}
+
+@layer components {
+    /* Let Scalar's client overlay escape Starlight's isolated content pane. */
+    .main-pane:has(.scalar-client--open) {
+        isolation: auto;
+    }
+    .scalar-api-reference {
+        --scalar-custom-header-height: var(--sl-nav-height);
+        --scalar-color-3: var(--sl-color-gray-2);
+        --scalar-color-orange: var(--sl-color-text-accent);
+        --scalar-sidebar-search-color: var(--sl-color-gray-2);
+    }
+    .sl-markdown-content table {
+        @apply my-6 block w-max max-w-full overflow-x-auto text-sm;
+        border: 1px solid var(--sl-color-hairline);
+        border-collapse: collapse;
+    }
+    .sl-markdown-content th {
+        @apply whitespace-nowrap text-left font-semibold;
+        background: var(--sl-color-gray-6);
+    }
+    .sl-markdown-content td {
+        @apply align-top;
+        overflow-wrap: break-word;
+    }
+    .sl-markdown-content :is(th, td) {
+        @apply px-3 py-3;
+    }
+    .sl-markdown-content :is(a, :not(pre) > code) {
+        overflow-wrap: break-word;
+    }
+    .sl-markdown-content a[id] {
+        @apply scroll-mt-24;
+    }
+
+    .xidl-idl-details {
+        @apply my-6 rounded-lg;
+        border: 1px solid var(--sl-color-hairline);
+    }
+    .xidl-idl-details > summary {
+        @apply min-h-11 cursor-pointer px-4 py-3 text-sm font-medium;
+        color: var(--sl-color-text-accent);
+    }
+    .xidl-idl-details > summary:focus-visible {
+        outline: 2px solid var(--sl-color-accent);
+        outline-offset: 2px;
+    }
+    .xidl-idl-details[open] > summary {
+        border-bottom: 1px solid var(--sl-color-hairline);
+    }
+    .xidl-version-comparison {
+        @apply grid min-w-0 gap-4 p-4 md:grid-cols-2;
+    }
+    .xidl-version-comparison > div {
+        @apply min-w-0;
+        margin-block-start: 0;
+    }
+    .xidl-version-comparison > div > :first-child {
+        @apply mt-0;
+    }
+}

@@ -1,0 +1,19 @@
+# {{ title|inline }}
+
+> Versioned HTTP API contracts, effective wire schemas and reviewed change documentation generated from XIDL.
+
+Reference pages describe only their selected version. Compatibility assessments
+and author explanations are separate from machine-extracted changes.
+
+## Overview
+
+- [Documentation overview]({{ home }}): Version navigation and changelog directory.
+{% for group, links in groups|items %}
+{% if links %}
+
+## {{ group }}
+{% for link in links %}
+- [{{ link.title|inline }}]({{ link.url }}): Markdown reference with links to complete operation and type pages.
+{% endfor %}
+{% endif %}
+{% endfor %}

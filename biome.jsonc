@@ -14,7 +14,8 @@
     }
   },
   "files": {
-    "ignoreUnknown": true
+    "ignoreUnknown": true,
+    "includes": ["**"]
   },
   "formatter": {
     "enabled": true,

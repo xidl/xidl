@@ -1,0 +1,151 @@
+{
+  "integration": {
+    "scalar_api_reference": "1.76.4",
+    "scalar_starlight": "0.2.19",
+    "starlight": "0.42.8"
+  },
+  "review": {
+    "aria-prohibited-attr": "Pinned Scalar client More Information controls use role=none together with ARIA attributes. Unresolved third-party semantic warning; no DOM rewriting or rule suppression.",
+    "aria-required-attr": "Pinned Scalar client CodeInputLite comboboxes lack aria-expanded/aria-controls. Unresolved third-party semantic warning; no DOM rewriting or rule suppression.",
+    "label-content-name-mismatch": "Starlight Search control: visible Search and accessible Search match; the visible keyboard shortcut is a hint. Recorded as a manually reviewed false positive; rule remains enabled."
+  },
+  "rules": ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"],
+  "scope": "Local production Billing site, Chromium; automated findings plus manual review, not a WCAG certification.",
+  "tool": "axe-core 4.14.0",
+  "views": [
+    {
+      "findings": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "node_count": 1,
+          "sample": "<button data-open-modal=\"\" aria-label=\"Search\" aria-keyshortcuts=\"Meta+K\" class=\"astro-pffcinzv\">"
+        }
+      ],
+      "incomplete_rule_count": 1,
+      "name": "desktop-overview",
+      "passed_rule_count": 28
+    },
+    {
+      "findings": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "node_count": 1,
+          "sample": "<button data-open-modal=\"\" aria-label=\"Search\" aria-keyshortcuts=\"Meta+K\" class=\"astro-pffcinzv\">"
+        }
+      ],
+      "incomplete_rule_count": 1,
+      "name": "desktop-change-table",
+      "passed_rule_count": 28
+    },
+    {
+      "findings": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "node_count": 1,
+          "sample": "<button data-open-modal=\"\" aria-label=\"Search\" aria-keyshortcuts=\"Meta+K\" class=\"astro-pffcinzv\">"
+        }
+      ],
+      "incomplete_rule_count": 1,
+      "name": "desktop-open-IDL",
+      "passed_rule_count": 28
+    },
+    {
+      "findings": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "node_count": 1,
+          "sample": "<button data-open-modal=\"\" aria-label=\"Search\" aria-keyshortcuts=\"Meta+K\" class=\"astro-pffcinzv\">"
+        }
+      ],
+      "incomplete_rule_count": 1,
+      "name": "desktop-dark-IDL",
+      "passed_rule_count": 28
+    },
+    {
+      "findings": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "node_count": 1,
+          "sample": "<button data-open-modal=\"\" aria-label=\"Search\" aria-keyshortcuts=\"Meta+K\" class=\"astro-pffcinzv\">"
+        }
+      ],
+      "incomplete_rule_count": 1,
+      "name": "desktop-Scalar-playground",
+      "passed_rule_count": 33
+    },
+    {
+      "findings": [
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "node_count": 1,
+          "sample": "<button data-open-modal=\"\" aria-label=\"Search\" aria-keyshortcuts=\"Meta+K\" class=\"astro-pffcinzv\">"
+        }
+      ],
+      "incomplete_rule_count": 1,
+      "name": "desktop-dark-Scalar",
+      "passed_rule_count": 33
+    },
+    {
+      "findings": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "node_count": 3,
+          "sample": "<button aria-label=\"More Information\" class=\"text-c-2 hover:text-c-1 hover:bg-b-2 rounded p-1\" role=\"none\" id=\"headlessui-popover-button-scalar-client-0-61\" aria-expanded=\"false\" data-headlessui-state=\"\" type=\"button\">"
+        },
+        {
+          "id": "aria-required-attr",
+          "impact": "critical",
+          "node_count": 9,
+          "sample": "<div data-v-5e6007a2=\"\" aria-autocomplete=\"list\" aria-label=\" Key\" aria-required=\"true\" class=\"code-input-lite__editor\" contenteditable=\"true\" data-placeholder=\"Key\" role=\"combobox\" spellcheck=\"false\">id</div>"
+        },
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "node_count": 1,
+          "sample": "<button data-open-modal=\"\" aria-label=\"Search\" aria-keyshortcuts=\"Meta+K\" class=\"astro-pffcinzv\">"
+        }
+      ],
+      "incomplete_rule_count": 2,
+      "name": "desktop-dark-Scalar-client",
+      "passed_rule_count": 36
+    },
+    {
+      "findings": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "node_count": 3,
+          "sample": "<button aria-label=\"More Information\" class=\"text-c-2 hover:text-c-1 hover:bg-b-2 rounded p-1\" role=\"none\" id=\"headlessui-popover-button-scalar-client-0-61\" aria-expanded=\"false\" data-headlessui-state=\"\" type=\"button\">"
+        },
+        {
+          "id": "aria-required-attr",
+          "impact": "critical",
+          "node_count": 9,
+          "sample": "<div data-v-5e6007a2=\"\" aria-autocomplete=\"list\" aria-label=\" Key\" aria-required=\"true\" class=\"code-input-lite__editor\" contenteditable=\"true\" data-placeholder=\"Key\" role=\"combobox\" spellcheck=\"false\">id</div>"
+        },
+        {
+          "id": "label-content-name-mismatch",
+          "impact": "serious",
+          "node_count": 1,
+          "sample": "<button data-open-modal=\"\" aria-label=\"Search\" aria-keyshortcuts=\"Meta+K\" class=\"astro-pffcinzv\">"
+        }
+      ],
+      "incomplete_rule_count": 2,
+      "name": "desktop-light-Scalar-client",
+      "passed_rule_count": 36
+    },
+    {
+      "findings": [],
+      "incomplete_rule_count": 1,
+      "name": "mobile-open-IDL",
+      "passed_rule_count": 26
+    }
+  ]
+}

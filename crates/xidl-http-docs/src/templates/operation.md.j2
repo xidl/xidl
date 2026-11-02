@@ -1,0 +1,91 @@
+# {{ title|inline }}
+
+{{ unit|inline }} · {{ version|inline }} ({{ wire_version|inline }}) · HTTP {{ publication|inline }}
+
+{% if interface_description %}
+{{ interface_description|markdown }}
+
+{% endif %}
+{{ description|markdown }}
+{% if deprecated %}
+**Deprecated.** This operation remains available in this version.
+
+```json
+{{ lifecycle }}
+```
+{% endif %}
+
+## Routes
+
+```text
+{{ route }}
+```
+
+## Request parameters
+{% for parameter in parameters %}
+
+### {{ parameter.name|inline }} {{ '{#' ~ parameter.anchor ~ '}' }}
+
+{{ parameter.location|inline }} · {{ "Required" if parameter.required else "Optional" }} · {{ parameter.ty|inline }}
+
+{{ parameter.description|markdown }}
+{% if parameter.declared_default %}
+Declared default: `{{ parameter.declared_default|inline }}`.
+{% endif %}
+{% if parameter.constraints %}
+Declared constraints:
+
+```json
+{{ parameter.constraints }}
+```
+{% endif %}
+{% if parameter.deprecated %}
+**Deprecated.** This parameter remains available.
+
+```json
+{{ parameter.lifecycle }}
+```
+{% endif %}
+{% for link in parameter.links %}
+- [{{ link.title|inline }}]({{ link.url }})
+{% endfor %}
+
+```json
+{{ parameter.details }}
+```
+{% else %}
+
+No path, query, header or cookie parameters.
+{% endfor %}
+
+## Request body
+
+The projected request body, including content type and effective wire schema:
+
+```json
+{{ request }}
+```
+
+## Responses and errors
+
+```json
+{{ responses }}
+```
+
+## Authentication
+
+```json
+{{ security }}
+```
+
+## Referenced types
+{% for link in definitions %}
+- [{{ link.title|inline }}]({{ link.url }})
+{% else %}
+
+No named types referenced.
+{% endfor %}
+
+## Examples
+
+No verified request or SDK example provided.

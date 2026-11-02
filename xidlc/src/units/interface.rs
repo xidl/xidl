@@ -22,6 +22,12 @@ pub struct UnitInterface {
 }
 
 impl UnitInterface {
+    /// Adds semantic member and timeline metadata to an import binding.
+    pub(super) fn enrich_import(&self, import: &mut serde_json::Map<String, serde_json::Value>) {
+        import.insert("members".into(), self.members().iter().cloned().collect());
+        import.insert("versions".into(), self.versions().into_iter().collect());
+    }
+
     /// Reads the interface `source` exposes.
     ///
     /// # Errors

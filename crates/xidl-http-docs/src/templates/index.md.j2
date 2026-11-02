@@ -1,0 +1,20 @@
+# {{ title|inline }}
+
+API contracts generated from XIDL. Compare adjacent versions and follow each change into its reference.
+
+{% if releases %}
+## Version changes
+
+| Comparison | Earlier version | Later version | Published changes | Review |
+| --- | --- | --- | --- | --- |
+{% for release in releases %}| [{{ release.title|inline }}]({{ release.url }}) | {{ release.from|inline }} | {{ release.to|inline }} | {{ release.changes|length }} | {{ "Author reviewed" if release.reviewed else "Needs review" }} |
+{% endfor %}
+{% endif %}
+
+## Reference
+{% for link in links %}
+- [{{ link.title|inline }}]({{ link.url }})
+{% else %}
+
+No published HTTP operations or referenced types in this scope.
+{% endfor %}

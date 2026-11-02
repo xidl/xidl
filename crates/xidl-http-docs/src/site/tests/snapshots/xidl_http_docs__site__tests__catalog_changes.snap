@@ -1,0 +1,173 @@
+---
+source: crates/xidl-http-docs/src/site/tests/mod.rs
+expression: "files[\"public/changelog/catalog/v1-to-v2.md\"]"
+---
+# catalog: v1 → v2
+
+Comparing 2026-01 → 2026-06.
+
+
+[Explore 2026-01 HTTP API](https://docs.example.test/reference/playground/catalog/v1/)
+
+
+[Explore 2026-06 HTTP API](https://docs.example.test/reference/playground/catalog/v2/)
+
+
+## Changes
+
+| API surface | Change | Before | After | Compatibility | Affected operations |
+| --- | --- | --- | --- | --- | --- |
+| [\_Product.label](#change-_Product~2elabel) | Removed | string · required | Absent | Needs review | 2 versioned references |
+| [\_Product.name](#change-_Product~2ename) | Added | Absent | string · required | Needs review | 2 versioned references |
+
+
+## Author explanation
+
+### No author explanation provided
+
+Review: Needs review.
+
+
+
+### Why / Impact
+
+Needs review / No business impact provided.
+
+### Upgrade
+
+No migration steps provided.
+
+---
+
+## Machine facts
+
+These facts compare the published wire surface of adjacent compiler projections.
+An added reachable type means it first appears in the published API surface;
+it does not imply a newly written source declaration. Shared types are listed
+once with their known referencing operations.
+
+
+### \_Product.label — Removed {#change-_Product~2elabel}
+
+**Compatibility:** Needs review: transport direction, requiredness and caller usage require review.
+
+- [Earlier: v1 \_Product](https://docs.example.test/reference/api/catalog/v1/types/_Product.md#field-label)
+
+
+
+| State | Published contract |
+| --- | --- |
+| Before · 2026-01 | string · required |
+| After · 2026-06 | Absent |
+
+<details class="xidl-idl-details">
+<summary>Compare IDL · \_Product</summary>
+
+
+
+<div class="xidl-version-comparison">
+<div>
+
+#### Before · 2026-01
+
+
+```idl title="Before" wrap del={3}
+struct _Product {
+    string id;
+    string label;
+};
+
+```
+
+
+</div>
+<div>
+
+#### After · 2026-06
+
+
+```idl title="After" wrap ins={3,4}
+struct _Product {
+    string id;
+    @id(3)
+    string name;
+};
+
+```
+
+
+</div>
+</div>
+
+</details>
+
+
+Known referencing operations:
+
+- [v1 catalog::Catalog::read](https://docs.example.test/reference/api/catalog/v1/operations/Catalog~3a~3aread.md)
+
+- [v2 catalog::Catalog::read](https://docs.example.test/reference/api/catalog/v2/operations/Catalog~3a~3aread.md)
+
+
+
+
+### \_Product.name — Added {#change-_Product~2ename}
+
+**Compatibility:** Needs review: transport direction, requiredness and caller usage require review.
+
+
+- [Later: v2 \_Product](https://docs.example.test/reference/api/catalog/v2/types/_Product.md#field-name)
+
+
+| State | Published contract |
+| --- | --- |
+| Before · 2026-01 | Absent |
+| After · 2026-06 | string · required |
+
+<details class="xidl-idl-details">
+<summary>Compare IDL · \_Product</summary>
+
+
+
+<div class="xidl-version-comparison">
+<div>
+
+#### Before · 2026-01
+
+
+```idl title="Before" wrap del={3}
+struct _Product {
+    string id;
+    string label;
+};
+
+```
+
+
+</div>
+<div>
+
+#### After · 2026-06
+
+
+```idl title="After" wrap ins={3,4}
+struct _Product {
+    string id;
+    @id(3)
+    string name;
+};
+
+```
+
+
+</div>
+</div>
+
+</details>
+
+
+Known referencing operations:
+
+- [v1 catalog::Catalog::read](https://docs.example.test/reference/api/catalog/v1/operations/Catalog~3a~3aread.md)
+
+- [v2 catalog::Catalog::read](https://docs.example.test/reference/api/catalog/v2/operations/Catalog~3a~3aread.md)

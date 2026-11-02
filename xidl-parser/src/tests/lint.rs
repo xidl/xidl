@@ -47,6 +47,23 @@ struct Details { string name; };
 }
 
 #[test]
+fn documentation_comments_are_metadata_while_doc_is_not_a_builtin_annotation() {
+    assert!(
+        crate::lint::BUILTIN_ANNOTATIONS
+            .iter()
+            .all(|annotation| annotation.name != "doc")
+    );
+    let comments =
+        "/// Account **documentation**.\nstruct Account {\n    /// Stable ID.\n    string id;\n};";
+    assert!(lint(&parser_text(comments).unwrap()).is_empty());
+    let explicit = "@doc(\"Custom metadata\") struct Account { string id; };";
+    let diagnostics = lint(&parser_text(explicit).unwrap());
+    assert_eq!(diagnostics.len(), 1);
+    assert_eq!(diagnostics[0].code, DiagnosticCode::UnknownAnnotation);
+    assert_eq!(diagnostics[0].severity, Severity::Warning);
+}
+
+#[test]
 fn argument_errors_preserve_duplicates_types_and_raw_boundaries() {
     let declarations = [
         "@version(in=\"header\") enum V { v1 };",

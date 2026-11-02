@@ -235,6 +235,8 @@ pub enum CodegenInput {
     RpcHir(xidl_parser::hir::Specification),
     RestHir(xidl_parser::rest_hir::RestHirDocument),
     JsonRpcHir(xidl_parser::jsonrpc_hir::JsonRpcHirDocument),
+    /// Compilation inputs for a generator advertising `generation_scope = "compilation"`.
+    Compilation(Box<super::CompilationInput>),
 }
 
 impl CodegenInput {

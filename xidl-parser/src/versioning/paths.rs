@@ -27,7 +27,7 @@ pub(crate) fn attribute_name(attribute: &crate::hir::AttrDcl) -> String {
             .iter()
             .map(|decl| decl.0.as_str())
             .collect::<Vec<_>>()
-            .join(","),
+            .join(", "),
         AttrDclInner::AttrSpec(spec) => match &spec.declarator {
             AttrDeclarator::SimpleDeclarator(declarators) => declarators
                 .iter()

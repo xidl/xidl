@@ -1,0 +1,74 @@
+# {{ title|inline }}
+
+{{ unit|inline }} · {{ version|inline }} · Type reference
+
+{{ description|markdown }}
+{% if deprecated %}
+**Deprecated.** This type remains available in this version.
+
+```json
+{{ lifecycle }}
+```
+{% endif %}
+
+## Fields
+{% for field in fields %}
+
+### {{ field.name|inline }} {{ '{#' ~ field.anchor ~ '}' }}
+
+{{ "Required" if field.required else "Optional" }} · {{ field.ty|inline }}
+
+{{ field.description|markdown }}
+{% if field.declared_default %}
+Declared default: `{{ field.declared_default|inline }}`.
+{% endif %}
+{% if field.constraints %}
+Declared constraints:
+
+```json
+{{ field.constraints }}
+```
+{% endif %}
+{% if field.deprecated %}
+**Deprecated.** This field remains available.
+
+```json
+{{ field.lifecycle }}
+```
+{% endif %}
+{% for link in field.links %}
+- [{{ link.title|inline }}]({{ link.url }})
+{% endfor %}
+
+```json
+{{ field.details }}
+```
+{% else %}
+
+See the wire schema for this declaration's shape.
+{% endfor %}
+
+Declared defaults and constraints describe the IDL contract; they do not guarantee
+server-side validation or default filling.
+
+## Wire schema
+
+```json
+{{ schema }}
+```
+
+## Referenced types
+{% for link in definitions %}
+- [{{ link.title|inline }}]({{ link.url }})
+{% else %}
+
+No named types referenced.
+{% endfor %}
+
+## Used by
+{% for link in uses %}
+- [{{ link.title|inline }}]({{ link.url }})
+{% else %}
+
+No published operation references this declaration.
+{% endfor %}

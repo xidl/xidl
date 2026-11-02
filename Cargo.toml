@@ -7,6 +7,7 @@ members = [
   "crates/xidl-jsonrpc",
   "crates/xidl-rust-axum",
   "crates/xidl-http",
+  "crates/xidl-http-docs",
   "xidlc",
   "xidl-parser",
 ]
@@ -32,7 +33,7 @@ xidl-parser-derive = { version = "0.110.0", path = "xidl-parser-derive" }
 xidl-jsonrpc = { version = "0.110.0", path = "crates/xidl-jsonrpc" }
 xidl-rust-axum = { version = "0.110.0", path = "crates/xidl-rust-axum" }
 xidl-build = { version = "0.110.0", path = "xidl-build" }
-xidlc = { version = "0.110.0", path = "xidlc" }
+xidlc = { version = "0.110.0", path = "xidlc", default-features = false }
 
 async-trait = "0.1.89"
 async-stream = "0.3"
@@ -42,12 +43,14 @@ http = "1"
 bytes = "1"
 insta = "1.44"
 minijinja = "2.19.0"
+pulldown-cmark = "0.13"
 reqwest = "0.13.2"
 glob = "0.3.3"
 semver = "1.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1.0"
 toml = "0.8.23"
+url = "2"
 similar = "2.7"
 tempfile = "3"
 thiserror = "2.0"

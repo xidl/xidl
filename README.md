@@ -137,6 +137,7 @@ The full documentation site is live at [xidl.netlify.app](https://xidl.netlify.a
 - [Rust Integration](website/src/content/docs/guide/rust-integration.mdx)
 - [Using xidlc](website/src/content/docs/docs/xidlc.mdx)
 - [Targets Reference](website/src/content/docs/docs/targets.mdx)
+- [Versioned API Documentation Plugin](crates/xidl-http-docs/README.md)
 - [HTTP & REST Basics](website/src/content/docs/rest/index.mdx)
 - [TypeScript REST Server](website/src/content/docs/rest/typescript-server.mdx)
 - [JSON-RPC Basics](website/src/content/docs/jsonrpc/index.mdx)

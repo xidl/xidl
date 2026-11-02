@@ -159,7 +159,9 @@ impl Generator {
         }
     }
 
-    fn get_properties_for_lang(&mut self) -> IdlcResult<HashMap<String, serde_json::Value>> {
+    pub(super) fn get_properties_for_lang(
+        &mut self,
+    ) -> IdlcResult<HashMap<String, serde_json::Value>> {
         log_info!("get properties for {}", self.lang);
         let mut session = CodegenSession::spawn(&self.lang)?;
         let props = session

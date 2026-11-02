@@ -199,7 +199,6 @@ annotations! {
     RenameAll, "rename_all", &[Struct, Union, Enum, Bitmask, Exception, Interface], String(&["rule"]);
     Skip, "skip", &[Member, UnionMember, Enumerator, BitmaskValue, Parameter], Marker;
     OmitEmpty, "omitempty", &[Member], Marker;
-    Doc, "doc", &[], String(&["text", "doc"]);
     Derive, "derive", TYPES, Values;
     Rust, "rust", &[], Value;
     Version, "version", &[Enum], Version;

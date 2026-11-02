@@ -1,0 +1,47 @@
+[package]
+name = "xidl-http-docs"
+version.workspace = true
+edition.workspace = true
+description = "Standalone versioned HTTP API documentation generator for XIDL"
+license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+include = [
+  "src/**",
+  "frontend/*.json",
+  "frontend/*.yaml",
+  "frontend/*.mjs",
+  "frontend/*.md",
+  "frontend/*.txt",
+  "frontend/scripts/**",
+  "frontend/.gitignore",
+  "frontend/src/**",
+  "frontend/public/favicon.svg",
+  "/README.md",
+]
+
+[lints]
+workspace = true
+
+[dependencies]
+xidlc = { workspace = true, default-features = false, features = [
+  "gen-openapi",
+] }
+xidl-parser.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+url.workspace = true
+thiserror.workspace = true
+minijinja = { workspace = true, features = ["json"] }
+pulldown-cmark.workspace = true
+pulldown-cmark-to-cmark = "23"
+github-slugger = "0.1"
+percent-encoding = "2"
+similar.workspace = true
+
+[dev-dependencies]
+insta = { workspace = true, features = ["json"] }
+tempfile.workspace = true
