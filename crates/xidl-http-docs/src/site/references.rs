@@ -2,14 +2,33 @@ use super::Site;
 use crate::contract::Contract;
 use crate::error::Result;
 use crate::links::Links;
+use crate::markdown::Markdown;
 use crate::page::{OperationPage, Page, PageContent, TypePage};
 use crate::schema::SchemaView;
+use crate::symbols::{SymbolScope, Symbols};
 use serde_json::{Value, json};
+use xidlc::jsonrpc::CompilationUnit;
 
 impl Site<'_> {
-    pub(super) fn references(&mut self, contracts: &[Contract]) -> Result<()> {
+    pub(super) fn references(
+        &mut self,
+        contracts: &[Contract],
+        units: &[CompilationUnit],
+    ) -> Result<()> {
+        let symbols = Symbols::new(contracts, &self.schemas, units, self.config);
         for contract in contracts {
             for operation in contract.operations.values() {
+                let documentation = |source: &str, name: &str| {
+                    Markdown::link_symbols(
+                        source,
+                        &symbols,
+                        SymbolScope {
+                            unit: &contract.unit,
+                            version: &contract.version,
+                            name,
+                        },
+                    )
+                };
                 let origin = contract.origin();
                 let view = SchemaView {
                     origin: &origin,
@@ -30,10 +49,12 @@ impl Site<'_> {
                         parameter["required"].as_bool().unwrap_or(false),
                         &parameter["schema"],
                     )?;
-                    row.description = parameter["description"]
-                        .as_str()
-                        .unwrap_or("No description provided.")
-                        .into();
+                    row.description = documentation(
+                        parameter["description"]
+                            .as_str()
+                            .unwrap_or("No description provided."),
+                        &operation.name,
+                    );
                     row.deprecated = parameter["deprecated"].as_bool().unwrap_or(false);
                     row.lifecycle = serde_json::to_string_pretty(&parameter["x-xidl-deprecation"])?;
                     parameters.push(row);
@@ -43,14 +64,21 @@ impl Site<'_> {
                     unit: contract.unit.clone(),
                     version: contract.version.clone(),
                     wire_version: contract.wire_version.clone(),
-                    description: operation.value["description"]
-                        .as_str()
-                        .unwrap_or("No description provided.")
-                        .into(),
-                    interface_description: operation.value["x-xidl-interface-description"]
-                        .as_str()
-                        .unwrap_or_default()
-                        .into(),
+                    description: documentation(
+                        operation.value["description"]
+                            .as_str()
+                            .unwrap_or("No description provided."),
+                        &operation.name,
+                    ),
+                    interface_description: documentation(
+                        operation.value["x-xidl-interface-description"]
+                            .as_str()
+                            .unwrap_or_default(),
+                        operation
+                            .name
+                            .rsplit_once("::")
+                            .map_or("", |(interface, _)| interface),
+                    ),
                     method: operation
                         .routes
                         .iter()
@@ -94,22 +122,41 @@ impl Site<'_> {
         }
         let mut pages = Vec::new();
         for (id, schema) in &self.schemas {
+            let mut fields = SchemaView {
+                origin: id,
+                schemas: &self.schemas,
+                config: self.config,
+            }
+            .fields(schema)?;
+            for field in &mut fields {
+                field.description = Markdown::link_symbols(
+                    &field.description,
+                    &symbols,
+                    SymbolScope {
+                        unit: &field.documentation_origin.unit,
+                        version: &field.documentation_origin.version,
+                        name: &field.documentation_origin.logical_name(),
+                    },
+                );
+            }
             let page = TypePage {
                 title: id.logical_name(),
                 unit: id.unit.clone(),
                 version: id.version.clone(),
-                description: schema["description"]
-                    .as_str()
-                    .unwrap_or("No description provided.")
-                    .into(),
+                description: Markdown::link_symbols(
+                    schema["description"]
+                        .as_str()
+                        .unwrap_or("No description provided."),
+                    &symbols,
+                    SymbolScope {
+                        unit: &id.unit,
+                        version: &id.version,
+                        name: &id.logical_name(),
+                    },
+                ),
                 deprecated: schema["deprecated"].as_bool().unwrap_or(false),
                 lifecycle: serde_json::to_string_pretty(&schema["x-xidl-deprecation"])?,
-                fields: SchemaView {
-                    origin: id,
-                    schemas: &self.schemas,
-                    config: self.config,
-                }
-                .fields(schema)?,
+                fields,
                 schema: serde_json::to_string_pretty(schema)?,
                 definitions: Links::definitions(id, schema, &self.schemas, self.config)?,
                 uses: self.uses.get(id).cloned().unwrap_or_default(),
