@@ -5,6 +5,8 @@ use crate::page::Page;
 use pulldown_cmark::{Event, Options, Parser, Tag};
 use std::collections::BTreeSet;
 
+mod symbols;
+
 #[cfg(test)]
 mod tests;
 

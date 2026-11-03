@@ -98,6 +98,7 @@ impl SchemaView<'_> {
         schema: &Value,
     ) -> Result<ReferenceRow> {
         Ok(ReferenceRow {
+            documentation_origin: self.origin.clone(),
             declared_default: schema["x-xidl-declared-default"]
                 .as_str()
                 .map(str::to_owned),

@@ -71,6 +71,29 @@ OpenAPI descriptions. The compiler owns comment collection; the HTTP renderer
 consumes the same documentation metadata as other generators. Documentation text
 does not create wire changes in version comparisons.
 
+Undefined Markdown references can name published IDL types and HTTP operations:
+
+```idl
+/// Returns an [Invoice]. See [Invoices::list] for collection access.
+@get(path = "/invoices/{id}")
+Invoice retrieve(@path string id);
+```
+
+Use `[Invoice]`, ``[`Invoice`]`` or `[the invoice][Invoice]`. Names resolve from
+the declaration's IDL scope toward the unit root; `::Invoice` starts at the unit
+root. Targets stay in the selected API version. Imported names use their import
+prefix, such as `[common::Invoice]` for a version-bound import or
+`[common::v1::Invoice]` for an explicit imported version. Other generation roots
+are visible only through imports.
+
+Links point to existing published reference pages. Unknown, excluded and
+unpublished declarations remain ordinary Markdown, as do declarations without
+their own reference page. Explicit Markdown links and reference definitions take
+precedence. Code spans, fenced examples and images retain their authored
+content. OpenAPI descriptions keep the original Markdown; generated reference
+pages and AI indexes contain the resolved links. Inherited field descriptions
+retain the declaring type's scope.
+
 ## Publication configuration
 
 Place `xidl-http-docs.toml` in the working directory or provide its path through

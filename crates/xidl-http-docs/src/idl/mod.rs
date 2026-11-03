@@ -14,6 +14,7 @@ use xidl_parser::rest_hir::{HttpOperationSource, RestHirDocument};
 pub(crate) struct IdlSource {
     spec: hir::Specification,
     operations: BTreeMap<String, String>,
+    names: hir::DeclarationNames,
 }
 
 impl IdlSource {
@@ -61,7 +62,22 @@ impl IdlSource {
                 );
             }
         }
-        Ok(Self { spec, operations })
+        let names = hir::DeclarationNames::collect(&spec.0);
+        Ok(Self {
+            spec,
+            operations,
+            names,
+        })
+    }
+
+    /// Includes unpublished declarations so documentation keeps lexical shadowing.
+    pub fn declares(&self, name: &str) -> bool {
+        let path = name.split("::").collect::<Vec<_>>();
+        self.names.contains(name)
+            || self.operations.contains_key(name)
+            || DeclarationSelection { path: &path }
+                .find(&self.spec.0)
+                .is_some()
     }
 
     /// Renders the actual owning declaration, retaining module and interface context.

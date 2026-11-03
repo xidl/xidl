@@ -121,6 +121,8 @@ pub(crate) struct ReferenceRow {
     pub required: bool,
     pub ty: String,
     pub description: String,
+    #[serde(skip)]
+    pub documentation_origin: crate::links::SchemaId,
     pub details: String,
     pub links: Vec<PageLink>,
     pub deprecated: bool,

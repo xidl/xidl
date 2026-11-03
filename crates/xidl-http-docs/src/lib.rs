@@ -15,6 +15,7 @@ mod render;
 mod schema;
 mod site;
 mod summary;
+mod symbols;
 mod wire;
 
 pub use config::DocumentationConfig;

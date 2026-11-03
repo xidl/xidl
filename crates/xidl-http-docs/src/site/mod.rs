@@ -65,7 +65,7 @@ impl<'a> Site<'a> {
             }
         }
         site.collect_schemas(&contracts)?;
-        site.references(&contracts)?;
+        site.references(&contracts, &compilation.units)?;
         let notes = config
             .notes
             .iter()
