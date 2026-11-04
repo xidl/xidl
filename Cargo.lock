@@ -3609,7 +3609,7 @@ dependencies = [
 
 [[package]]
 name = "xidl-build"
-version = "0.110.0"
+version = "0.111.0"
 dependencies = [
  "serde_json",
  "tempfile",
@@ -3618,7 +3618,7 @@ dependencies = [
 
 [[package]]
 name = "xidl-http"
-version = "0.110.0"
+version = "0.111.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -3626,7 +3626,7 @@ dependencies = [
 
 [[package]]
 name = "xidl-http-docs"
-version = "0.110.0"
+version = "0.111.0"
 dependencies = [
  "github-slugger",
  "insta",
@@ -3647,7 +3647,7 @@ dependencies = [
 
 [[package]]
 name = "xidl-jsonrpc"
-version = "0.110.0"
+version = "0.111.0"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -3670,7 +3670,7 @@ dependencies = [
 
 [[package]]
 name = "xidl-parser"
-version = "0.110.0"
+version = "0.111.0"
 dependencies = [
  "convert_case",
  "http",
@@ -3689,7 +3689,7 @@ dependencies = [
 
 [[package]]
 name = "xidl-parser-derive"
-version = "0.110.0"
+version = "0.111.0"
 dependencies = [
  "convert_case",
  "proc-macro2",
@@ -3700,7 +3700,7 @@ dependencies = [
 
 [[package]]
 name = "xidl-rust-axum"
-version = "0.110.0"
+version = "0.111.0"
 dependencies = [
  "axum",
  "axum-extra",
@@ -3728,7 +3728,7 @@ dependencies = [
 
 [[package]]
 name = "xidlc"
-version = "0.110.0"
+version = "0.111.0"
 dependencies = [
  "clap",
  "convert_case",
@@ -3762,7 +3762,7 @@ dependencies = [
 
 [[package]]
 name = "xidlc-examples"
-version = "0.110.0"
+version = "0.111.0"
 dependencies = [
  "anyhow",
  "async-stream",
