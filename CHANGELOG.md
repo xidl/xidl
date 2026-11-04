@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.111.0](https://github.com/xidl/xidl/compare/v0.110.0...v0.111.0) (2026-11-04)
+
+
+### Features
+
+* **http-docs:** generate versioned Starlight documentation ([263ab04](https://github.com/xidl/xidl/commit/263ab04a04a632e7dca712ec199725fe54990a37))
+* **http-docs:** resolve scoped IDL symbol links ([db119ae](https://github.com/xidl/xidl/commit/db119ae559e09615bd0da376970bfd5f1bb0f343)), closes [#478](https://github.com/xidl/xidl/issues/478)
+
 ## [0.110.0](https://github.com/xidl/xidl/compare/v0.109.0...v0.110.0) (2026-11-02)
 
 
