@@ -51,7 +51,7 @@ jobs:
       - name: Setup HTTP documentation frontend
         uses: ./.github/actions/setup-http-docs-frontend
 
-      - uses: jdx/mise-action@v4
+      - uses: jdx/mise-action@v5
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
