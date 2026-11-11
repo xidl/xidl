@@ -151,3 +151,26 @@ The full documentation site is live at [xidl.netlify.app](https://xidl.netlify.a
 
 - [Linux Do](https://linux.do/)
 - [XIDL Language Server](https://github.com/xidl/idl-language-server)
+
+## Powered by
+
+<p align="center">
+  <a href="https://tree-sitter.github.io/tree-sitter/">
+    <img
+      src="website/public/assets/tree-sitter-logo.png"
+      alt="tree-sitter"
+      height="64">
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://scalar.com">
+    <picture>
+      <source
+        media="(prefers-color-scheme: dark)"
+        srcset="website/public/assets/scalar-logomark-dark.svg">
+      <img
+        src="website/public/assets/scalar-logomark-light.svg"
+        alt="Scalar"
+        height="64">
+    </picture>
+  </a>
+</p>
