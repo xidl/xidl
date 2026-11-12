@@ -134,10 +134,18 @@ impl<'a> crate::parser::FromTreeSitter<'a> for ElementSpec {
         if let Some(doc) = ctx.take_doc_comment(&node) {
             annotations.insert(0, AnnotationAppl::doc(doc));
         }
+        let ty = ty.ok_or_else(|| {
+            crate::error::ParseError::UnexpectedNode("element_spec is missing a type".to_string())
+        })?;
+        let value = value.ok_or_else(|| {
+            crate::error::ParseError::UnexpectedNode(
+                "element_spec is missing a declarator".to_string(),
+            )
+        })?;
         Ok(Self {
             annotations,
-            ty: ty.unwrap(),
-            value: value.unwrap(),
+            ty,
+            value,
         })
     }
 }

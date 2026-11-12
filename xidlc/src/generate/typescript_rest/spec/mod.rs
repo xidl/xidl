@@ -121,7 +121,12 @@ pub(crate) fn render_spec(
     rest_hir: &RestHirDocument,
 ) -> IdlcResult<TsHttpOutput> {
     let text_aliases = super::interface::text_aliases::TextAliases::collect(spec);
-    let blocks = render_defs(&spec.0, &[], renderer, rest_hir, &text_aliases)?;
+    let context = super::interface::HttpRenderContext {
+        renderer,
+        rest_hir,
+        text_aliases: &text_aliases,
+    };
+    let blocks = render_defs(&spec.0, &[], &context)?;
     let mut model_exports = ZodImportCollector::collect_exported_names(spec);
     model_exports.extend(renderer.imported_units());
     let mut zod_imports = Vec::new();
@@ -257,13 +262,10 @@ pub(crate) fn render_spec(
     })
 }
 
-#[allow(clippy::too_many_arguments)]
 fn render_defs(
     defs: &[hir::Definition],
     module_path: &[String],
-    renderer: &TypescriptRenderer,
-    rest_hir: &RestHirDocument,
-    text_aliases: &super::interface::text_aliases::TextAliases,
+    context: &super::interface::HttpRenderContext<'_>,
 ) -> IdlcResult<TsHttpBlocks> {
     let mut out = TsHttpBlocks::default();
     for def in defs {
@@ -271,14 +273,13 @@ fn render_defs(
             hir::Definition::ModuleDcl(module) => {
                 let mut next = module_path.to_vec();
                 next.push(module.ident.clone());
-                let body =
-                    render_defs(&module.definition, &next, renderer, rest_hir, text_aliases)?;
+                let body = render_defs(&module.definition, &next, context)?;
                 if !body.is_empty() {
                     let ident =
                         crate::generate::typescript::definition::names::ts_ident(&module.ident);
                     let doc = ts_doc_lines(&module.annotations)?;
                     let module = ModuleBlock {
-                        renderer,
+                        renderer: context.renderer,
                         ident: &ident,
                         doc: &doc,
                     };
@@ -289,13 +290,7 @@ fn render_defs(
                 }
             }
             hir::Definition::InterfaceDcl(interface) => {
-                out.extend(render_interface(
-                    interface,
-                    module_path,
-                    renderer,
-                    rest_hir,
-                    text_aliases,
-                )?);
+                out.extend(render_interface(interface, module_path, context)?);
             }
             _ => {}
         }

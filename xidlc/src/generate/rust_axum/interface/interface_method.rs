@@ -8,8 +8,8 @@ use crate::generate::rust_axum::interface::{
     },
     interface_method_params::{MethodParams, collect_method_params},
     interface_method_support::{
-        ensure_streaming_constraints, method_struct_prefix, op_decode_expr, op_encode_expr,
-        op_return_ty, request_payload_ty, response_ty,
+        StreamingShape, ensure_streaming_constraints, method_struct_prefix, op_decode_expr,
+        op_encode_expr, op_return_ty, request_payload_ty, response_ty,
     },
 };
 use crate::generate::rust_axum::transport::{
@@ -99,13 +99,12 @@ pub(crate) fn render_op_from_http(
     collect_method_params(op, http_op, &path, transport, env, &mut params)?;
     ensure_streaming_constraints(
         op,
-        is_client_stream,
-        is_bidi_stream,
-        allow_handshake_params,
-        &params.path_params,
-        &params.query_params,
-        &params.header_params,
-        &params.cookie_params,
+        &StreamingShape {
+            is_client_stream,
+            is_bidi_stream,
+            allow_handshake_params,
+        },
+        &params,
     )?;
 
     let method = http_method_from_hir(http_op.meta.method);

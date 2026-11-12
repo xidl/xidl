@@ -74,11 +74,12 @@ pub(crate) fn parse_xidlc_pragma(call: &crate::typed_ast::PreprocCall) -> Option
 
 pub(crate) fn trim_pragma_value(value: &str) -> String {
     let value = value.trim();
-    if value.len() >= 2 {
-        let first = value.chars().next().unwrap();
-        let last = value.chars().last().unwrap();
-        if (first == '"' && last == '"') || (first == '\'' && last == '\'') {
-            return value[1..value.len() - 1].to_string();
+    for quote in ['"', '\''] {
+        if let Some(inner) = value
+            .strip_prefix(quote)
+            .and_then(|rest| rest.strip_suffix(quote))
+        {
+            return inner.to_string();
         }
     }
     value.to_string()
@@ -108,13 +109,15 @@ fn parse_pragma_service(value: &str) -> Option<(String, Option<String>)> {
         return None;
     }
 
-    let (base_url, remainder) = if value.starts_with('"') || value.starts_with('\'') {
-        let quote = value.chars().next().unwrap();
-        let end = value.char_indices().skip(1).find(|(_, ch)| *ch == quote)?.0;
-        (value[1..end].to_string(), value[end + 1..].trim())
-    } else {
-        let mut parts = value.splitn(2, char::is_whitespace);
-        (parts.next()?.to_string(), parts.next().unwrap_or("").trim())
+    let (base_url, remainder) = match value.chars().next() {
+        Some(quote) if quote == '"' || quote == '\'' => {
+            let end = value.char_indices().skip(1).find(|(_, ch)| *ch == quote)?.0;
+            (value[1..end].to_string(), value[end + 1..].trim())
+        }
+        _ => {
+            let mut parts = value.splitn(2, char::is_whitespace);
+            (parts.next()?.to_string(), parts.next().unwrap_or("").trim())
+        }
     };
 
     let description = (!remainder.is_empty()).then(|| trim_pragma_value(remainder));

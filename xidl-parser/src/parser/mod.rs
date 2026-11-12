@@ -86,7 +86,13 @@ pub fn parser_text_with_resolver(
     use crate::typed_ast::Specification;
 
     let mut parser = tree_sitter::Parser::new();
-    parser.set_language(&tree_sitter_idl::language()).unwrap();
+    parser
+        .set_language(&tree_sitter_idl::language())
+        .map_err(|err| {
+            crate::error::ParseError::TreeSitterError(format!(
+                "failed to load the IDL tree-sitter grammar: {err}"
+            ))
+        })?;
 
     let mut source = text.to_string();
     let mut tree_source = normalize::source(text).into_owned();
@@ -96,19 +102,16 @@ pub fn parser_text_with_resolver(
     })?;
 
     if let Some(path) = initial_path {
-        let mut include_stack = Vec::new();
         let source_len = tree_source.len();
-        expand_includes(
-            &mut source,
-            &mut tree_source,
-            &mut tree,
-            &mut parser,
+        let mut expander = IncludeExpander {
+            source: &mut source,
+            tree_source: &mut tree_source,
+            tree: &mut tree,
+            parser: &mut parser,
             resolver,
-            &mut include_stack,
-            path.to_string(),
-            0,
-            source_len,
-        )?;
+            include_stack: Vec::new(),
+        };
+        expander.expand(path.to_string(), 0, source_len)?;
     }
 
     let root_node = tree.root_node();
@@ -122,97 +125,98 @@ pub fn parser_text_with_resolver(
     Specification::from_node(root_node, &mut context)
 }
 
-#[allow(clippy::too_many_arguments)]
-fn expand_includes(
-    source: &mut String,
-    tree_source: &mut String,
-    tree: &mut Tree,
-    parser: &mut Parser,
-    resolver: &mut dyn IncludeResolver,
-    include_stack: &mut Vec<String>,
-    current_path: String,
-    start_offset: usize,
-    mut end_offset: usize,
-) -> ParserResult<usize> {
-    if include_stack.contains(&current_path) {
-        let chain = include_stack.join(" -> ");
-        return Err(crate::error::ParseError::Message(format!(
-            "cyclic include detected: {} -> {}",
-            chain, current_path
-        )));
-    }
-    include_stack.push(current_path.clone());
+struct IncludeExpander<'a> {
+    source: &'a mut String,
+    tree_source: &'a mut String,
+    tree: &'a mut Tree,
+    parser: &'a mut Parser,
+    resolver: &'a mut dyn IncludeResolver,
+    include_stack: Vec<String>,
+}
 
-    let mut search_start = start_offset;
-    while let Some(node) = find_first_include_in_range(tree.root_node(), search_start, end_offset) {
-        let node_start = node.start_byte();
-        let node_end = node.end_byte();
-        let node_start_pos = node.start_position();
-        let node_end_pos = node.end_position();
-
-        let path_str = extract_include_path(node, tree_source)?;
-
-        // A versioned include is spliced while the HIR is lowered: the version
-        // projection only exists there, so the directive stays in the tree.
-        if crate::hir::split_version_selector(&path_str).1.is_some() {
-            search_start = node_end;
-            continue;
-        }
-
-        let (actual_path, content) = resolver.resolve(Some(&current_path), &path_str)?;
-
-        let normalized_content = normalize::source(&content);
-        let new_len = normalized_content.len();
-
-        // Edit tree
-        let edit = InputEdit {
-            start_byte: node_start,
-            old_end_byte: node_end,
-            new_end_byte: node_start + new_len,
-            start_position: node_start_pos,
-            old_end_position: node_end_pos,
-            new_end_position: get_pos_after(node_start_pos, &normalized_content),
-        };
-        tree.edit(&edit);
-
-        // Update source and tree_source
-        source.replace_range(node_start..node_end, &content);
-        tree_source.replace_range(node_start..node_end, &normalized_content);
-
-        // Re-parse
-        *tree = parser.parse(&*tree_source, Some(tree)).ok_or_else(|| {
-            crate::error::ParseError::TreeSitterError("Failed to re-parse text".to_string())
-        })?;
-
-        if tree.root_node().has_error()
-            && has_error_in_range(tree.root_node(), node_start, node_start + new_len)
-        {
+impl IncludeExpander<'_> {
+    fn expand(
+        &mut self,
+        current_path: String,
+        start_offset: usize,
+        mut end_offset: usize,
+    ) -> ParserResult<usize> {
+        if self.include_stack.contains(&current_path) {
+            let chain = self.include_stack.join(" -> ");
             return Err(crate::error::ParseError::Message(format!(
-                "failed to parse include '{}'",
-                path_str
+                "cyclic include detected: {} -> {}",
+                chain, current_path
             )));
         }
+        self.include_stack.push(current_path.clone());
 
-        // Recurse
-        let expanded_len = expand_includes(
-            source,
-            tree_source,
-            tree,
-            parser,
-            resolver,
-            include_stack,
-            actual_path,
-            node_start,
-            node_start + new_len,
-        )?;
+        let mut search_start = start_offset;
+        while let Some(node) =
+            find_first_include_in_range(self.tree.root_node(), search_start, end_offset)
+        {
+            let node_start = node.start_byte();
+            let node_end = node.end_byte();
+            let node_start_pos = node.start_position();
+            let node_end_pos = node.end_position();
 
-        let diff = (expanded_len as isize) - ((node_end - node_start) as isize);
-        end_offset = ((end_offset as isize) + diff) as usize;
-        search_start = node_start + expanded_len;
+            let path_str = extract_include_path(node, self.tree_source)?;
+
+            // A versioned include is spliced while the HIR is lowered: the version
+            // projection only exists there, so the directive stays in the tree.
+            if crate::hir::split_version_selector(&path_str).1.is_some() {
+                search_start = node_end;
+                continue;
+            }
+
+            let (actual_path, content) = self.resolver.resolve(Some(&current_path), &path_str)?;
+
+            let normalized_content = normalize::source(&content);
+            let new_len = normalized_content.len();
+
+            // Edit tree
+            let edit = InputEdit {
+                start_byte: node_start,
+                old_end_byte: node_end,
+                new_end_byte: node_start + new_len,
+                start_position: node_start_pos,
+                old_end_position: node_end_pos,
+                new_end_position: get_pos_after(node_start_pos, &normalized_content),
+            };
+            self.tree.edit(&edit);
+
+            // Update source and tree_source
+            self.source.replace_range(node_start..node_end, &content);
+            self.tree_source
+                .replace_range(node_start..node_end, &normalized_content);
+
+            // Re-parse
+            *self.tree = self
+                .parser
+                .parse(&*self.tree_source, Some(self.tree))
+                .ok_or_else(|| {
+                    crate::error::ParseError::TreeSitterError("Failed to re-parse text".to_string())
+                })?;
+
+            if self.tree.root_node().has_error()
+                && has_error_in_range(self.tree.root_node(), node_start, node_start + new_len)
+            {
+                return Err(crate::error::ParseError::Message(format!(
+                    "failed to parse include '{}'",
+                    path_str
+                )));
+            }
+
+            // Recurse
+            let expanded_len = self.expand(actual_path, node_start, node_start + new_len)?;
+
+            let diff = (expanded_len as isize) - ((node_end - node_start) as isize);
+            end_offset = ((end_offset as isize) + diff) as usize;
+            search_start = node_start + expanded_len;
+        }
+
+        self.include_stack.pop();
+        Ok(end_offset - start_offset)
     }
-
-    include_stack.pop();
-    Ok(end_offset - start_offset)
 }
 
 fn find_first_include_in_range(node: Node, start: usize, end: usize) -> Option<Node> {

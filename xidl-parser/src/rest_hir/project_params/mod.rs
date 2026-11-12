@@ -32,6 +32,12 @@ pub(super) fn project_params(
     let mut response_params = Vec::new();
     let mut path_binding_count = HashMap::<String, usize>::new();
     let mut query_binding_count = HashMap::<String, usize>::new();
+    let mut distribution = ParamDistribution {
+        request_params: &mut request_params,
+        response_params: &mut response_params,
+        path_binding_count: &mut path_binding_count,
+        query_binding_count: &mut query_binding_count,
+    };
 
     for param in params {
         if is_skipped(&param.annotations) {
@@ -46,14 +52,7 @@ pub(super) fn project_params(
             validate_cookie_name(&projected.wire_name, &projected.name)?;
         }
         validate_projected_param(&op.ident, &projected, direction, &sources.route_path_names)?;
-        distribute_param(
-            projected,
-            direction,
-            &mut request_params,
-            &mut response_params,
-            &mut path_binding_count,
-            &mut query_binding_count,
-        );
+        distribution.distribute(projected, direction);
     }
 
     HttpParam::validate_unique_inputs(&request_params, &op.ident)?;
@@ -86,38 +85,41 @@ impl HttpParam {
     }
 }
 
-#[allow(clippy::too_many_arguments)]
-fn distribute_param(
-    projected: HttpParam,
-    direction: HttpParamDirection,
-    request_params: &mut Vec<HttpParam>,
-    response_params: &mut Vec<HttpParam>,
-    path_binding_count: &mut HashMap<String, usize>,
-    query_binding_count: &mut HashMap<String, usize>,
-) {
-    if matches!(
-        direction,
-        HttpParamDirection::In | HttpParamDirection::InOut
-    ) {
-        match projected.kind {
-            HttpParamKind::Path => {
-                *path_binding_count
-                    .entry(projected.wire_name.clone())
-                    .or_insert(0) += 1;
+struct ParamDistribution<'a> {
+    request_params: &'a mut Vec<HttpParam>,
+    response_params: &'a mut Vec<HttpParam>,
+    path_binding_count: &'a mut HashMap<String, usize>,
+    query_binding_count: &'a mut HashMap<String, usize>,
+}
+
+impl ParamDistribution<'_> {
+    fn distribute(&mut self, projected: HttpParam, direction: HttpParamDirection) {
+        if matches!(
+            direction,
+            HttpParamDirection::In | HttpParamDirection::InOut
+        ) {
+            match projected.kind {
+                HttpParamKind::Path => {
+                    *self
+                        .path_binding_count
+                        .entry(projected.wire_name.clone())
+                        .or_insert(0) += 1;
+                }
+                HttpParamKind::Query => {
+                    *self
+                        .query_binding_count
+                        .entry(projected.wire_name.clone())
+                        .or_insert(0) += 1;
+                }
+                HttpParamKind::Header | HttpParamKind::Cookie | HttpParamKind::Body => {}
             }
-            HttpParamKind::Query => {
-                *query_binding_count
-                    .entry(projected.wire_name.clone())
-                    .or_insert(0) += 1;
-            }
-            HttpParamKind::Header | HttpParamKind::Cookie | HttpParamKind::Body => {}
+            self.request_params.push(projected.clone());
         }
-        request_params.push(projected.clone());
-    }
-    if matches!(
-        direction,
-        HttpParamDirection::Out | HttpParamDirection::InOut
-    ) {
-        response_params.push(projected.clone());
+        if matches!(
+            direction,
+            HttpParamDirection::Out | HttpParamDirection::InOut
+        ) {
+            self.response_params.push(projected.clone());
+        }
     }
 }

@@ -66,28 +66,30 @@ pub(crate) fn render_op(
         .collect::<HashSet<_>>();
     let default_source = default_param_source(method);
     let mut buckets = ParamBuckets::default();
-    let mut path_binding_count = HashMap::<String, usize>::new();
-    let mut query_binding_count = HashMap::<String, usize>::new();
+    let mut classification = ParamClassification {
+        all_path_param_names: &all_path_param_names,
+        all_query_template_names: &all_query_template_names,
+        path_param_sets: &path_param_sets,
+        default_source,
+        path_binding_count: HashMap::new(),
+        query_binding_count: HashMap::new(),
+        op_ident: &op.ident,
+    };
     for param in params {
-        classify_param(
-            param,
-            &all_path_param_names,
-            &all_query_template_names,
-            &path_param_sets,
-            default_source,
-            &mut path_binding_count,
-            &mut query_binding_count,
-            &mut buckets,
-            &op.ident,
-        )?;
+        classification.classify(param, &mut buckets)?;
     }
-    validate_route_bindings(&path_param_sets, &path_binding_count, "path", &op.ident)?;
+    validate_route_bindings(
+        &path_param_sets,
+        &classification.path_binding_count,
+        "path",
+        &op.ident,
+    )?;
     validate_route_bindings(
         &route_templates
             .iter()
             .map(|value| value.query_params.clone())
             .collect::<Vec<_>>(),
-        &query_binding_count,
+        &classification.query_binding_count,
         "query",
         &op.ident,
     )?;
@@ -145,84 +147,84 @@ struct ParamBuckets {
     output_params: Vec<ParamInfo>,
 }
 
-#[allow(clippy::too_many_arguments)]
-fn classify_param(
-    param: &hir::ParamDcl,
-    all_path_param_names: &HashSet<String>,
-    all_query_template_names: &HashSet<String>,
-    path_param_sets: &[HashSet<String>],
+struct ParamClassification<'a> {
+    all_path_param_names: &'a HashSet<String>,
+    all_query_template_names: &'a HashSet<String>,
+    path_param_sets: &'a [HashSet<String>],
     default_source: ParamSource,
-    path_binding_count: &mut HashMap<String, usize>,
-    query_binding_count: &mut HashMap<String, usize>,
-    buckets: &mut ParamBuckets,
-    op_ident: &str,
-) -> IdlcResult<()> {
-    let binding = explicit_param_binding(param)?;
-    let (source, wire_name) = match binding {
-        Some(binding) => (binding.source, binding.bound_name),
-        None if all_path_param_names.contains(&param.declarator.0) => {
-            (ParamSource::Path, param.declarator.0.clone())
-        }
-        None if all_query_template_names.contains(&param.declarator.0) => {
-            (ParamSource::Query, param.declarator.0.clone())
-        }
-        None => (default_source, param.declarator.0.clone()),
-    };
-    validate_binding(
-        source,
-        &wire_name,
-        &param.declarator.0,
-        all_path_param_names,
-        path_param_sets,
-        op_ident,
-    )?;
-    let info = ParamInfo {
-        name: ts_ident(&param.declarator.0),
-        raw_name: param.declarator.0.clone(),
-        wire_name,
-        ty: param.ty.clone(),
-        optional: has_optional_annotation(&param.annotations),
-        doc: doc_lines_from_annotations(&param.annotations),
-    };
-    let direction = param_direction(param.attr.as_ref());
-    if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
-        buckets.output_params.push(info.clone());
-    }
-    if matches!(direction, ParamDirection::Out) {
-        return Ok(());
-    }
-    buckets.params.push(info.clone());
-    match source {
-        ParamSource::Path => push_param(info, &mut buckets.path_params, path_binding_count),
-        ParamSource::Query => push_param(info, &mut buckets.query_params, query_binding_count),
-        ParamSource::Header => buckets.header_params.push(info),
-        ParamSource::Cookie => buckets.cookie_params.push(info),
-        ParamSource::Body => buckets.body_params.push(info),
-    }
-    Ok(())
+    path_binding_count: HashMap<String, usize>,
+    query_binding_count: HashMap<String, usize>,
+    op_ident: &'a str,
 }
 
-fn validate_binding(
-    source: ParamSource,
-    wire_name: &str,
-    param_name: &str,
-    all_path_param_names: &HashSet<String>,
-    path_param_sets: &[HashSet<String>],
-    op_ident: &str,
-) -> IdlcResult<()> {
-    if matches!(source, ParamSource::Path) && !all_path_param_names.contains(wire_name) {
-        return Err(IdlcError::rpc(format!(
-            "parameter '{}' is annotated with @path but '{}' is not present in route template of method '{}'",
-            param_name, wire_name, op_ident
-        )));
+impl ParamClassification<'_> {
+    fn classify(&mut self, param: &hir::ParamDcl, buckets: &mut ParamBuckets) -> IdlcResult<()> {
+        let binding = explicit_param_binding(param)?;
+        let (source, wire_name) = match binding {
+            Some(binding) => (binding.source, binding.bound_name),
+            None if self.all_path_param_names.contains(&param.declarator.0) => {
+                (ParamSource::Path, param.declarator.0.clone())
+            }
+            None if self.all_query_template_names.contains(&param.declarator.0) => {
+                (ParamSource::Query, param.declarator.0.clone())
+            }
+            None => (self.default_source, param.declarator.0.clone()),
+        };
+        self.validate_binding(source, &wire_name, &param.declarator.0)?;
+        let info = ParamInfo {
+            name: ts_ident(&param.declarator.0),
+            raw_name: param.declarator.0.clone(),
+            wire_name,
+            ty: param.ty.clone(),
+            optional: has_optional_annotation(&param.annotations),
+            doc: doc_lines_from_annotations(&param.annotations),
+        };
+        let direction = param_direction(param.attr.as_ref());
+        if matches!(direction, ParamDirection::Out | ParamDirection::InOut) {
+            buckets.output_params.push(info.clone());
+        }
+        if matches!(direction, ParamDirection::Out) {
+            return Ok(());
+        }
+        buckets.params.push(info.clone());
+        match source {
+            ParamSource::Path => {
+                push_param(info, &mut buckets.path_params, &mut self.path_binding_count)
+            }
+            ParamSource::Query => push_param(
+                info,
+                &mut buckets.query_params,
+                &mut self.query_binding_count,
+            ),
+            ParamSource::Header => buckets.header_params.push(info),
+            ParamSource::Cookie => buckets.cookie_params.push(info),
+            ParamSource::Body => buckets.body_params.push(info),
+        }
+        Ok(())
     }
-    if matches!(source, ParamSource::Path) && !path_name_in_all_routes(wire_name, path_param_sets) {
-        return Err(IdlcError::rpc(format!(
-            "parameter '{}' is bound to path variable '{}' but it is not present in every route template of method '{}'",
-            param_name, wire_name, op_ident
-        )));
+
+    fn validate_binding(
+        &self,
+        source: ParamSource,
+        wire_name: &str,
+        param_name: &str,
+    ) -> IdlcResult<()> {
+        if matches!(source, ParamSource::Path) && !self.all_path_param_names.contains(wire_name) {
+            return Err(IdlcError::rpc(format!(
+                "parameter '{}' is annotated with @path but '{}' is not present in route template of method '{}'",
+                param_name, wire_name, self.op_ident
+            )));
+        }
+        if matches!(source, ParamSource::Path)
+            && !path_name_in_all_routes(wire_name, self.path_param_sets)
+        {
+            return Err(IdlcError::rpc(format!(
+                "parameter '{}' is bound to path variable '{}' but it is not present in every route template of method '{}'",
+                param_name, wire_name, self.op_ident
+            )));
+        }
+        Ok(())
     }
-    Ok(())
 }
 
 fn push_param(info: ParamInfo, target: &mut Vec<ParamInfo>, counts: &mut HashMap<String, usize>) {

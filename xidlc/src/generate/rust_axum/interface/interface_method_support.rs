@@ -1,5 +1,7 @@
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::rust_axum::interface::{ParamContext, ParamSource, RenderEnv};
+use crate::generate::rust_axum::interface::{
+    ParamSource, RenderEnv, interface_method_params::MethodParams,
+};
 use crate::generate::rust_axum::transport::{
     TransportDirection, TransportTracker, decode_expr, encode_expr,
 };
@@ -104,28 +106,28 @@ pub(crate) fn response_ty(http_op: &HttpOperation, struct_prefix: &str, ret_ty: 
     }
 }
 
-#[allow(clippy::too_many_arguments)]
+pub(crate) struct StreamingShape {
+    pub(crate) is_client_stream: bool,
+    pub(crate) is_bidi_stream: bool,
+    pub(crate) allow_handshake_params: bool,
+}
+
 pub(crate) fn ensure_streaming_constraints(
     op: &hir::OpDcl,
-    is_client_stream: bool,
-    is_bidi_stream: bool,
-    allow_handshake_params: bool,
-    path_params: &[ParamContext],
-    query_params: &[ParamContext],
-    header_params: &[ParamContext],
-    cookie_params: &[ParamContext],
+    shape: &StreamingShape,
+    params: &MethodParams,
 ) -> IdlcResult<()> {
-    let has_non_body = !path_params.is_empty()
-        || !query_params.is_empty()
-        || !header_params.is_empty()
-        || !cookie_params.is_empty();
-    if is_client_stream && has_non_body {
+    let has_non_body = !params.path_params.is_empty()
+        || !params.query_params.is_empty()
+        || !params.header_params.is_empty()
+        || !params.cookie_params.is_empty();
+    if shape.is_client_stream && has_non_body {
         return Err(IdlcError::rpc(format!(
             "@client_stream method '{}' currently supports body parameters only",
             op.ident
         )));
     }
-    if is_bidi_stream && has_non_body && !allow_handshake_params {
+    if shape.is_bidi_stream && has_non_body && !shape.allow_handshake_params {
         return Err(IdlcError::rpc(format!(
             "@bidi_stream method '{}' currently supports body parameters only",
             op.ident

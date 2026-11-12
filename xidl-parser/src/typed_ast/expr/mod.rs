@@ -162,10 +162,20 @@ impl<'a> crate::parser::FromTreeSitter<'a> for FloatingPtLiteral {
                 _ => {}
             }
         }
+        let integer = integer.ok_or_else(|| {
+            crate::error::ParseError::UnexpectedNode(
+                "floating_pt_literal is missing an integer part".to_string(),
+            )
+        })?;
+        let fraction = fraction.ok_or_else(|| {
+            crate::error::ParseError::UnexpectedNode(
+                "floating_pt_literal is missing a fraction part".to_string(),
+            )
+        })?;
         Ok(Self {
             sign,
-            integer: integer.unwrap(),
-            fraction: fraction.unwrap(),
+            integer,
+            fraction,
         })
     }
 }

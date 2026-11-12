@@ -18,17 +18,24 @@ mod response_schema;
 pub(crate) mod text_aliases;
 mod websocket_helpers;
 
+pub(crate) struct HttpRenderContext<'a> {
+    pub(crate) renderer: &'a TypescriptRenderer,
+    pub(crate) rest_hir: &'a RestHirDocument,
+    pub(crate) text_aliases: &'a text_aliases::TextAliases,
+}
+
 pub(crate) fn render_interface(
     interface: &hir::InterfaceDcl,
     module_path: &[String],
-    renderer: &TypescriptRenderer,
-    rest_hir: &RestHirDocument,
-    text_aliases: &text_aliases::TextAliases,
+    context: &HttpRenderContext<'_>,
 ) -> IdlcResult<TsHttpBlocks> {
     let hir::InterfaceDclInner::InterfaceDef(def) = &interface.decl else {
         return Ok(TsHttpBlocks::default());
     };
-    let Some(http_interface) = rest_hir.find_interface(module_path, &def.header.ident) else {
+    let Some(http_interface) = context
+        .rest_hir
+        .find_interface(module_path, &def.header.ident)
+    else {
         return Ok(TsHttpBlocks::default());
     };
     let methods = http_interface
@@ -39,23 +46,24 @@ pub(crate) fn render_interface(
                 interface_name: def.header.ident.as_str(),
                 module_path,
                 op,
-                exceptions: &rest_hir.document.exceptions,
-                text_aliases,
+                exceptions: &context.rest_hir.document.exceptions,
+                text_aliases: context.text_aliases,
             })
         })
         .collect::<IdlcResult<Vec<_>>>()?;
     let mut out = TsHttpBlocks::default();
     for method in &methods {
-        render_request_types(&mut out, method, module_path, renderer)?;
-        render_response_types(&mut out, method, module_path, renderer)?;
+        render_request_types(&mut out, method, module_path, context.renderer)?;
+        render_response_types(&mut out, method, module_path, context.renderer)?;
     }
-    let api_version = rest_hir
+    let api_version = context
+        .rest_hir
         .document
         .api_version(module_path)
         .map(str::to_string);
-    let version_parameter = rest_hir.document.version_parameter.clone();
+    let version_parameter = context.rest_hir.document.version_parameter.clone();
     out.client.push(client::render(
-        renderer,
+        context.renderer,
         &ClientClassContext {
             client_name: ts_ident(&def.header.ident), // Template adds 'Client'
             methods: methods
@@ -73,7 +81,7 @@ pub(crate) fn render_interface(
     )?);
     let (ws_client_helpers, ws_server_helpers) = websocket_helpers::WebsocketHelpers::render(
         &methods,
-        renderer,
+        context.renderer,
         version_parameter.as_ref().zip(api_version.as_deref()),
     )?;
     out.client.extend(ws_client_helpers);
@@ -92,7 +100,7 @@ pub(crate) fn render_interface(
             methods,
             fixed_response_headers,
         )?
-        .render(renderer)?,
+        .render(context.renderer)?,
     );
 
     Ok(out)
