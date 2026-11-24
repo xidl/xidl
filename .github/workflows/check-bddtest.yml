@@ -63,7 +63,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Install just
-        uses: taiki-e/install-action@v2.90.2
+        uses: taiki-e/install-action@v2.90.7
         with:
           tool: just
 
