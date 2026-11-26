@@ -9,6 +9,7 @@ pub(super) struct FileContext {
     pub file_stem: String,
     pub has_errors: bool,
     pub has_updates: bool,
+    pub versions: Vec<VersionMeta>,
     pub decisions: Vec<Decision>,
     pub hooks: Vec<Hook>,
     pub readers: Vec<Reader>,
@@ -18,8 +19,30 @@ pub(super) struct FileContext {
     pub operations: Vec<Operation>,
     pub endpoints: Vec<Endpoint>,
     pub dispatchers: Vec<Dispatcher>,
+    pub interface_dispatchers: Vec<InterfaceDispatcher>,
     pub type_dispatchers: Vec<TypeDispatcher>,
     pub wire_definitions: Vec<super::wire_context::WireDefinition>,
+}
+
+/// One declared version entry exported for runtime version routing.
+#[derive(Serialize)]
+pub(super) struct VersionMeta {
+    pub id: String,
+    pub value: String,
+}
+
+/// Typed operation dispatcher map matching `<Interface>Operations` handler keys.
+#[derive(Serialize)]
+pub(super) struct InterfaceDispatcher {
+    pub name: String,
+    pub entries: Vec<InterfaceDispatcherEntry>,
+}
+
+/// One method key -> `dispatch<Interface><Op>` binding.
+#[derive(Serialize)]
+pub(super) struct InterfaceDispatcherEntry {
+    pub handler: String,
+    pub dispatcher: String,
 }
 
 #[derive(Serialize)]

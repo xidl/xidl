@@ -3,6 +3,8 @@
 use std::collections::HashMap;
 use std::path::Path;
 
+#[path = "version_adapters/router.rs"]
+mod router;
 #[path = "version_adapters/unions.rs"]
 mod unions;
 

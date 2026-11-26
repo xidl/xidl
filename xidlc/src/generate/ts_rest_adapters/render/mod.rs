@@ -35,10 +35,20 @@ impl<'a> AdapterRenderer<'a> {
     }
 
     pub(super) fn context(&self, stem: &str) -> IdlcResult<FileContext> {
+        let versions = self
+            .plan
+            .versions
+            .iter()
+            .map(|item| VersionMeta {
+                id: item.version.id.clone(),
+                value: item.version.value.clone(),
+            })
+            .collect();
         let mut file = FileContext {
             file_stem: stem.into(),
             has_errors: false,
             has_updates: !self.plan.updates.operations.is_empty(),
+            versions,
             decisions: Vec::new(),
             hooks: Vec::new(),
             readers: Vec::new(),
@@ -49,6 +59,7 @@ impl<'a> AdapterRenderer<'a> {
             wire_definitions: Vec::new(),
             endpoints: Vec::new(),
             dispatchers: Vec::new(),
+            interface_dispatchers: Vec::new(),
             type_dispatchers: Vec::new(),
         };
         let head = self
