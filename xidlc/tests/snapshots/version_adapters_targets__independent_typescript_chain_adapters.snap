@@ -1005,6 +1005,10 @@ export interface VersionAdapters {
     }
 
 
+/** Declared versions in timeline order. */
+export const VERSIONS = [{ id: "v2026_06_01", value: "2026-06-01" }, { id: "v2026_10_01", value: "2026-10-01" }, { id: "v2027_01_01", value: "2027-01-01" }] as const;
+export type VersionId = (typeof VERSIONS)[number]["id"];
+
 /** The application has already resolved this version; no routing is performed here. */
 export interface VersionContext { originalVersion: string; originalVersionId: string }
 export interface ValidationError { kind: "Validation"; version: string; operation: string; issues: z.core.$ZodIssue[] }
@@ -1325,6 +1329,17 @@ export type DispatchOutcome<T, Head> =
             
         }
     }
+
+
+
+    /** Typed dispatcher lookup keyed by generated server operation handler name. */
+    export const SchedulerDispatchers = {
+        
+            _get: dispatchSchedulerGet,
+        
+            book: dispatchSchedulerBook,
+        
+    } as const;
 
 
 

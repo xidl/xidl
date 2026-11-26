@@ -1,3 +1,7 @@
+/** Declared versions in timeline order. */
+export const VERSIONS = [{% for version in versions %}{ id: {{ version.id | tojson }}, value: {{ version.value | tojson }} }{% if not loop.last %}, {% endif %}{% endfor %}] as const;
+export type VersionId = (typeof VERSIONS)[number]["id"];
+
 /** The application has already resolved this version; no routing is performed here. */
 export interface VersionContext { originalVersion: string; originalVersionId: string }
 export interface ValidationError { kind: "Validation"; version: string; operation: string; issues: z.core.$ZodIssue[] }
@@ -85,6 +89,15 @@ export type DispatchOutcome<T, Head> =
             {% endfor %}
         }
     }
+{% endfor %}
+
+{% for group in interface_dispatchers %}
+    /** Typed dispatcher lookup keyed by generated server operation handler name. */
+    export const {{ group.name }} = {
+        {% for entry in group.entries %}
+            {{ entry.handler }}: {{ entry.dispatcher }},
+        {% endfor %}
+    } as const;
 {% endfor %}
 
 {% for dispatcher in type_dispatchers %}

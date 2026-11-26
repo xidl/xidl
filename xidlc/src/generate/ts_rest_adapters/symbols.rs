@@ -43,6 +43,11 @@ impl FileContext {
                 .iter()
                 .map(|value| format!("dispatch{}", value.prefix)),
         );
+        names.extend(
+            self.interface_dispatchers
+                .iter()
+                .map(|value| value.name.clone()),
+        );
         let mut symbols = BTreeSet::new();
         for name in &names {
             if !symbols.insert(name) {
