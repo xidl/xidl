@@ -215,6 +215,7 @@ impl<'a> Projector<'a> {
             let mut projected = case.clone();
             projected.label = labels;
             projected.element = element;
+            projected.wire_tags.clear();
             cases.push(projected);
         }
         let mut projected = value.clone();

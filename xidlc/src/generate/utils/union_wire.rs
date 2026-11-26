@@ -8,7 +8,18 @@ pub(crate) struct UnionWire;
 impl UnionWire {
     /// Wire tags selecting a case; a default case has the explicit tag `default`.
     pub(crate) fn tags(case: &hir::Case) -> Vec<String> {
-        case.label.iter().map(Self::label).collect()
+        case.label
+            .iter()
+            .enumerate()
+            .map(|(index, label)| Self::case_label(case, index, label))
+            .collect()
+    }
+
+    /// The stable wire discriminator of one case label, honoring enumerator renames.
+    pub(crate) fn case_label(case: &hir::Case, index: usize, label: &hir::CaseLabel) -> String {
+        case.wire_tag(index)
+            .map(str::to_owned)
+            .unwrap_or_else(|| Self::label(label))
     }
 
     /// The stable discriminator of a source case label.

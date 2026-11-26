@@ -152,3 +152,93 @@ fn source_validation_runs_before_version_projection() {
     assert!(error.to_string().contains("union 'Retired'"), "{error}");
     assert!(error.to_string().contains("case label 'sms'"), "{error}");
 }
+
+#[test]
+fn renamed_enum_discriminators_populate_union_wire_tags_across_scopes() {
+    let spec = lower(
+        r#"
+        enum RootKind { @rename("root-a") alpha, beta };
+        typedef RootKind RootAlias;
+        module delivery {
+            @rename_all("kebab-case")
+            enum Channel { sms_text, @name("mms-wire") mms_media, voice };
+            typedef Channel Transport;
+            typedef union Direct switch(Transport) {
+                case Transport::sms_text:
+                case ::RootAlias::alpha: string text;
+                case Channel::mms_media: string media;
+                case Channel::voice: string audio;
+                default: string fallback;
+            } DirectAlias;
+            interface Api {
+                enum State { @rename("on") active };
+                union Nested switch(long) {
+                    case 1: union Inner switch(State) {
+                        case State::active: string value;
+                    } inner;
+                };
+            };
+        };
+        "#,
+    )
+    .expect("renamed enum discriminators resolve");
+
+    let debug = format!("{spec:?}");
+    assert!(debug.contains("wire_tags"), "{debug}");
+    assert!(debug.contains("sms-text"), "{debug}");
+    assert!(debug.contains("root-a"), "{debug}");
+    assert!(debug.contains("mms-wire"), "{debug}");
+    assert!(debug.contains("\"on\""), "{debug}");
+
+    let serialized = serde_json::to_value(&spec).expect("serialize HIR");
+    let direct_cases = &serialized[2]["ModuleDcl"]["definition"][2]["TypeDcl"]["TypedefDcl"]["ty"]
+        ["ConstrTypeDcl"]["UnionDef"]["case"];
+    assert_eq!(
+        direct_cases[0]["wire_tags"],
+        serde_json::json!(["sms-text", "root-a"])
+    );
+    assert_eq!(
+        direct_cases[1]["wire_tags"],
+        serde_json::json!(["mms-wire"])
+    );
+    assert!(direct_cases[2].get("wire_tags").is_none());
+    assert!(direct_cases[3].get("wire_tags").is_none());
+}
+
+#[test]
+fn versioned_projections_recompute_union_wire_tags_per_version() {
+    let typed = crate::parser::parser_text(
+        r#"
+        @version enum V { v1, v2 };
+        enum Kind {
+            @removed(V::v2) @rename("kind-v1") alpha,
+            @added(V::v2) @rename("kind-v2") alpha,
+            beta
+        };
+        union U switch(Kind) {
+            case Kind::alpha: string first;
+            case Kind::beta: string second;
+        };
+        "#,
+    )
+    .expect("parse versioned renamed union");
+    let projections = Specification::project_typed_ast_versions(
+        typed,
+        std::collections::HashMap::from([(
+            crate::versioning::VERSION_LAYOUT_PROPERTY.into(),
+            serde_json::json!(crate::versioning::LAYOUT_PER_VERSION),
+        )]),
+        "versioned-union.idl",
+    )
+    .expect("project versions");
+    assert_eq!(projections.len(), 2);
+    let tags: Vec<String> = projections
+        .iter()
+        .map(|projection| match &projection.hir {
+            crate::rest_hir::ProjectedHir::Rpc(spec) => format!("{spec:?}"),
+            other => panic!("expected Rpc projection, got {other:?}"),
+        })
+        .collect();
+    assert!(tags[0].contains("kind-v1") && !tags[0].contains("kind-v2"));
+    assert!(tags[1].contains("kind-v2") && !tags[1].contains("kind-v1"));
+}

@@ -41,10 +41,33 @@ pub struct UnionDef {
     pub case: Vec<Case>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Serialize, Deserialize, Clone)]
 pub struct Case {
     pub label: Vec<CaseLabel>,
     pub element: ElementSpec,
+    /// Resolved discriminator wire tags when an enumerator uses `@rename` or `@rename_all`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub wire_tags: Vec<Option<String>>,
+}
+
+impl Case {
+    /// Returns the resolved wire tag for the label at `index`, when renamed.
+    pub fn wire_tag(&self, index: usize) -> Option<&str> {
+        self.wire_tags.get(index).and_then(Option::as_deref)
+    }
+}
+
+impl std::fmt::Debug for Case {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut debug = f.debug_struct("Case");
+        debug
+            .field("label", &self.label)
+            .field("element", &self.element);
+        if !self.wire_tags.is_empty() {
+            debug.field("wire_tags", &self.wire_tags);
+        }
+        debug.finish()
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -220,6 +243,7 @@ impl From<crate::typed_ast::Case> for Case {
         Self {
             label: value.label.into_iter().map(Into::into).collect(),
             element: value.element.into(),
+            wire_tags: Vec::new(),
         }
     }
 }

@@ -10,7 +10,7 @@ use crate::error::ParserResult;
 
 pub(crate) use constants::IntegerDeclarations;
 pub use constants::{INTEGER_IMPORTS_PROPERTY, IntegerExports, IntegerImports};
-pub(crate) use union_cases::UnionCaseLabels;
+pub(crate) use union_cases::{UnionCaseLabels, UnionWireTags};
 
 pub(crate) use bounds::CollectionBounds;
 
@@ -30,6 +30,7 @@ impl Analysis {
         spec.inherit_module_deprecation();
         spec.mark_deprecated_references();
         recursive::annotate_recursive_members(spec);
+        UnionWireTags::resolve(spec);
         Ok(())
     }
 }

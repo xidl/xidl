@@ -113,12 +113,13 @@ pub(crate) fn render_union_with_config(
             let serde_arms = case
                 .label
                 .iter()
+                .enumerate()
                 .zip(&labels)
-                .map(|(wire, label)| {
+                .map(|((label_index, wire), label)| {
                     let is_default = matches!(wire, hir::CaseLabel::Default);
                     json!({
                         "match_expr": label,
-                        "tag_literal": format!("{:?}", UnionWire::label(wire)),
+                        "tag_literal": format!("{:?}", UnionWire::case_label(case, label_index, wire)),
                         "tag_expr": label,
                         "is_default": is_default,
                     })

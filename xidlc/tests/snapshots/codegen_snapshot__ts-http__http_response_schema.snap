@@ -136,7 +136,7 @@ export interface Shape {
 }
 
 
-export type Area = { tag: "kind_round", data: number } | { tag: "kind_square", data: number } | { tag: "default", data: number };
+export type Area = { tag: "kindRound", data: number } | { tag: "squared", data: number } | { tag: "default", data: number };
 export {};
 ===============
 http_response_schema.iface.d.ts
@@ -308,4 +308,4 @@ import { xjson } from "xidl-typescript-codec";
     });
 
     
-    export const AreaSchema = z.union([z.object({ tag: z.enum(["kind_round"]), data: z.number().min(0).max(255).refine(Number.isInteger, "expected an integer") }), z.object({ tag: z.enum(["kind_square"]), data: z.number().min(0).max(255).refine(Number.isInteger, "expected an integer") }), z.object({ tag: z.enum(["default"]), data: z.number().min(0).max(255).refine(Number.isInteger, "expected an integer") })]);
+    export const AreaSchema = z.union([z.object({ tag: z.enum(["kindRound"]), data: z.number().min(0).max(255).refine(Number.isInteger, "expected an integer") }), z.object({ tag: z.enum(["squared"]), data: z.number().min(0).max(255).refine(Number.isInteger, "expected an integer") }), z.object({ tag: z.enum(["default"]), data: z.number().min(0).max(255).refine(Number.isInteger, "expected an integer") })]);
