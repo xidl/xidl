@@ -74,8 +74,10 @@ enum GenLang {
     JsonRpcHir(FilesArgs),
     #[command(name = "typed-ast", alias = "typed_ast", hide = true)]
     TypedAst(FilesArgs),
+    #[cfg(feature = "gen-rust")]
     #[command(name = "rust", alias = "rs")]
     Rust(ClientServerArgs),
+    #[cfg(feature = "gen-rust-jsonrpc")]
     #[command(
         name = "rust-jsonrpc",
         alias = "rust_jsonrpc",
@@ -83,6 +85,7 @@ enum GenLang {
         alias = "rs_jsonrpc"
     )]
     RustJsonRpc(ClientServerArgs),
+    #[cfg(feature = "gen-rust-axum")]
     #[command(
         name = "rust-axum",
         alias = "rust_axum",
@@ -94,8 +97,10 @@ enum GenLang {
     #[cfg(feature = "gen-rust-axum-adapters")]
     #[command(name = "rust-axum-adapters")]
     RustAxumAdapters(FilesArgs),
+    #[cfg(feature = "gen-typescript")]
     #[command(name = "typescript", alias = "ts")]
     Typescript(ClientServerArgs),
+    #[cfg(feature = "gen-typescript-rest")]
     #[command(
         name = "typescript-rest",
         alias = "typescript_rest",
@@ -106,12 +111,16 @@ enum GenLang {
     #[cfg(feature = "gen-typescript-rest-adapters")]
     #[command(name = "typescript-rest-adapters")]
     TypescriptRestAdapters(FilesArgs),
+    #[cfg(feature = "gen-go")]
     #[command(name = "go", alias = "golang")]
     Go(ClientServerArgs),
+    #[cfg(feature = "gen-go-rest")]
     #[command(name = "go-rest", alias = "go_rest")]
     GoRest(ClientServerArgs),
+    #[cfg(feature = "gen-openapi")]
     #[command(name = "openapi")]
     Openapi(OpenApiArgs),
+    #[cfg(feature = "gen-openrpc")]
     #[command(name = "openrpc", alias = "open-rpc")]
     Openrpc(FilesArgs),
     #[command(external_subcommand)]
@@ -124,6 +133,7 @@ struct FilesArgs {
 }
 
 /// Generates an OpenAPI JSON document for HTTP interfaces.
+#[cfg(feature = "gen-openapi")]
 #[derive(Debug, Args)]
 struct OpenApiArgs {
     /// OpenAPI document version. `auto` keeps the generator's choice (OpenAPI
@@ -135,6 +145,7 @@ struct OpenApiArgs {
 }
 
 /// Accepted `--version` values for the `openapi` target.
+#[cfg(feature = "gen-openapi")]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
 enum OpenApiVersion {
     /// Let the generator choose the document version.
@@ -144,6 +155,7 @@ enum OpenApiVersion {
     V31,
 }
 
+#[cfg(feature = "gen-openapi")]
 impl OpenApiVersion {
     /// Generator property value, or `None` to keep the `auto` behaviour.
     fn property(self) -> Option<String> {
@@ -154,6 +166,15 @@ impl OpenApiVersion {
     }
 }
 
+#[cfg(any(
+    feature = "gen-rust",
+    feature = "gen-rust-jsonrpc",
+    feature = "gen-rust-axum",
+    feature = "gen-typescript",
+    feature = "gen-typescript-rest",
+    feature = "gen-go",
+    feature = "gen-go-rest",
+))]
 #[derive(Debug, Args)]
 struct ClientServerArgs {
     #[arg(long = "client", default_value_t = false)]
@@ -192,24 +213,33 @@ impl GenLang {
             Self::RestHir(args) => Ok(shared.into_plain("rest-hir", args.files)),
             Self::JsonRpcHir(args) => Ok(shared.into_plain("jsonrpc-hir", args.files)),
             Self::TypedAst(args) => Ok(shared.into_plain("typed-ast", args.files)),
+            #[cfg(feature = "gen-rust")]
             Self::Rust(args) => Ok(shared.into_client_server("rust", args)),
+            #[cfg(feature = "gen-rust-jsonrpc")]
             Self::RustJsonRpc(args) => Ok(shared.into_client_server("rust-jsonrpc", args)),
+            #[cfg(feature = "gen-rust-axum")]
             Self::RustAxum(args) => Ok(shared.into_client_server("rust-axum", args)),
             #[cfg(feature = "gen-rust-axum-adapters")]
             Self::RustAxumAdapters(args) => Ok(shared.into_plain("rust-axum-adapters", args.files)),
+            #[cfg(feature = "gen-typescript")]
             Self::Typescript(args) => Ok(shared.into_client_server("typescript", args)),
+            #[cfg(feature = "gen-typescript-rest")]
             Self::TypescriptRest(args) => Ok(shared.into_client_server("typescript-rest", args)),
             #[cfg(feature = "gen-typescript-rest-adapters")]
             Self::TypescriptRestAdapters(args) => {
                 Ok(shared.into_plain("typescript-rest-adapters", args.files))
             }
+            #[cfg(feature = "gen-go")]
             Self::Go(args) => Ok(shared.into_client_server("go", args)),
+            #[cfg(feature = "gen-go-rest")]
             Self::GoRest(args) => Ok(shared.into_client_server("go-rest", args)),
+            #[cfg(feature = "gen-openapi")]
             Self::Openapi(args) => {
                 let mut generate = shared.into_plain("openapi", args.files);
                 generate.openapi_version = args.version.property();
                 Ok(generate)
             }
+            #[cfg(feature = "gen-openrpc")]
             Self::Openrpc(args) => Ok(shared.into_plain("openrpc", args.files)),
             Self::External(values) => parse_external(shared, values),
         }
@@ -226,20 +256,29 @@ impl GenLang {
             Self::RestHir(_) => gen_cmd.find_subcommand_mut("rest-hir"),
             Self::JsonRpcHir(_) => gen_cmd.find_subcommand_mut("jsonrpc-hir"),
             Self::TypedAst(_) => gen_cmd.find_subcommand_mut("typed-ast"),
+            #[cfg(feature = "gen-rust")]
             Self::Rust(_) => gen_cmd.find_subcommand_mut("rust"),
+            #[cfg(feature = "gen-rust-jsonrpc")]
             Self::RustJsonRpc(_) => gen_cmd.find_subcommand_mut("rust-jsonrpc"),
+            #[cfg(feature = "gen-rust-axum")]
             Self::RustAxum(_) => gen_cmd.find_subcommand_mut("rust-axum"),
             #[cfg(feature = "gen-rust-axum-adapters")]
             Self::RustAxumAdapters(_) => gen_cmd.find_subcommand_mut("rust-axum-adapters"),
+            #[cfg(feature = "gen-typescript")]
             Self::Typescript(_) => gen_cmd.find_subcommand_mut("typescript"),
+            #[cfg(feature = "gen-typescript-rest")]
             Self::TypescriptRest(_) => gen_cmd.find_subcommand_mut("typescript-rest"),
             #[cfg(feature = "gen-typescript-rest-adapters")]
             Self::TypescriptRestAdapters(_) => {
                 gen_cmd.find_subcommand_mut("typescript-rest-adapters")
             }
+            #[cfg(feature = "gen-go")]
             Self::Go(_) => gen_cmd.find_subcommand_mut("go"),
+            #[cfg(feature = "gen-go-rest")]
             Self::GoRest(_) => gen_cmd.find_subcommand_mut("go-rest"),
+            #[cfg(feature = "gen-openapi")]
             Self::Openapi(_) => gen_cmd.find_subcommand_mut("openapi"),
+            #[cfg(feature = "gen-openrpc")]
             Self::Openrpc(_) => gen_cmd.find_subcommand_mut("openrpc"),
             Self::External(_) => None,
         };
@@ -256,18 +295,27 @@ impl GenLang {
             Self::RestHir(_) => "xidlc gen rest-hir [FILES]...",
             Self::JsonRpcHir(_) => "xidlc gen jsonrpc-hir [FILES]...",
             Self::TypedAst(_) => "xidlc gen typed-ast [FILES]...",
+            #[cfg(feature = "gen-rust")]
             Self::Rust(_) => "xidlc gen rust [OPTIONS] [FILES]...",
+            #[cfg(feature = "gen-rust-jsonrpc")]
             Self::RustJsonRpc(_) => "xidlc gen rust-jsonrpc [OPTIONS] [FILES]...",
+            #[cfg(feature = "gen-rust-axum")]
             Self::RustAxum(_) => "xidlc gen rust-axum [OPTIONS] [FILES]...",
             #[cfg(feature = "gen-rust-axum-adapters")]
             Self::RustAxumAdapters(_) => "xidlc gen rust-axum-adapters [FILES]...",
+            #[cfg(feature = "gen-typescript")]
             Self::Typescript(_) => "xidlc gen typescript [OPTIONS] [FILES]...",
+            #[cfg(feature = "gen-typescript-rest")]
             Self::TypescriptRest(_) => "xidlc gen typescript-rest [OPTIONS] [FILES]...",
             #[cfg(feature = "gen-typescript-rest-adapters")]
             Self::TypescriptRestAdapters(_) => "xidlc gen typescript-rest-adapters [FILES]...",
+            #[cfg(feature = "gen-go")]
             Self::Go(_) => "xidlc gen go [OPTIONS] [FILES]...",
+            #[cfg(feature = "gen-go-rest")]
             Self::GoRest(_) => "xidlc gen go-rest [OPTIONS] [FILES]...",
+            #[cfg(feature = "gen-openapi")]
             Self::Openapi(_) => "xidlc gen openapi [OPTIONS] [FILES]...",
+            #[cfg(feature = "gen-openrpc")]
             Self::Openrpc(_) => "xidlc gen openrpc [FILES]...",
             Self::External(_) => "xidlc gen <lang> [FILES]...",
         }
@@ -290,6 +338,15 @@ impl SharedGenArgs {
         }
     }
 
+    #[cfg(any(
+        feature = "gen-rust",
+        feature = "gen-rust-jsonrpc",
+        feature = "gen-rust-axum",
+        feature = "gen-typescript",
+        feature = "gen-typescript-rest",
+        feature = "gen-go",
+        feature = "gen-go-rest",
+    ))]
     fn into_client_server(self, lang: impl Into<String>, args: ClientServerArgs) -> ArgsGenerate {
         let lang = lang.into();
         let (client, server) = if !args.client && !args.server {

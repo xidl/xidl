@@ -93,8 +93,6 @@ impl RequestBodyBuilder {
 /// }
 /// ```
 ///
-/// [schema]: crate::ToSchema
-///
 pub trait RequestBodyExt {
     /// Add [`Content`] to [`RequestBody`] referring to a _`schema`_
     /// with Content-Type `application/json`.

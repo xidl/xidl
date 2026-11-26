@@ -3,7 +3,6 @@ use std::collections::BTreeMap;
 use indexmap::IndexMap;
 use serde::Serialize;
 
-use crate::IntoResponses;
 use crate::openapi::{Ref, RefOr};
 
 use super::super::{
@@ -53,11 +52,6 @@ impl ResponsesBuilder {
             iter.into_iter()
                 .map(|(code, response)| (code.into(), response.into())),
         );
-        self
-    }
-
-    pub fn responses_from_into_responses<I: IntoResponses>(mut self) -> Self {
-        self.responses.extend(I::responses());
         self
     }
 
