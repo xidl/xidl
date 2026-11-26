@@ -1,0 +1,48 @@
+{% if rust_attrs and rust_attrs | length > 0 -%}
+    {% for attr in rust_attrs -%}
+        #[{{ attr }}]
+    {% endfor -%}
+{%- endif -%}
+{% if opt.mock -%}
+    #[allow(deprecated, useless_deprecated)]
+    #[mockall::automock]
+{%- endif %}
+#[allow(non_snake_case)]
+#[async_trait::async_trait]
+pub trait {{ ident }} {
+    {% for method in methods %}
+        {% if method.rust_attrs and method.rust_attrs | length > 0 %}
+            {% for attr in method.rust_attrs %}
+                #[{{ attr }}]
+            {% endfor %}
+        {% endif %}
+        {% if method.kind == "rpc" or method.kind == "stream_op" %}
+            async fn {{ method.name }}<'a>(&'a self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ method.ret }}, xidl_jsonrpc::Error>;
+        {% elif method.kind == "stream_source" %}
+            async fn {{ method.name }}<'a>(&'a self) -> Result<xidl_jsonrpc::stream::BoxStream<'a, {{ method.stream_item_ty }}>, xidl_jsonrpc::Error>;
+        {% endif %}
+    {% endfor %}
+}
+
+{% for method in methods %}
+    {% if method.kind == "rpc" or (method.kind == "stream_op" and method.stream_mode == "server") %}
+        #[derive(::serde::Serialize, ::serde::Deserialize)]
+        struct {{ method.params_struct }} {
+            {% for field in method.params_fields %}
+                {{ field.name }}: {{ field.ty }},
+            {% endfor %}
+        }
+    {% endif %}
+{% endfor %}
+
+{% for method in methods %}
+    {% if (method.kind == "rpc" or method.kind == "stream_op") and method.response_kind != "empty" %}
+        #[derive(::serde::Serialize, ::serde::Deserialize)]
+        pub struct {{ method.response_struct }} {
+            {% for field in method.response_fields %}
+                #[serde(rename = "{{ field.json_name }}")]
+                pub {{ field.name }}: {{ field.ty }},
+            {% endfor %}
+        }
+    {% endif %}
+{% endfor %}
