@@ -13,6 +13,8 @@ pub mod openapi;
 pub mod units;
 #[cfg(feature = "cli")]
 mod version_diff;
+#[cfg(feature = "cli")]
+mod version_lock;
 
 use std::collections::HashMap;
 use std::path::Path as FsPath;

@@ -1,5 +1,6 @@
 mod fmt;
 mod lint;
+mod version;
 
 use crate::driver;
 use crate::driver::ArgsGenerate;
@@ -21,32 +22,11 @@ enum Command {
     /// Check annotation names, placement and arguments without generating files.
     Lint(lint::ArgsLint),
     Gen(ArgsGen),
-    Version(ArgsVersion),
+    Version(version::ArgsVersion),
     #[command(alias = "format")]
     Fmt(fmt::ArgsFormat),
     #[command(name = "import")]
     Import(ArgsImport),
-}
-
-#[derive(Debug, Args)]
-struct ArgsVersion {
-    #[command(subcommand)]
-    command: VersionCommand,
-}
-
-#[derive(Debug, Subcommand)]
-enum VersionCommand {
-    Diff(ArgsVersionDiff),
-}
-
-#[derive(Debug, Args)]
-struct ArgsVersionDiff {
-    /// Earlier version member name or display value.
-    from: String,
-    /// Later version member name or display value.
-    to: String,
-    /// Versioned IDL contract.
-    idl: PathBuf,
 }
 
 #[derive(Debug, Args)]

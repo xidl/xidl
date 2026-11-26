@@ -78,7 +78,29 @@ impl VersionDiff {
         Ok((!diff.is_empty()).then_some(diff))
     }
 
+    /// Returns the analyzed versioning record for this contract.
+    pub(crate) fn record(&self) -> &VersioningRecord {
+        &self.record
+    }
+
+    /// Formats a canonical projection with the `@version` enum excluded so
+    /// adding or removing later timeline members never mutates frozen versions.
+    pub(crate) fn formatted_lock_projection(&self, version: VersionId) -> IdlcResult<String> {
+        let mut definitions = self.projected_definitions(version)?;
+        if let Some(path) = Self::find_version_enum_path(&self.spec.0, &[]) {
+            Self::strip_enum_at_path(&mut definitions, &path);
+        }
+        let body = format_idl_source(&IdlPrinter::render(&Specification(definitions)))?;
+        Ok(self.imports.clone() + &body)
+    }
+
     fn formatted_projection(&self, version: VersionId) -> IdlcResult<String> {
+        let definitions = self.projected_definitions(version)?;
+        let body = format_idl_source(&IdlPrinter::render(&Specification(definitions)))?;
+        Ok(self.imports.clone() + &body)
+    }
+
+    fn projected_definitions(&self, version: VersionId) -> IdlcResult<Vec<Definition>> {
         let projected = self.record.project(&self.spec, version)?;
         // Projection's outer module and document version identify an artifact,
         // while the diff header already identifies each side. Keep original
@@ -91,8 +113,66 @@ impl VersionDiff {
                 definition => definitions.push(definition),
             }
         }
-        let body = format_idl_source(&IdlPrinter::render(&Specification(definitions)))?;
-        Ok(self.imports.clone() + &body)
+        Ok(definitions)
+    }
+
+    fn find_version_enum_path(definitions: &[Definition], scope: &[String]) -> Option<Vec<String>> {
+        for definition in definitions {
+            match definition {
+                Definition::ModuleDcl(module) => {
+                    let mut nested = scope.to_vec();
+                    nested.push(module.ident.clone());
+                    if let Some(found) = Self::find_version_enum_path(&module.definition, &nested) {
+                        return Some(found);
+                    }
+                }
+                Definition::TypeDcl(xidl_parser::hir::TypeDcl::ConstrTypeDcl(
+                    xidl_parser::hir::ConstrTypeDcl::EnumDcl(enumeration),
+                ))
+                | Definition::ConstrTypeDcl(xidl_parser::hir::ConstrTypeDcl::EnumDcl(
+                    enumeration,
+                )) if enumeration.annotations.iter().any(|annotation| {
+                    matches!(
+                        annotation,
+                        xidl_parser::hir::Annotation::Version
+                            | xidl_parser::hir::Annotation::VersionParameter(_)
+                    )
+                }) =>
+                {
+                    let mut path = scope.to_vec();
+                    path.push(enumeration.ident.clone());
+                    return Some(path);
+                }
+                _ => {}
+            }
+        }
+        None
+    }
+
+    fn strip_enum_at_path(definitions: &mut Vec<Definition>, path: &[String]) {
+        let Some((head, tail)) = path.split_first() else {
+            return;
+        };
+        if tail.is_empty() {
+            definitions.retain(|definition| {
+                !matches!(
+                    definition,
+                    Definition::TypeDcl(xidl_parser::hir::TypeDcl::ConstrTypeDcl(
+                        xidl_parser::hir::ConstrTypeDcl::EnumDcl(enumeration),
+                    )) | Definition::ConstrTypeDcl(xidl_parser::hir::ConstrTypeDcl::EnumDcl(
+                        enumeration,
+                    )) if enumeration.ident == *head
+                )
+            });
+            return;
+        }
+        for definition in definitions {
+            if let Definition::ModuleDcl(module) = definition
+                && module.ident == *head
+            {
+                Self::strip_enum_at_path(&mut module.definition, tail);
+            }
+        }
     }
 
     fn header(&self, version: VersionId) -> IdlcResult<String> {

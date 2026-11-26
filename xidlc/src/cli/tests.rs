@@ -1,3 +1,4 @@
+use super::version::VersionCommand;
 use super::*;
 
 #[test]
@@ -7,7 +8,9 @@ fn version_diff_uses_three_positional_arguments_and_rejects_legacy_options() {
     let Command::Version(args) = cli.command else {
         panic!("expected version command");
     };
-    let VersionCommand::Diff(args) = args.command;
+    let VersionCommand::Diff(args) = args.command else {
+        panic!("expected version diff command");
+    };
     assert_eq!(args.from, "v1");
     assert_eq!(args.to, "2026-07");
     assert_eq!(args.idl, PathBuf::from("api.idl"));
@@ -20,6 +23,49 @@ fn version_diff_uses_three_positional_arguments_and_rejects_legacy_options() {
     ] {
         assert!(Cli::try_parse_from(args).is_err());
     }
+}
+
+#[test]
+fn version_lock_and_check_parse_idl_and_options() {
+    let lock = Cli::try_parse_from([
+        "xidlc",
+        "version",
+        "lock",
+        "--lock-file",
+        "custom.lock.json",
+        "--force",
+        "api.idl",
+    ])
+    .expect("parse version lock");
+    let Command::Version(args) = lock.command else {
+        panic!("expected version command");
+    };
+    let VersionCommand::Lock(args) = args.command else {
+        panic!("expected version lock command");
+    };
+    assert_eq!(args.lock_file, Some(PathBuf::from("custom.lock.json")));
+    assert!(args.force);
+    assert_eq!(args.idl, PathBuf::from("api.idl"));
+
+    let check = Cli::try_parse_from([
+        "xidlc",
+        "version",
+        "check",
+        "-l",
+        "custom.lock.json",
+        "--strict",
+        "api.idl",
+    ])
+    .expect("parse version check");
+    let Command::Version(args) = check.command else {
+        panic!("expected version command");
+    };
+    let VersionCommand::Check(args) = args.command else {
+        panic!("expected version check command");
+    };
+    assert_eq!(args.lock_file, Some(PathBuf::from("custom.lock.json")));
+    assert!(args.strict);
+    assert_eq!(args.idl, PathBuf::from("api.idl"));
 }
 
 #[test]
