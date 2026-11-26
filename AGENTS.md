@@ -3,13 +3,14 @@
 ## Scope
 
 - This file MUST govern handwritten source files under `xidl-build/src/`,
-  `xidl-jsonrpc/src/`, `xidl-parser/src/`, `xidl-parser-derive/src/`,
-  `xidl-rust-axum/src/`, and `xidlc/src/`.
-- This file MUST govern handwritten test files under `xidl-jsonrpc/tests/`,
-  `xidl-parser/tests/`, `xidl-rust-axum/tests/`, `xidl-parser/tests/`,
-  `xidl-rust-axum/tests/`, `xidlc/tests/`, and `python/tests/`.
+  `crates/xidl-http/src/`, `crates/xidl-http-docs/src/`,
+  `crates/xidl-jsonrpc/src/`, `crates/xidl-rust-axum/src/`, `xidl-parser/src/`,
+  `xidl-parser-derive/src/`, and `xidlc/src/`.
+- This file MUST govern handwritten test files under `xidl-build/tests/`,
+  `crates/xidl-jsonrpc/tests/`, `crates/xidl-rust-axum/tests/`,
+  `xidl-parser/tests/`, `xidlc/tests/`, and `xidlc-examples/tests/`.
 - This file MUST govern generator templates under
-  `xidlc/src/generate/**/templates/` and `xidl-parser/src/hir/templates/`.
+  `xidlc/src/generate/**/templates/` and `crates/xidl-http-docs/src/templates/`.
 
 ## Code Style
 
@@ -71,15 +72,12 @@
 
 ## Generator Architecture
 
-- Generator implementations under `xidlc/src/generate/` and
-  `xidl-parser/src/hir/interface_codegen/` MUST use Rust for preprocessing,
-  normalization, validation, and render-context assembly.
-- Generator implementations under `xidlc/src/generate/` and
-  `xidl-parser/src/hir/interface_codegen/` MUST use `minijinja` for template
-  rendering.
-- Templates under `xidlc/src/generate/**/templates/` and
-  `xidl-parser/src/hir/templates/` MUST contain rendering statements and data
-  access statements.
+- Generator implementations under `xidlc/src/generate/` MUST use Rust for
+  preprocessing, normalization, validation, and render-context assembly.
+- Generator implementations under `xidlc/src/generate/` MUST use `minijinja` for
+  template rendering.
+- Templates under `xidlc/src/generate/**/templates/` MUST contain rendering
+  statements and data access statements.
 - Manually assembled Rust string fragments inside generator implementation code
   MUST stay below 20 characters per fragment.
 
