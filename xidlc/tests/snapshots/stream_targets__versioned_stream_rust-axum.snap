@@ -7,23 +7,6 @@ expression: output
 
 #[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
 pub mod v1 {
-    #[derive(
-        Debug,
-        Clone,
-        PartialEq,
-        ::serde::Serialize,
-        ::serde::Deserialize,
-        Copy,
-        Eq,
-        Default,
-    )]
-    pub enum Version {
-        #[serde(rename = "2026-01-01")]
-        #[default]
-        v1,
-        #[serde(rename = "2026-07-01")]
-        v2,
-    }
     #[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
     pub mod billing {
         #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]
@@ -674,23 +657,6 @@ pub mod v1 {
 }
 #[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
 pub mod v2 {
-    #[derive(
-        Debug,
-        Clone,
-        PartialEq,
-        ::serde::Serialize,
-        ::serde::Deserialize,
-        Copy,
-        Eq,
-        Default,
-    )]
-    pub enum Version {
-        #[serde(rename = "2026-01-01")]
-        #[default]
-        v1,
-        #[serde(rename = "2026-07-01")]
-        v2,
-    }
     #[allow(clippy::too_many_arguments, clippy::large_enum_variant)]
     pub mod billing {
         #[derive(Debug, Clone, PartialEq, ::serde::Serialize, ::serde::Deserialize)]

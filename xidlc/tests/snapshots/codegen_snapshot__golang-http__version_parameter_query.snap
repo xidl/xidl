@@ -9,50 +9,6 @@ version_parameter.go
 
 package version_parameter
 
-import (
-	"fmt"
-	"github.com/xidl/xidl/golang/xidl-go-codec"
-)
-
-type V1Versions string
-
-const (
-	V1VersionsV1 V1Versions = "2026-04"
-	V1VersionsV2 V1Versions = "2026-07"
-)
-
-
-
-// MarshalText validates the enum's published wire value.
-func (value V1Versions) MarshalText() ([]byte, error) {
-    switch string(value) {
-    case "2026-04", "2026-07":
-        return []byte(value), nil
-    default:
-        return nil, fmt.Errorf("enum V1Versions has an invalid value %q", value)
-    }
-}
-
-// UnmarshalText accepts only values declared by the IDL enum.
-func (value *V1Versions) UnmarshalText(data []byte) error {
-    decoded := V1Versions(data)
-    if _, err := decoded.MarshalText(); err != nil { return err }
-    *value = decoded
-    return nil
-}
-
-func (value V1Versions) MarshalJSON() ([]byte, error) {
-    text, err := value.MarshalText()
-    if err != nil { return nil, err }
-    return json.Marshal(string(text))
-}
-
-func (value *V1Versions) UnmarshalJSON(data []byte) error {
-    var text string
-    if err := json.Unmarshal(data, &text); err != nil { return err }
-    return value.UnmarshalText([]byte(text))
-}
-
 type V1BusinessItem struct {
 	Id string `xjson:"id"`
 }
@@ -63,45 +19,6 @@ type V1BusinessConflict struct {
 
 func (e *V1BusinessConflict) Error() string {
 	return "V1BusinessConflict"
-}
-
-type V2Versions string
-
-const (
-	V2VersionsV1 V2Versions = "2026-04"
-	V2VersionsV2 V2Versions = "2026-07"
-)
-
-
-
-// MarshalText validates the enum's published wire value.
-func (value V2Versions) MarshalText() ([]byte, error) {
-    switch string(value) {
-    case "2026-04", "2026-07":
-        return []byte(value), nil
-    default:
-        return nil, fmt.Errorf("enum V2Versions has an invalid value %q", value)
-    }
-}
-
-// UnmarshalText accepts only values declared by the IDL enum.
-func (value *V2Versions) UnmarshalText(data []byte) error {
-    decoded := V2Versions(data)
-    if _, err := decoded.MarshalText(); err != nil { return err }
-    *value = decoded
-    return nil
-}
-
-func (value V2Versions) MarshalJSON() ([]byte, error) {
-    text, err := value.MarshalText()
-    if err != nil { return nil, err }
-    return json.Marshal(string(text))
-}
-
-func (value *V2Versions) UnmarshalJSON(data []byte) error {
-    var text string
-    if err := json.Unmarshal(data, &text); err != nil { return err }
-    return value.UnmarshalText([]byte(text))
 }
 
 type V2BusinessItem struct {

@@ -54,12 +54,12 @@ impl UnionWireTags {
                 TypedefType::ConstrTypeDcl(constr) => self.collect_constructed(constr, scope),
                 TypedefType::TypeSpec(TypeSpec::ScopedName(target)) => {
                     for decl in &typedef.decl {
-                        let name = match decl {
-                            crate::hir::Declarator::SimpleDeclarator(value) => &value.0,
-                            crate::hir::Declarator::ArrayDeclarator(value) => &value.ident,
-                        };
-                        self.aliases
-                            .insert(Self::join(scope, name), (scope.to_vec(), target.clone()));
+                        if let crate::hir::Declarator::SimpleDeclarator(value) = decl {
+                            self.aliases.insert(
+                                Self::join(scope, &value.0),
+                                (scope.to_vec(), target.clone()),
+                            );
+                        }
                     }
                 }
                 TypedefType::TypeSpec(_) => {}
@@ -202,9 +202,10 @@ impl UnionWireTags {
             if let Some(members) = self.enums.get(&path) {
                 return Some(members);
             }
-            if let Some((alias_scope, target)) = self.aliases.get(&path)
-                && visited.insert(path)
-            {
+            if let Some((alias_scope, target)) = self.aliases.get(&path) {
+                if !visited.insert(path) {
+                    return None;
+                }
                 return self.lookup_enum(target, alias_scope, visited);
             }
         }

@@ -34,14 +34,6 @@ expression: documents
             "event_type"
           ],
           "type": "object"
-        },
-        "v1.V": {
-          "enum": [
-            "v1",
-            "v2",
-            "v3"
-          ],
-          "type": "string"
         }
       }
     },
@@ -88,14 +80,6 @@ expression: documents
             "event_type"
           ],
           "type": "object"
-        },
-        "v2.V": {
-          "enum": [
-            "v1",
-            "v2",
-            "v3"
-          ],
-          "type": "string"
         }
       }
     },
@@ -310,14 +294,6 @@ expression: documents
             "event_type"
           ],
           "type": "object"
-        },
-        "v3.V": {
-          "enum": [
-            "v1",
-            "v2",
-            "v3"
-          ],
-          "type": "string"
         }
       }
     },

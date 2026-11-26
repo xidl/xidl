@@ -83,13 +83,13 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     return optional && entries.length === 0 ? undefined : Object.fromEntries(entries);
 }
 
-    const wireType2Schema: z.ZodType<types.v2026_01_01.EventKind> = z.lazy(() =>
+    const wireType1Schema: z.ZodType<types.v2026_01_01.EventKind> = z.lazy(() =>
     
         z.enum(["updated"])
     
     );
 
-    const wireType1Schema: z.ZodType<types.v2026_01_01.Event> = z.lazy(() =>
+    const wireType0Schema: z.ZodType<types.v2026_01_01.Event> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -114,7 +114,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["kind"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType2Schema),
+            ["kind"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType1Schema),
         
             ["payload"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
@@ -151,7 +151,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["event"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType1Schema),
+            ["event"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType0Schema),
         
     })).transform((value) => ({
         
@@ -180,13 +180,110 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType5Schema: z.ZodType<types.v2026_04_01.EventKind> = z.lazy(() =>
+    const wireType3Schema: z.ZodType<types.v2026_04_01.EventKind> = z.lazy(() =>
     
         z.enum(["updated"])
     
     );
 
-    const wireType4Schema: z.ZodType<types.v2026_04_01.Event> = z.lazy(() =>
+    const wireType2Schema: z.ZodType<types.v2026_04_01.Event> = z.lazy(() =>
+    
+        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["id"]: z.unknown().optional(),
+        
+            ["kind"]: z.unknown().optional(),
+        
+            ["payload"]: z.unknown().optional(),
+        
+    }).strict()
+    
+    .transform((wire): Record<string, unknown> => ({
+        
+            ["id"]: wire["id"],
+        
+            ["kind"]: wire["kind"],
+        
+            ["payload"]: wire["payload"],
+        
+    }))
+    .pipe(z.object({
+        
+            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
+        
+            ["kind"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType3Schema),
+        
+            ["payload"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
+        
+    })).transform((value) => ({
+        
+            
+                ["id"]: value["id"],
+            
+        
+            
+                ["kind"]: value["kind"],
+            
+        
+            
+                ["payload"]: value["payload"],
+            
+        
+    })))
+    
+    );
+
+    const wireRequest4Schema: z.ZodType<ifaceTypes.v2026_04_01.NotifierEmitRequest> = z.lazy(() =>
+    
+        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+            ["event"]: z.unknown().optional(),
+        
+    }).strict()
+    
+    .transform((wire): Record<string, unknown> => ({
+        
+            ["event"]: wire["event"],
+        
+    }))
+    .pipe(z.object({
+        
+            ["event"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType2Schema),
+        
+    })).transform((value) => ({
+        
+            
+                ["event"]: value["event"],
+            
+        
+    })))
+    
+    );
+
+    const wireRequest7Schema: z.ZodType<{  }> = z.lazy(() =>
+    
+        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
+        
+    }).strict()
+    
+    .transform((wire): Record<string, unknown> => ({
+        
+    }))
+    .pipe(z.object({
+        
+    })).transform((value) => ({
+        
+    })))
+    
+    );
+
+    const wireType5Schema: z.ZodType<types.v2026_07_01.EventKind> = z.lazy(() =>
+    
+        z.enum(["delivered", "read"])
+    
+    );
+
+    const wireType4Schema: z.ZodType<types.v2026_07_01.Event> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -233,103 +330,6 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireRequest4Schema: z.ZodType<ifaceTypes.v2026_04_01.NotifierEmitRequest> = z.lazy(() =>
-    
-        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
-        
-            ["event"]: z.unknown().optional(),
-        
-    }).strict()
-    
-    .transform((wire): Record<string, unknown> => ({
-        
-            ["event"]: wire["event"],
-        
-    }))
-    .pipe(z.object({
-        
-            ["event"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType4Schema),
-        
-    })).transform((value) => ({
-        
-            
-                ["event"]: value["event"],
-            
-        
-    })))
-    
-    );
-
-    const wireRequest7Schema: z.ZodType<{  }> = z.lazy(() =>
-    
-        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
-        
-    }).strict()
-    
-    .transform((wire): Record<string, unknown> => ({
-        
-    }))
-    .pipe(z.object({
-        
-    })).transform((value) => ({
-        
-    })))
-    
-    );
-
-    const wireType8Schema: z.ZodType<types.v2026_07_01.EventKind> = z.lazy(() =>
-    
-        z.enum(["delivered", "read"])
-    
-    );
-
-    const wireType7Schema: z.ZodType<types.v2026_07_01.Event> = z.lazy(() =>
-    
-        z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
-        
-            ["id"]: z.unknown().optional(),
-        
-            ["kind"]: z.unknown().optional(),
-        
-            ["payload"]: z.unknown().optional(),
-        
-    }).strict()
-    
-    .transform((wire): Record<string, unknown> => ({
-        
-            ["id"]: wire["id"],
-        
-            ["kind"]: wire["kind"],
-        
-            ["payload"]: wire["payload"],
-        
-    }))
-    .pipe(z.object({
-        
-            ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
-        
-            ["kind"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType8Schema),
-        
-            ["payload"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
-        
-    })).transform((value) => ({
-        
-            
-                ["id"]: value["id"],
-            
-        
-            
-                ["kind"]: value["kind"],
-            
-        
-            
-                ["payload"]: value["payload"],
-            
-        
-    })))
-    
-    );
-
     const wireRequest8Schema: z.ZodType<ifaceTypes.v2026_07_01.NotifierEmitRequest> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
@@ -345,7 +345,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["event"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType7Schema),
+            ["event"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType4Schema),
         
     })).transform((value) => ({
         

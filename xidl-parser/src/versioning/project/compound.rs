@@ -115,11 +115,12 @@ impl<'a> Projector<'a> {
         parent: Availability,
         path: &str,
     ) -> ParserResult<Option<ConstrTypeDcl>> {
-        if value
-            .annotations
-            .iter()
-            .any(|annotation| matches!(annotation, Annotation::Version))
-        {
+        if value.annotations.iter().any(|annotation| {
+            matches!(
+                annotation,
+                Annotation::Version | Annotation::VersionParameter(_)
+            )
+        }) {
             // The version enum itself never appears in a projection, so
             // references to it must be reported instead of silently kept.
             let here = join(path, &value.ident);

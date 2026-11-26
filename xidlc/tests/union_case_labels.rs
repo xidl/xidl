@@ -95,7 +95,9 @@ fn renamed_enum_discriminator_propagates_to_union_tags_across_targets() {
         let ts = render("typescript", model_source);
         assert!(ts.contains("\"kind-a\" | \"beta\""), "{ts}");
         assert!(ts.contains("tag: \"kind-a\""), "{ts}");
+        assert!(ts.contains("tag: \"beta\""), "{ts}");
         assert!(ts.contains("z.enum([\"kind-a\"])"), "{ts}");
+        assert!(ts.contains("z.enum([\"beta\"])"), "{ts}");
         assert!(!ts.contains("tag: \"alpha\""), "{ts}");
         assert!(!ts.contains("z.enum([\"alpha\"])"), "{ts}");
     }
@@ -125,7 +127,10 @@ fn renamed_enum_discriminator_propagates_to_union_tags_across_targets() {
         let rs = render("rust", model_source);
         assert!(rs.contains("\"kind-a\" =>"), "{rs}");
         assert!(rs.contains("let tag = \"kind-a\""), "{rs}");
+        assert!(rs.contains("\"beta\" =>"), "{rs}");
+        assert!(rs.contains("let tag = \"beta\""), "{rs}");
         assert!(!rs.contains("\"alpha\" =>"), "{rs}");
+        assert!(!rs.contains("let tag = \"alpha\""), "{rs}");
     }
 
     #[cfg(feature = "gen-go")]
@@ -133,6 +138,9 @@ fn renamed_enum_discriminator_propagates_to_union_tags_across_targets() {
         let go = render("go", model_source);
         assert!(go.contains("tag: \"kind-a\""), "{go}");
         assert!(go.contains("case \"kind-a\":"), "{go}");
+        assert!(go.contains("tag: \"beta\""), "{go}");
+        assert!(go.contains("case \"beta\":"), "{go}");
+        assert!(!go.contains("tag: \"alpha\""), "{go}");
         assert!(!go.contains("case \"alpha\":"), "{go}");
     }
 }
@@ -163,8 +171,10 @@ fn renamed_enum_discriminator_propagates_to_version_adapters() {
             .map(|f| f.content())
             .collect::<Vec<_>>()
             .join("\n");
-        assert!(ts.contains("\"kind-a\""), "{ts}");
-        assert!(!ts.contains("case \"alpha\":"), "{ts}");
+        assert!(ts.contains("z.enum([\"kind-a\"])"), "{ts}");
+        assert!(ts.contains("case \"kind-a\":"), "{ts}");
+        assert!(ts.contains("case \"beta\":"), "{ts}");
+        assert!(!ts.contains("\"alpha\""), "{ts}");
     }
 
     #[cfg(feature = "gen-rust-axum-adapters")]
@@ -178,6 +188,7 @@ fn renamed_enum_discriminator_propagates_to_version_adapters() {
             .collect::<Vec<_>>()
             .join("\n");
         assert!(rs.contains("\"kind-a\""), "{rs}");
+        assert!(rs.contains("\"beta\""), "{rs}");
         assert!(!rs.contains("\"alpha\""), "{rs}");
     }
 }

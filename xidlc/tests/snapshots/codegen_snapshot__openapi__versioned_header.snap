@@ -26,13 +26,6 @@ openapi_versioned_header.v1.json
         ],
         "type": "object"
       },
-      "v1.ApiVersions": {
-        "enum": [
-          "2025-01",
-          "2025-06"
-        ],
-        "type": "string"
-      },
       "v1.Item": {
         "properties": {
           "id": {
@@ -267,13 +260,6 @@ openapi_versioned_header.v2.json
           "msg"
         ],
         "type": "object"
-      },
-      "v2.ApiVersions": {
-        "enum": [
-          "2025-01",
-          "2025-06"
-        ],
-        "type": "string"
       },
       "v2.Item": {
         "properties": {

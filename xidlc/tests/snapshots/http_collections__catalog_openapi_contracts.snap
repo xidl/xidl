@@ -24,13 +24,6 @@ expression: documents
           ],
           "type": "object"
         },
-        "v1.ApiVersion": {
-          "enum": [
-            "2026-07-01",
-            "2026-10-01"
-          ],
-          "type": "string"
-        },
         "v1.Denied": {
           "properties": {
             "reason": {
@@ -429,13 +422,6 @@ expression: documents
             "msg"
           ],
           "type": "object"
-        },
-        "v2.ApiVersion": {
-          "enum": [
-            "2026-07-01",
-            "2026-10-01"
-          ],
-          "type": "string"
         },
         "v2.Denied": {
           "properties": {

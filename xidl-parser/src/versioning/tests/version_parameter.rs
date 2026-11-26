@@ -140,3 +140,41 @@ fn version_headers_cannot_replace_http_transport_metadata() {
         );
     }
 }
+
+#[test]
+fn parameterized_version_enum_is_omitted_from_projections_and_cannot_be_referenced() {
+    let (spec, record) = analyze(
+        r#"
+        @version(in = "header", name = "X-Version")
+        enum Versions { v1, v2 };
+        struct Item { string id; };
+        "#,
+    );
+    for (id, _) in record.timeline().iter() {
+        let projected = record.project(&spec, id).expect("project version");
+        let rendered = crate::hir::printer::IdlPrinter::render(&projected);
+        assert!(
+            !rendered.contains("enum Versions"),
+            "version enum must not leak into projection:\n{rendered}"
+        );
+    }
+
+    let (bad_spec, bad_record) = analyze(
+        r#"
+        @version(in = "header", name = "X-Version")
+        enum Versions { v1, v2 };
+        struct Item { Versions v; };
+        "#,
+    );
+    let v1 = bad_record.resolve_version("v1").expect("resolve v1");
+    let err = bad_record
+        .project(&bad_spec, v1)
+        .expect_err("referencing parameterized version enum must fail");
+    assert!(
+        matches!(
+            err,
+            ParseError::Versioning(VersioningError::DanglingReference { .. })
+        ),
+        "{err}"
+    );
+}

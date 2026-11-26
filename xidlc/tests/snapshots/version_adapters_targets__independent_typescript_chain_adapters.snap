@@ -85,7 +85,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     return optional && entries.length === 0 ? undefined : Object.fromEntries(entries);
 }
 
-    const wireType2Schema: z.ZodType<types.v2026_06_01.Booking> = z.lazy(() =>
+    const wireType1Schema: z.ZodType<types.v2026_06_01.Booking> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -173,7 +173,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["booking"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType2Schema),
+            ["booking"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType1Schema),
         
     })).transform((value) => ({
         
@@ -212,7 +212,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType4Schema: z.ZodType<types.v2026_10_01.AgendaEntry> = z.lazy(() =>
+    const wireType3Schema: z.ZodType<types.v2026_10_01.AgendaEntry> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -249,7 +249,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType6Schema: z.ZodType<types.v2026_10_01.Booking> = z.lazy(() =>
+    const wireType4Schema: z.ZodType<types.v2026_10_01.Booking> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -294,7 +294,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["title"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["items"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType4Schema)),
+            ["items"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType3Schema)),
         
             ["roster"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(z.string())),
         
@@ -347,7 +347,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["booking"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType6Schema),
+            ["booking"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType4Schema),
         
     })).transform((value) => ({
         
@@ -386,7 +386,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType8Schema: z.ZodType<types.v2027_01_01.AgendaEntry> = z.lazy(() =>
+    const wireType6Schema: z.ZodType<types.v2027_01_01.AgendaEntry> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -423,7 +423,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType10Schema: z.ZodType<types.v2027_01_01.Booking> = z.lazy(() =>
+    const wireType7Schema: z.ZodType<types.v2027_01_01.Booking> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -464,7 +464,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["title"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["items"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType8Schema)),
+            ["items"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.array(wireType6Schema)),
         
             ["organizer"]: z.string().nullish().transform((value) => value ?? undefined),
         
@@ -511,7 +511,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["booking"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType10Schema),
+            ["booking"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType7Schema),
         
     })).transform((value) => ({
         
