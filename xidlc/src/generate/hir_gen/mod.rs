@@ -1,6 +1,6 @@
 use xidl_parser::hir::ParserProperties;
 use xidl_parser::parser::IncludeResolver;
-use xidl_parser::rest_hir::ProjectedHir;
+use xidl_parser::pipeline::{CompileOptions, Pipeline, ProjectedHir};
 use xidl_parser::versioning::{self, VersionedProjection};
 
 use crate::driver::lang::Plugin;
@@ -9,14 +9,15 @@ use crate::library::MOUNT_PROPERTY;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
+/// Built-in HIR stage compiling IDL source into projected IR artifacts.
 pub struct HirGen;
 
 impl crate::jsonrpc::Codegen for HirGen {
-    fn get_engine_version(&self) -> Result<String, crate::jsonrpc::RpcError> {
+    fn get_engine_version(&self) -> Result<String, RpcError> {
         Ok("*".to_string())
     }
 
-    fn get_properties(&self) -> Result<ParserProperties, crate::jsonrpc::RpcError> {
+    fn get_properties(&self) -> Result<ParserProperties, RpcError> {
         Ok(crate::macros::hashmap! {
             "enable_metadata" => true
         })
@@ -26,53 +27,48 @@ impl crate::jsonrpc::Codegen for HirGen {
         &self,
         _input_hir: crate::jsonrpc::CodegenInput,
         input: String,
-        props: ::xidl_parser::hir::ParserProperties,
-    ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
+        mut props: ParserProperties,
+    ) -> Result<Vec<Artifact>, RpcError> {
         let source = Self::required_string_prop(&props, "idl")?;
         let target_lang = Self::required_string_prop(&props, "target_lang")?;
-
         let mut resolver = include_resolver(&props);
-        let typed =
-            xidl_parser::parser::parser_text_with_resolver(&source, Some(&input), &mut *resolver)
-                .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
+
         if Self::is_version_map_target(&target_lang) {
-            let version_map = Self::build_version_map(&source, &input, &props)?;
+            let options = CompileOptions::new(&input, props).with_version_map(true);
+            let version_map = Pipeline::build_version_map(&source, options, &mut *resolver)
+                .map_err(|err| RpcError::new(err.to_string()))?;
             let Some(version_map) = version_map.as_ref() else {
-                return Err(crate::jsonrpc::RpcError::new(
-                    "xidlc version-map requires a @version enum",
-                ));
+                return Err(RpcError::new("xidlc version-map requires a @version enum"));
             };
             let file_name = std::path::Path::new(&input)
                 .file_stem()
                 .and_then(|name| name.to_str())
                 .unwrap_or("api");
             let content = xidl_parser::versioning::map::to_json(version_map)
-                .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
+                .map_err(|err| RpcError::new(err.to_string()))?;
             return Ok(vec![Artifact::new_file(ArtifactFile {
                 path: format!("{file_name}.version-map.json"),
                 content,
             })]);
         }
-        // The same resolver reads the units a versioned include names.
-        let projections =
-            xidl_parser::hir::Specification::project_typed_ast_versions_with_resolver(
-                typed,
-                props.clone(),
-                std::path::Path::new(&input),
-                &mut *resolver,
-            )
-            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
-        let version_map = Self::build_version_map(&source, &input, &props)?;
-        let mut props = props;
-        if let Some(version_map) = version_map {
+
+        let include_http_operations = matches!(
+            props.get("hir_kind").and_then(serde_json::Value::as_str),
+            Some(value) if value.eq_ignore_ascii_case("http")
+        );
+        let options =
+            CompileOptions::new(&input, props.clone()).with_version_map(include_http_operations);
+        let compiled = Pipeline::compile_source(&source, options, &mut *resolver)
+            .map_err(|err| RpcError::new(err.to_string()))?;
+
+        if let Some(version_map) = compiled.version_map {
             props.insert(
                 "version_map".to_string(),
-                serde_json::to_value(version_map)
-                    .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?,
+                serde_json::to_value(version_map).map_err(|err| RpcError::new(err.to_string()))?,
             );
         }
         let mut artifacts = Vec::new();
-        for projection in projections {
+        for projection in compiled.projections {
             let props = projection_properties(props.clone(), &projection);
             artifacts.push(projection_artifact(
                 projection,
@@ -97,48 +93,6 @@ impl HirGen {
 
     fn is_version_map_target(target_lang: &str) -> bool {
         Plugin::from(target_lang) == Plugin::VersionMap
-    }
-
-    fn build_version_map(
-        source: &str,
-        input: &str,
-        props: &ParserProperties,
-    ) -> Result<Option<xidl_parser::versioning::map::VersionMap>, crate::jsonrpc::RpcError> {
-        let mut map_resolver = include_resolver(props);
-        let map_spec = xidl_parser::hir::Specification::source_from_typed_ast_with_resolver(
-            xidl_parser::parser::parser_text_with_resolver(source, Some(input), &mut *map_resolver)
-                .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?,
-            std::path::Path::new(input),
-            &mut *map_resolver,
-        )
-        .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?;
-        let Some(record) = xidl_parser::versioning::VersioningRecord::analyze(&map_spec)
-            .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?
-        else {
-            return Ok(None);
-        };
-        let contract = std::path::Path::new(input)
-            .file_name()
-            .and_then(|name| name.to_str())
-            .unwrap_or(input);
-        xidl_parser::versioning::map::from_spec_with_http(
-            &map_spec,
-            &record,
-            xidl_parser::versioning::map::MapOptions {
-                contract: contract.to_owned(),
-                integer_imports: xidl_parser::semantic::IntegerImports::from_properties(props)
-                    .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))?,
-                include_http_operations: matches!(
-                    props.get("hir_kind").and_then(serde_json::Value::as_str),
-                    Some(value) if value.eq_ignore_ascii_case("http")
-                ) || matches!(
-                    props.get("target_lang").and_then(serde_json::Value::as_str),
-                    Some("version-map" | "version_map")
-                ),
-            },
-        )
-        .map(Some)
-        .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))
     }
 }
 
@@ -182,7 +136,7 @@ fn projection_artifact(
     target_lang: &str,
     input: &str,
     props: ParserProperties,
-) -> Result<Artifact, crate::jsonrpc::RpcError> {
+) -> Result<Artifact, RpcError> {
     let plugin = Plugin::from(target_lang);
     Ok(match projection.hir {
         ProjectedHir::Rpc(hir) => {

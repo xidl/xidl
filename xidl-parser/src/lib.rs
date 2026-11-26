@@ -1,3 +1,4 @@
+pub mod diagnostic;
 pub mod error;
 pub mod manifest;
 pub mod parser;
@@ -7,6 +8,7 @@ pub mod typed_ast;
 pub mod hir;
 pub mod jsonrpc_hir;
 pub mod lint;
+pub mod pipeline;
 pub mod rest_hir;
 pub mod versioning;
 

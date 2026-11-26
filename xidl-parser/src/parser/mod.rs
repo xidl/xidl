@@ -1,6 +1,9 @@
 mod doc_comments;
+mod include;
 mod normalize;
 pub(crate) mod raw;
+
+pub use include::split_version_selector;
 
 use crate::error::ParserResult;
 use std::collections::{HashMap, HashSet};
@@ -86,7 +89,9 @@ pub fn parser_text_with_resolver(
     use crate::typed_ast::Specification;
 
     let mut parser = tree_sitter::Parser::new();
-    parser.set_language(&tree_sitter_idl::language()).unwrap();
+    parser
+        .set_language(&tree_sitter_idl::language())
+        .map_err(|err| crate::error::ParseError::TreeSitterError(format!("xidl parser: {err}")))?;
 
     let mut source = text.to_string();
     let mut tree_source = normalize::source(text).into_owned();
@@ -113,6 +118,10 @@ pub fn parser_text_with_resolver(
 
     let root_node = tree.root_node();
     if root_node.has_error() {
+        let diagnostics = crate::diagnostic::SyntaxPass::collect_tree(&tree, &source);
+        if !diagnostics.is_empty() {
+            return Err(crate::error::ParseError::Diagnostics(diagnostics));
+        }
         return Err(crate::error::ParseError::TreeSitterError(
             "Failed to parse text".to_string(),
         ));
@@ -154,7 +163,7 @@ fn expand_includes(
 
         // A versioned include is spliced while the HIR is lowered: the version
         // projection only exists there, so the directive stays in the tree.
-        if crate::hir::split_version_selector(&path_str).1.is_some() {
+        if split_version_selector(&path_str).1.is_some() {
             search_start = node_end;
             continue;
         }

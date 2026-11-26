@@ -1,8 +1,10 @@
 use std::path::PathBuf;
 
 use clap::{Args, ValueEnum};
-use xidl_parser::lint::{Diagnostic, Severity};
+use xidl_parser::diagnostic::Severity;
+use xidl_parser::error::ParseError;
 
+use crate::diagnostic::DiagnosticDisplay;
 use crate::error::{IdlcError, IdlcResult};
 
 #[derive(Debug, Args)]
@@ -35,6 +37,13 @@ impl ArgsLint {
             };
             let ast = match xidl_parser::parser::parser_text(&source) {
                 Ok(ast) => ast,
+                Err(ParseError::Diagnostics(diagnostics)) => {
+                    for diagnostic in &diagnostics {
+                        DiagnosticDisplay::new(&filename, &source, diagnostic).print();
+                    }
+                    failed = true;
+                    continue;
+                }
                 Err(error) => {
                     eprintln!("{filename}: {error}");
                     failed = true;
@@ -43,49 +52,13 @@ impl ArgsLint {
             };
             for diagnostic in xidl_parser::lint::lint(&ast) {
                 failed |= diagnostic.severity == Severity::Error || self.deny.is_some();
-                LintDisplay {
-                    filename: &filename,
-                    source: &source,
-                    diagnostic: &diagnostic,
-                }
-                .print();
+                DiagnosticDisplay::new(&filename, &source, &diagnostic).print();
             }
         }
         if failed {
             Err(IdlcError::LintFailed)
         } else {
             Ok(())
-        }
-    }
-}
-
-struct LintDisplay<'a> {
-    filename: &'a str,
-    source: &'a str,
-    diagnostic: &'a Diagnostic,
-}
-
-impl LintDisplay<'_> {
-    fn print(&self) {
-        let diagnostic = self.diagnostic;
-        let prefix = &self.source[..diagnostic.span.start];
-        let line = prefix.bytes().filter(|byte| *byte == b'\n').count() + 1;
-        let column = prefix
-            .rsplit('\n')
-            .next()
-            .map_or(1, |line| line.chars().count() + 1);
-        let severity = match diagnostic.severity {
-            Severity::Error => "error",
-            Severity::Warning => "warning",
-        };
-        eprintln!(
-            "{}:{line}:{column}: {severity}[{}]: {}",
-            self.filename,
-            diagnostic.code.as_str(),
-            diagnostic.message
-        );
-        if let Some(suggestion) = &diagnostic.suggestion {
-            eprintln!("  did you mean `@{suggestion}`?");
         }
     }
 }

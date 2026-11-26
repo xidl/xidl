@@ -19,7 +19,6 @@ mod spec;
 mod struct_dcl;
 mod type_dcl;
 mod types;
-mod versioned_include;
 
 pub use annotation::*;
 pub use compound::*;
@@ -30,6 +29,7 @@ pub use enum_dcl::*;
 pub use exception_dcl::*;
 pub use expr::*;
 pub use include::*;
+pub(crate) use include::{NoopVersionedIncludes, VersionedIncludeExpander};
 pub use integer::*;
 pub use interface::*;
 pub use pragma::*;
@@ -38,7 +38,6 @@ pub use scoped_name::*;
 pub use struct_dcl::*;
 pub use type_dcl::*;
 pub use types::*;
-pub(crate) use versioned_include::VersionedIncludes;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

@@ -9,124 +9,74 @@ mod highlight;
 pub use highlight::TreeSitterMietteHighlighter;
 
 use crate::error::{DiagnosticError, IdlcError, IdlcResult};
-use tree_sitter::{Language, Parser, Query, QueryCursor, StreamingIterator, Tree};
+use xidl_parser::diagnostic::{Diagnostic, Severity, SyntaxPass};
 
-const IDL_ERROR_QUERY: &str = "[(ERROR) (MISSING)] @error";
-
-/// Runner for tree-sitter diagnostics.
-pub struct DiagnosticRunner {
-    language: Language,
-    label: &'static str,
-}
-
-struct SpanLabel {
-    offset: usize,
-    len: usize,
-    label: String,
-}
+/// Runner for IDL syntax diagnostics backed by [`SyntaxPass`].
+pub struct DiagnosticRunner;
 
 impl DiagnosticRunner {
-    /// Create a runner for IDL.
+    /// Creates a runner for IDL syntax diagnostics.
     pub fn new_idl() -> Self {
-        Self {
-            language: tree_sitter_idl::language(),
-            label: "idl",
-        }
+        Self
     }
 
-    /// Parse and validate source, returning diagnostics on error.
+    /// Runs the parser's [`SyntaxPass`] on `source`, returning miette-ready diagnostics on error.
     pub fn run(&self, source: &str, filename: &str) -> IdlcResult<()> {
-        let tree = self.parse(source)?;
-        self.ensure_tree(tree, source, filename)
-    }
-
-    fn parse(&self, source: &str) -> IdlcResult<Tree> {
-        let mut parser = Parser::new();
-        parser
-            .set_language(&self.language)
-            .map_err(|err| IdlcError::fmt(format!("set {} language: {err}", self.label)))?;
-        let normalized = if self.label == "idl" {
-            xidl_parser::parser::normalize_source_for_tree_sitter(source)
-        } else {
-            std::borrow::Cow::Borrowed(source)
-        };
-
-        parser
-            .parse(normalized.as_ref(), None)
-            .ok_or_else(|| IdlcError::fmt(format!("failed to parse {}", self.label)))
-    }
-
-    fn ensure_tree(&self, tree: Tree, source: &str, filename: &str) -> IdlcResult<()> {
-        let root = tree.root_node();
-        let mut labels = self.collect_error_labels(root, source);
-
-        if !labels.is_empty() {
-            labels.sort_by_key(|label| (label.offset, label.len));
-            labels.dedup_by_key(|label| (label.offset, label.len));
-
-            let diagnostics = labels
-                .into_iter()
-                .map(|label| {
-                    DiagnosticError::from_span(
-                        filename,
-                        source,
-                        label.offset,
-                        label.len,
-                        label.label,
-                    )
-                })
-                .collect();
-            return Err(IdlcError::diagnostics(diagnostics));
+        let diagnostics = SyntaxPass::check_source(source)?;
+        if diagnostics.is_empty() {
+            return Ok(());
         }
+        let errors = diagnostics
+            .into_iter()
+            .map(|diagnostic| {
+                let offset = diagnostic.span.start;
+                let len = diagnostic.span.end.saturating_sub(offset);
+                DiagnosticError::from_span(filename, source, offset, len, diagnostic.message)
+            })
+            .collect();
+        Err(IdlcError::diagnostics(errors))
+    }
+}
 
-        Ok(())
+/// Formats [`Diagnostic`] items consistently across CLI commands.
+pub struct DiagnosticDisplay<'a> {
+    filename: &'a str,
+    source: &'a str,
+    diagnostic: &'a Diagnostic,
+}
+
+impl<'a> DiagnosticDisplay<'a> {
+    /// Creates a display formatter for one source-located diagnostic.
+    pub fn new(filename: &'a str, source: &'a str, diagnostic: &'a Diagnostic) -> Self {
+        Self {
+            filename,
+            source,
+            diagnostic,
+        }
     }
 
-    fn collect_error_labels(&self, root: tree_sitter::Node<'_>, source: &str) -> Vec<SpanLabel> {
-        let Ok(query) = Query::new(&self.language, IDL_ERROR_QUERY) else {
-            return vec![];
+    /// Prints this diagnostic to stderr with line/column location and suggestion.
+    pub fn print(&self) {
+        let diagnostic = self.diagnostic;
+        let offset = diagnostic.span.start.min(self.source.len());
+        let prefix = &self.source[..offset];
+        let line = prefix.bytes().filter(|byte| *byte == b'\n').count() + 1;
+        let column = prefix
+            .rsplit('\n')
+            .next()
+            .map_or(1, |line| line.chars().count() + 1);
+        let severity = match diagnostic.severity {
+            Severity::Error => "error",
+            Severity::Warning => "warning",
         };
-
-        let mut cursor = QueryCursor::new();
-        let mut matches = cursor.matches(&query, root, source.as_bytes());
-        let mut labels = vec![];
-
-        while let Some(matched) = matches.next() {
-            for capture in matched.captures {
-                let node = capture.node;
-                let start = node.start_byte();
-                let mut len = node.end_byte().saturating_sub(start);
-                let mut offset = start;
-                if len == 0 {
-                    if source.is_empty() {
-                        offset = 0;
-                        len = 0;
-                    } else if start >= source.len() {
-                        offset = source.len().saturating_sub(1);
-                        len = 1;
-                    } else {
-                        len = 1;
-                    }
-                }
-
-                let message = if node.is_missing() {
-                    let missing = node
-                        .utf8_text(source.as_bytes())
-                        .ok()
-                        .filter(|text| !text.trim().is_empty())
-                        .unwrap_or(node.kind());
-                    format!("missing {missing}")
-                } else {
-                    "syntax error".to_string()
-                };
-                labels.push(SpanLabel {
-                    offset,
-                    len,
-                    label: message,
-                });
-            }
+        eprintln!(
+            "{}:{line}:{column}: {severity}[{}]: {}",
+            self.filename,
+            diagnostic.code.as_str(),
+            diagnostic.message
+        );
+        if let Some(suggestion) = &diagnostic.suggestion {
+            eprintln!("  did you mean `@{suggestion}`?");
         }
-
-        labels
     }
 }
