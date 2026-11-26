@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.113.0](https://github.com/xidl/xidl/compare/v0.112.0...v0.113.0) (2026-11-26)
+
+
+### Features
+
+* **xidl-parser:** add layered diagnostic passes and compilation pipeline ([75438c3](https://github.com/xidl/xidl/commit/75438c39833fa5b7c4874e349b4b597c78e6953a)), closes [#500](https://github.com/xidl/xidl/issues/500) [#501](https://github.com/xidl/xidl/issues/501)
+* **xidl-parser:** collect multi-error semantic, versioning, and protocol diagnostics ([0c3d1b9](https://github.com/xidl/xidl/commit/0c3d1b997468680a7961a92791047183442576f7))
+
+
+### Bug Fixes
+
+* **typescript-server:** preserve raw wire bodies in adapted router ([23b6c6e](https://github.com/xidl/xidl/commit/23b6c6edda4d2967247bc276eeccf66e44a0eb80))
+* **xidl-parser:** omit parameterized version enums from projections ([1f54012](https://github.com/xidl/xidl/commit/1f54012259267e680e5587bd11865deb7f113781))
+* **xidlc:** align typescript-rest template ownership and shared HIR annotation helpers ([3920b6e](https://github.com/xidl/xidl/commit/3920b6e95b0b2b34f160169d4d44188601e5b2aa)), closes [#502](https://github.com/xidl/xidl/issues/502)
+* **xidlc:** register jsonrpc-hir plugin and replace panicking IPC accessors ([b0c5066](https://github.com/xidl/xidl/commit/b0c506699afa2c1e91f69947ad7b149d73580340)), closes [#498](https://github.com/xidl/xidl/issues/498) [#499](https://github.com/xidl/xidl/issues/499)
+* **xidlc:** remove unused root OpenAPI traits and sync adapter feature flags ([f97d38d](https://github.com/xidl/xidl/commit/f97d38d5984aef98cc60bdc6ca27df4138f5b9d8)), closes [#505](https://github.com/xidl/xidl/issues/505)
+* **xidlc:** use crown for version lock hashing and track imported units ([bdc60d0](https://github.com/xidl/xidl/commit/bdc60d0cae46ae2c264e8857c11c59dae671db4f))
+
 ## [0.112.0](https://github.com/xidl/xidl/compare/v0.111.0...v0.112.0) (2026-11-26)
 
 
