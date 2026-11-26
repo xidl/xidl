@@ -16,6 +16,9 @@ pub(crate) struct UnionCaseLabels<'a> {
 
 #[cfg(test)]
 mod tests;
+mod wire_tags;
+
+pub(crate) use wire_tags::UnionWireTags;
 
 impl<'a> UnionCaseLabels<'a> {
     /// Rejects bare enumerators while preserving references to declared constants.

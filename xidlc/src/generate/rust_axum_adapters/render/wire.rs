@@ -305,8 +305,8 @@ impl WireBuilder<'_> {
                         })
                         .ok_or_else(|| Layout::error(key, "union wire case has no public label"))?;
                     let name = self.renderer.union_case_name(case, is_http)?;
-                    for label in &case.label {
-                        let tag = UnionWire::label(label);
+                    for (label_index, label) in case.label.iter().enumerate() {
+                        let tag = UnionWire::case_label(case, label_index, label);
                         definition.fields.push(WireField {
                             name: name.clone(),
                             wire: tag,

@@ -65,3 +65,119 @@ fn documented_union_uses_qualified_labels_and_struct_payloads() {
         .join("\n");
     insta::assert_snapshot!("documented_color_point", output);
 }
+
+#[test]
+fn renamed_enum_discriminator_propagates_to_union_tags_across_targets() {
+    let model_source = r#"
+        enum Kind { @rename("kind-a") alpha, beta };
+        struct A { string x; };
+        union U switch (Kind) {
+            case Kind::alpha: A first;
+            case Kind::beta: @rename("second-wire") A second;
+        };
+        struct Holder { U u; Kind k; };
+    "#;
+    let http_source =
+        format!("{model_source}\ninterface Api {{ @get(path = \"/holder\") Holder get(); }};");
+
+    let render = |target: &str, source: &str| {
+        xidlc::driver::Generator::new(target.into())
+            .generate_from_idl(source, Path::new("t.idl"), HashMap::new())
+            .unwrap_or_else(|error| panic!("{target} failed: {error}"))
+            .into_iter()
+            .map(|file| file.content().to_string())
+            .collect::<Vec<_>>()
+            .join("\n")
+    };
+
+    #[cfg(feature = "gen-typescript")]
+    {
+        let ts = render("typescript", model_source);
+        assert!(ts.contains("\"kind-a\" | \"beta\""), "{ts}");
+        assert!(ts.contains("tag: \"kind-a\""), "{ts}");
+        assert!(ts.contains("z.enum([\"kind-a\"])"), "{ts}");
+        assert!(!ts.contains("tag: \"alpha\""), "{ts}");
+        assert!(!ts.contains("z.enum([\"alpha\"])"), "{ts}");
+    }
+
+    #[cfg(feature = "gen-openapi")]
+    {
+        let oa = render("openapi", &http_source);
+        let doc: serde_json::Value = serde_json::from_str(&oa).expect("valid openapi json");
+        let schemas = &doc["components"]["schemas"];
+        assert_eq!(
+            schemas["Kind"]["enum"],
+            serde_json::json!(["kind-a", "beta"])
+        );
+        let branches = schemas["U"]["oneOf"].as_array().expect("U oneOf");
+        assert_eq!(
+            branches[0]["properties"]["tag"]["enum"],
+            serde_json::json!(["kind-a"])
+        );
+        assert_eq!(
+            branches[1]["properties"]["tag"]["enum"],
+            serde_json::json!(["beta"])
+        );
+    }
+
+    #[cfg(feature = "gen-rust")]
+    {
+        let rs = render("rust", model_source);
+        assert!(rs.contains("\"kind-a\" =>"), "{rs}");
+        assert!(rs.contains("let tag = \"kind-a\""), "{rs}");
+        assert!(!rs.contains("\"alpha\" =>"), "{rs}");
+    }
+
+    #[cfg(feature = "gen-go")]
+    {
+        let go = render("go", model_source);
+        assert!(go.contains("tag: \"kind-a\""), "{go}");
+        assert!(go.contains("case \"kind-a\":"), "{go}");
+        assert!(!go.contains("case \"alpha\":"), "{go}");
+    }
+}
+
+#[test]
+fn renamed_enum_discriminator_propagates_to_version_adapters() {
+    let source = r#"
+        @version enum V { v1, v2 };
+        enum Kind { @rename("kind-a") alpha, beta };
+        struct A { string x; @added(V::v2) @optional string y; };
+        union U switch (Kind) {
+            case Kind::alpha: A first;
+            case Kind::beta: A second;
+        };
+        interface Api {
+            @post(path = "/submit")
+            U submit(U value);
+        };
+    "#;
+
+    #[cfg(feature = "gen-typescript-rest-adapters")]
+    {
+        let files = xidlc::driver::Generator::new("typescript-rest-adapters".into())
+            .generate_from_idl(source, Path::new("t.idl"), HashMap::new())
+            .expect("ts adapters");
+        let ts = files
+            .iter()
+            .map(|f| f.content())
+            .collect::<Vec<_>>()
+            .join("\n");
+        assert!(ts.contains("\"kind-a\""), "{ts}");
+        assert!(!ts.contains("case \"alpha\":"), "{ts}");
+    }
+
+    #[cfg(feature = "gen-rust-axum-adapters")]
+    {
+        let files = xidlc::driver::Generator::new("rust-axum-adapters".into())
+            .generate_from_idl(source, Path::new("t.idl"), HashMap::new())
+            .expect("rust adapters");
+        let rs = files
+            .iter()
+            .map(|f| f.content())
+            .collect::<Vec<_>>()
+            .join("\n");
+        assert!(rs.contains("\"kind-a\""), "{rs}");
+        assert!(!rs.contains("\"alpha\""), "{rs}");
+    }
+}
