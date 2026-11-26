@@ -1,0 +1,34 @@
+func Register{{ interface_name }}Handler(r gin.IRouter, svc {{ interface_name }}Service) {
+{%- for route in routes %}
+{%- if route.cors_mw %}
+	r.OPTIONS("{{ route.pattern }}", {{ route.cors_mw }})
+	r.{{ route.gin_method }}("{{ route.pattern }}", {{ route.cors_mw }}, func(c *gin.Context) {
+{%- else %}
+	r.{{ route.gin_method }}("{{ route.pattern }}", func(c *gin.Context) {
+{%- endif %}
+{%- if route.version_header %}
+		c.Header({{ route.version_header.name | tojson }}, {{ route.version_header.value | tojson }})
+{%- endif %}
+{%- if route.accept_check %}
+		if err := xidlgohttp.GinRequireAccept(c, "{{ route.accept_check }}"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusNotAcceptable, http.StatusNotAcceptable, err.Error())
+			return
+		}
+{%- endif %}
+{%- if route.has_security %}
+		ctx, err := xidlgohttp.RequireAuth(c.Request, {{ route.struct_prefix }}SecurityRequirements())
+		if err != nil {
+			xidlgohttp.Unauthorized(c.Writer, {{ route.struct_prefix }}SecurityRequirements())
+			return
+		}
+		c.Request = c.Request.WithContext(ctx)
+{%- endif %}
+{%- if route.content_type_check %}
+		if err := xidlgohttp.GinRequireContentType(c, "{{ route.content_type_check }}"); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusUnsupportedMediaType, http.StatusUnsupportedMediaType, err.Error())
+			return
+		}
+{%- endif %}
+{{ route.binding }}{{ route.handler }}	})
+{%- endfor %}
+}

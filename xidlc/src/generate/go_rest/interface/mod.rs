@@ -12,7 +12,7 @@ pub(crate) use exceptions::ExceptionContext;
 
 use crate::error::IdlcResult;
 use crate::generate::go_rest::{GoRestRenderBlocks, MethodMeta};
-use std::fmt::Write;
+use serde::Serialize;
 use xidl_parser::hir;
 use xidl_parser::rest_hir::HttpOperationSource;
 
@@ -21,6 +21,17 @@ use interface_client::render_client;
 pub(crate) use interface_meta::build_method_meta;
 use interface_server::render_server;
 use interface_types::render_method_types;
+
+#[derive(Serialize)]
+struct ServiceInterfaceTemplate<'a> {
+    interface_name: &'a str,
+    methods: Vec<ServiceMethodTemplate>,
+}
+
+#[derive(Serialize)]
+struct ServiceMethodTemplate {
+    signature: String,
+}
 
 pub(crate) fn render_interface(
     interface: &hir::InterfaceDcl,
@@ -62,13 +73,19 @@ pub(crate) fn render_interface(
         ..Default::default()
     };
 
-    let mut server = String::new();
-    writeln!(server, "type {interface_name}Service interface {{").unwrap();
-    for method in &methods {
-        render_service_method(&mut server, method);
-    }
-    writeln!(server, "}}").unwrap();
-    writeln!(server).unwrap();
+    let mut server = context.renderer.render_template(
+        "service_interface.go.j2",
+        &ServiceInterfaceTemplate {
+            interface_name: &interface_name,
+            methods: methods
+                .iter()
+                .map(|method| ServiceMethodTemplate {
+                    signature: service_method_signature(method),
+                })
+                .collect(),
+        },
+    )?;
+    server.push_str("\n\n");
     render_server(&mut server, &interface_name, &methods, context.renderer)?;
     blocks.push_server(server);
 
@@ -87,27 +104,21 @@ pub(crate) fn render_interface(
     Ok(blocks)
 }
 
-fn render_service_method(out: &mut String, method: &MethodMeta) {
+fn service_method_signature(method: &MethodMeta) -> String {
     use xidl_parser::rest_hir::semantics::HttpStreamKind;
 
     match method.stream_kind {
-        Some(HttpStreamKind::Server) => writeln!(
-            out,
-            "\t{}(ctx context.Context, req *{}, stream xidlgohttp.ServerStreamWriter[{}]) error",
-            method.method_name,
-            method.request_struct,
-            method
-                .return_ty
-                .clone()
-                .unwrap_or_else(|| "string".to_string())
-        )
-        .unwrap(),
-        Some(HttpStreamKind::Client) => writeln!(
-            out,
-            "\t{}(ctx context.Context, stream *xidlgohttp.ClientStreamReader[{}]) (*{}, error)",
+        Some(HttpStreamKind::Server) => {
+            let item = method.return_ty.as_deref().unwrap_or("string");
+            format!(
+                "{}(ctx context.Context, req *{}, stream xidlgohttp.ServerStreamWriter[{item}]) error",
+                method.method_name, method.request_struct
+            )
+        }
+        Some(HttpStreamKind::Client) => format!(
+            "{}(ctx context.Context, stream *xidlgohttp.ClientStreamReader[{}]) (*{}, error)",
             method.method_name, method.request_struct, method.response_struct
-        )
-        .unwrap(),
+        ),
         Some(HttpStreamKind::Bidi) => {
             let mut args = format!(
                 "ctx context.Context, stream *xidlgohttp.WSBidiStream[{}, {}]",
@@ -119,19 +130,13 @@ fn render_service_method(out: &mut String, method: &MethodMeta) {
                 } else {
                     param.ty.clone()
                 };
-                args.push_str(&format!(
-                    ", {} {}",
-                    param.field_name.to_ascii_lowercase(),
-                    ty
-                ));
+                args.push_str(&format!(", {} {ty}", param.field_name.to_ascii_lowercase()));
             }
-            writeln!(out, "\t{}({}) error", method.method_name, args).unwrap()
+            format!("{}({args}) error", method.method_name)
         }
-        None => writeln!(
-            out,
-            "\t{}(ctx context.Context, req *{}) (*{}, error)",
+        None => format!(
+            "{}(ctx context.Context, req *{}) (*{}, error)",
             method.method_name, method.request_struct, method.response_struct
-        )
-        .unwrap(),
+        ),
     }
 }

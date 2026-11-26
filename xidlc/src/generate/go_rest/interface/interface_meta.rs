@@ -256,8 +256,12 @@ fn build_param_meta(op: &HttpOperation, p: &HttpSignatureParam, scope: GoScope<'
         } else {
             match &op.http.request.body.shape {
                 HttpRequestBodyShape::Object { fields } => {
-                    let f = fields.iter().find(|f| f.source_param == name).unwrap();
-                    (ParamSource::Body, f.field_name.clone())
+                    let wire = fields
+                        .iter()
+                        .find(|f| f.source_param == name)
+                        .map(|f| f.field_name.clone())
+                        .unwrap_or_else(|| name.to_string());
+                    (ParamSource::Body, wire)
                 }
                 HttpRequestBodyShape::SingleValue {
                     source_param: _, ..
