@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 
+use crate::diagnostic::{Diagnostic, DiagnosticBag, DiagnosticCode};
 use crate::error::ParserResult;
 use crate::hir;
 
@@ -35,6 +36,40 @@ pub(super) fn project_attr(
             module_path,
             user_ops,
         ),
+    }
+}
+
+/// Collects all attribute-vs-operation naming collisions for `attr` into `bag`.
+pub(super) fn collect_attr_diagnostics(
+    attr: &hir::AttrDcl,
+    interface_path: &str,
+    user_ops: &HashSet<&str>,
+    bag: &mut DiagnosticBag,
+) {
+    match &attr.decl {
+        hir::AttrDclInner::ReadonlyAttrSpec(spec) => {
+            for decl in readonly_names(spec) {
+                let getter = format!("get_attribute_{decl}");
+                if let Err(err) = validate_attr_collision(user_ops, &decl, &getter, "") {
+                    bag.push(
+                        Diagnostic::error(DiagnosticCode::ProtocolError, 0..0, err.to_string())
+                            .with_location(format!("{interface_path}::{decl}")),
+                    );
+                }
+            }
+        }
+        hir::AttrDclInner::AttrSpec(spec) => {
+            for decl in attr_names(spec) {
+                let getter = format!("get_attribute_{decl}");
+                let setter = format!("set_attribute_{decl}");
+                if let Err(err) = validate_attr_collision(user_ops, &decl, &getter, &setter) {
+                    bag.push(
+                        Diagnostic::error(DiagnosticCode::ProtocolError, 0..0, err.to_string())
+                            .with_location(format!("{interface_path}::{decl}")),
+                    );
+                }
+            }
+        }
     }
 }
 

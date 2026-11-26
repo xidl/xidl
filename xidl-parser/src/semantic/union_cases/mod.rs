@@ -1,6 +1,6 @@
 //! Validates symbolic union labels without changing their source spelling.
 
-use crate::error::{ParseError, ParserResult};
+use crate::diagnostic::{Diagnostic, DiagnosticBag, DiagnosticCode};
 use crate::hir::{
     CaseLabel, ConstExpr, ConstrTypeDcl, Definition, ElementSpecTy, Export, InterfaceDclInner,
     ScopedName, TypeDcl, TypedefType, UnionDef,
@@ -21,14 +21,13 @@ mod wire_tags;
 pub(crate) use wire_tags::UnionWireTags;
 
 impl<'a> UnionCaseLabels<'a> {
-    /// Rejects bare enumerators while preserving references to declared constants.
-    pub(crate) fn validate(definitions: &'a [Definition]) -> ParserResult<()> {
+    /// Collects all unqualified bare enumerator union labels into `bag`.
+    pub(crate) fn collect_diagnostics(definitions: &'a [Definition], bag: &mut DiagnosticBag) {
         let mut labels = Self::default();
         labels.collect(definitions, &[]);
         for (scope, union) in &labels.unions {
-            labels.check_union(union, scope)?;
+            labels.check_union(union, scope, bag);
         }
-        Ok(())
     }
 
     fn collect(&mut self, definitions: &'a [Definition], scope: &[String]) {
@@ -91,22 +90,28 @@ impl<'a> UnionCaseLabels<'a> {
         }
     }
 
-    fn check_union(&self, union: &UnionDef, scope: &[String]) -> ParserResult<()> {
+    fn check_union(&self, union: &UnionDef, scope: &[String], bag: &mut DiagnosticBag) {
+        let union_path = Self::path(scope, &union.ident).join("::");
         for case in &union.case {
             for label in &case.label {
                 let CaseLabel::Value(ConstExpr::ScopedName(name)) = label else {
                     continue;
                 };
                 if name.name.len() < 2 && !self.is_constant(name, scope) {
-                    return Err(ParseError::Message(format!(
-                        "union '{}': case label '{}' must be qualified as Enum::member",
-                        Self::path(scope, &union.ident).join("::"),
-                        name.name.join("::"),
-                    )));
+                    bag.push(
+                        Diagnostic::error(
+                            DiagnosticCode::SemanticError,
+                            0..0,
+                            format!(
+                                "union '{union_path}': case label '{}' must be qualified as Enum::member",
+                                name.name.join("::"),
+                            ),
+                        )
+                        .with_location(union_path.clone()),
+                    );
                 }
             }
         }
-        Ok(())
     }
 
     fn is_constant(&self, name: &ScopedName, scope: &[String]) -> bool {

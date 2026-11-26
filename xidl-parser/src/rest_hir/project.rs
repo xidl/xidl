@@ -210,7 +210,7 @@ fn project_interface(
     }))
 }
 
-fn project_operation(
+pub(super) fn project_operation(
     interface_name: &str,
     module_path: &[String],
     interface_annotations: &[hir::Annotation],

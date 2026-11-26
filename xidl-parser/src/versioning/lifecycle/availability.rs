@@ -1,9 +1,10 @@
 //! Availability intervals derived from `@added` and `@removed`.
 
-use super::super::VersioningError;
 use super::super::timeline::{VersionId, VersionTimeline};
+use super::super::{VersioningDiagnostic, VersioningError};
+pub(crate) use super::site::{Availability, Site, SiteKind, VersionVisitor};
 use crate::error::ParserResult;
-use crate::hir::{Annotation, Enumerator, ScopedName};
+use crate::hir::{Annotation, ScopedName};
 use crate::lint::AnnotationKind;
 
 /// Rejected versioning annotations, rather than promises of future syntax.
@@ -18,143 +19,183 @@ pub(super) const UNSUPPORTED_ANNOTATIONS: [&str; 8] = [
     "defaultversion",
 ];
 
-/// Half-open interval `[from, until)` over the timeline.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) struct Availability {
-    pub(crate) from: usize,
-    pub(crate) until: usize,
+fn push_diag(errors: &mut Vec<VersioningDiagnostic>, location: &str, error: VersioningError) {
+    errors.push(VersioningDiagnostic {
+        location: location.to_string(),
+        error,
+    });
 }
 
-impl Availability {
-    pub(crate) fn full() -> Self {
-        Self {
-            from: 0,
-            until: usize::MAX,
+struct LifecycleSlot<'a> {
+    label: &'static str,
+    version: &'a mut Option<VersionId>,
+    name: &'a mut String,
+}
+
+fn apply_lifecycle_ref(
+    site: &Site<'_>,
+    reference: &ScopedName,
+    slot: LifecycleSlot<'_>,
+    timeline: &VersionTimeline,
+    errors: &mut Vec<VersioningDiagnostic>,
+) -> bool {
+    if slot.version.is_some() {
+        push_diag(
+            errors,
+            &site.path,
+            VersioningError::DuplicateLifecycleAnnotation {
+                annotation: slot.label.to_string(),
+                decl: site.path.clone(),
+            },
+        );
+        return false;
+    }
+    match resolve_reference(timeline, slot.label, &site.path, reference) {
+        Ok(resolved) => {
+            *slot.name = render_reference(reference);
+            *slot.version = Some(resolved);
+            true
         }
-    }
-
-    pub(crate) fn contains(&self, version: VersionId) -> bool {
-        version.index() >= self.from && version.index() < self.until
-    }
-}
-
-/// Kind of source declaration visited by the lifecycle walker.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub(crate) enum SiteKind {
-    Module,
-    Type,
-    Member,
-    Enumerator,
-    BitmaskValue,
-    Bitfield,
-    Interface,
-    Operation,
-    Parameter,
-    Attribute,
-    /// Annotatable declarations that `@added`/`@removed` cannot target.
-    Unsupported,
-}
-
-impl SiteKind {
-    fn supports_lifecycle(self) -> bool {
-        !matches!(self, Self::Unsupported | Self::Bitfield)
-    }
-
-    pub(super) fn describe(self) -> &'static str {
-        match self {
-            Self::Module => "module",
-            Self::Type => "type declaration",
-            Self::Member => "member",
-            Self::Enumerator => "enumerator",
-            Self::BitmaskValue => "bitmask value",
-            Self::Bitfield => "bitfield",
-            Self::Interface => "interface",
-            Self::Operation => "operation",
-            Self::Parameter => "parameter",
-            Self::Attribute => "attribute",
-            Self::Unsupported => "declaration",
+        Err(crate::error::ParseError::Versioning(error)) => {
+            push_diag(errors, &site.path, error);
+            false
         }
+        Err(_) => false,
     }
 }
 
-/// One source declaration and its available annotation slot.
-#[derive(Debug)]
-pub(crate) struct Site<'a> {
-    /// Declaration path, e.g. `PetStore::Pet::age`.
-    pub(crate) path: String,
-    /// Path of the enclosing declaration, or an empty string for the spec root.
-    pub(crate) parent_path: String,
-    pub(crate) kind: SiteKind,
-    pub(crate) annotations: &'a [Annotation],
-    /// Members of an enum declaration; `None` for every other site.
-    pub(crate) enum_members: Option<&'a [Enumerator]>,
-    /// Original parameter node, used to resolve its canonical HTTP binding.
-    pub(crate) parameter: Option<&'a crate::hir::ParamDcl>,
-}
+/// Computes availability for one site, recording every lifecycle violation into `errors`.
+pub(crate) fn availability_into(
+    site: &Site<'_>,
+    parent: Availability,
+    timeline: &VersionTimeline,
+    errors: &mut Vec<VersioningDiagnostic>,
+) -> Availability {
+    let mut added: Option<VersionId> = None;
+    let mut removed: Option<VersionId> = None;
+    let mut added_name = String::new();
+    let mut removed_name = String::new();
+    let mut invalid = false;
 
-impl<'a> Site<'a> {
-    /// Rejects unsupported names independently of whether a timeline exists.
-    pub(crate) fn validate_supported_annotations(&self) -> ParserResult<()> {
-        for annotation in self.annotations {
-            if let Some(name) = raw_versioning_name(annotation) {
-                if UNSUPPORTED_ANNOTATIONS.contains(&name.to_ascii_lowercase().as_str()) {
-                    return Err(VersioningError::UnsupportedVersionAnnotation {
-                        name: format!("@{name}"),
-                        decl: self.path.clone(),
+    for annotation in site.annotations {
+        match annotation {
+            Annotation::Added { version } => {
+                let slot = LifecycleSlot {
+                    label: "@added",
+                    version: &mut added,
+                    name: &mut added_name,
+                };
+                invalid |= !apply_lifecycle_ref(site, version, slot, timeline, errors);
+            }
+            Annotation::Removed { version } => {
+                let slot = LifecycleSlot {
+                    label: "@removed",
+                    version: &mut removed,
+                    name: &mut removed_name,
+                };
+                invalid |= !apply_lifecycle_ref(site, version, slot, timeline, errors);
+            }
+            Annotation::Version | Annotation::VersionParameter(_) => {}
+            other => {
+                let Some(name) = raw_versioning_name(other) else {
+                    continue;
+                };
+                match AnnotationKind::from_name(name.as_str()) {
+                    Some(AnnotationKind::Added | AnnotationKind::Removed) => {
+                        push_diag(
+                            errors,
+                            &site.path,
+                            VersioningError::MalformedVersionReference {
+                                annotation: format!("@{name}"),
+                                decl: site.path.clone(),
+                            },
+                        );
+                        invalid = true;
                     }
-                    .into());
+                    Some(AnnotationKind::Version) => {
+                        push_diag(
+                            errors,
+                            &site.path,
+                            VersioningError::MalformedVersionMarker {
+                                decl: site.path.clone(),
+                            },
+                        );
+                        invalid = true;
+                    }
+                    _ => {}
                 }
             }
         }
-        Ok(())
     }
 
-    /// Builds a site that carries no enum members.
-    pub(crate) fn new(
-        kind: SiteKind,
-        path: &str,
-        parent_path: &str,
-        annotations: &'a [Annotation],
-    ) -> Self {
-        Self {
-            path: path.to_string(),
-            parent_path: parent_path.to_string(),
-            kind,
-            annotations,
-            enum_members: None,
-            parameter: None,
+    if (added.is_some() || removed.is_some()) && !site.kind.supports_lifecycle() {
+        let annotation = if added.is_some() {
+            "@added"
+        } else {
+            "@removed"
+        };
+        push_diag(
+            errors,
+            &site.path,
+            VersioningError::UnsupportedVersionTarget {
+                annotation: annotation.to_string(),
+                target: format!("{} ({})", site.path, site.kind.describe()),
+            },
+        );
+        return parent;
+    }
+    if invalid {
+        return parent;
+    }
+
+    let own_from = added.map(VersionId::index).unwrap_or(0);
+    let own_until = removed.map(VersionId::index).unwrap_or(timeline.len());
+    if own_from >= own_until {
+        push_diag(
+            errors,
+            &site.path,
+            VersioningError::EmptyAvailability {
+                decl: site.path.clone(),
+                added: added_name,
+                removed: removed_name,
+            },
+        );
+        return parent;
+    }
+
+    let mut out_of_bounds = false;
+    for (version, name, outside) in [
+        (
+            added,
+            added_name,
+            added.is_some_and(|v| v.index() < parent.from || v.index() >= parent.until),
+        ),
+        (
+            removed,
+            removed_name,
+            removed.is_some_and(|v| v.index() >= parent.until || v.index() <= parent.from),
+        ),
+    ] {
+        if version.is_some() && outside {
+            push_diag(
+                errors,
+                &site.path,
+                VersioningError::ChildOutsideParent {
+                    decl: site.path.clone(),
+                    parent: site.parent_path.clone(),
+                    version: name,
+                },
+            );
+            out_of_bounds = true;
         }
     }
-
-    /// Attaches the original parameter without reconstructing it from annotations.
-    pub(crate) fn with_parameter(mut self, parameter: &'a crate::hir::ParamDcl) -> Self {
-        self.parameter = Some(parameter);
-        self
+    if out_of_bounds {
+        return parent;
     }
 
-    /// Attaches the members of an enum declaration.
-    pub(crate) fn with_enum_members(mut self, members: &'a [Enumerator]) -> Self {
-        self.enum_members = Some(members);
-        self
-    }
-}
-
-/// Callback invoked for every site while walking a specification.
-pub(crate) trait VersionVisitor {
-    /// Returns the availability that applies to the site's descendants.
-    fn enter(&mut self, site: &Site<'_>, parent: Availability) -> ParserResult<Availability>;
-
-    /// Walks every annotation-carrying site of a specification in source order.
-    fn walk(
-        &mut self,
-        definitions: &[crate::hir::Definition],
-        path: &str,
-        parent: Availability,
-    ) -> ParserResult<()>
-    where
-        Self: Sized,
-    {
-        super::walk::walk(definitions, path, parent, self)
+    Availability {
+        from: own_from.max(parent.from),
+        until: own_until.min(parent.until),
     }
 }
 
@@ -167,115 +208,16 @@ pub(crate) fn availability(
     parent: Availability,
     timeline: &VersionTimeline,
 ) -> ParserResult<Availability> {
-    site.validate_supported_annotations()?;
-    let mut added: Option<VersionId> = None;
-    let mut removed: Option<VersionId> = None;
-    let mut added_name = String::new();
-    let mut removed_name = String::new();
-
-    for annotation in site.annotations {
-        match annotation {
-            Annotation::Added { version } => {
-                if added.is_some() {
-                    return Err(VersioningError::DuplicateLifecycleAnnotation {
-                        annotation: "@added".to_string(),
-                        decl: site.path.clone(),
-                    }
-                    .into());
-                }
-                let resolved = resolve_reference(timeline, "@added", &site.path, version)?;
-                added_name = render_reference(version);
-                added = Some(resolved);
-            }
-            Annotation::Removed { version } => {
-                if removed.is_some() {
-                    return Err(VersioningError::DuplicateLifecycleAnnotation {
-                        annotation: "@removed".to_string(),
-                        decl: site.path.clone(),
-                    }
-                    .into());
-                }
-                let resolved = resolve_reference(timeline, "@removed", &site.path, version)?;
-                removed_name = render_reference(version);
-                removed = Some(resolved);
-            }
-            Annotation::Version => {}
-            // Discovery validates the parameter and reports misuse; the
-            // availability walk only needs to ignore it.
-            Annotation::VersionParameter(_) => {}
-            other => {
-                let Some(name) = raw_versioning_name(other) else {
-                    continue;
-                };
-                if matches!(
-                    AnnotationKind::from_name(name.as_str()),
-                    Some(AnnotationKind::Added | AnnotationKind::Removed)
-                ) {
-                    return Err(VersioningError::MalformedVersionReference {
-                        annotation: format!("@{name}"),
-                        decl: site.path.clone(),
-                    }
-                    .into());
-                }
-                if AnnotationKind::from_name(name.as_str()) == Some(AnnotationKind::Version) {
-                    return Err(VersioningError::MalformedVersionMarker {
-                        decl: site.path.clone(),
-                    }
-                    .into());
-                }
-            }
-        }
+    let mut errors = Vec::new();
+    site.validate_supported_annotations_into(&mut errors);
+    if let Some(first) = errors.drain(..).next() {
+        return Err(first.error.into());
     }
-
-    if (added.is_some() || removed.is_some()) && !site.kind.supports_lifecycle() {
-        let annotation = if added.is_some() {
-            "@added"
-        } else {
-            "@removed"
-        };
-        return Err(VersioningError::UnsupportedVersionTarget {
-            annotation: annotation.to_string(),
-            target: format!("{} ({})", site.path, site.kind.describe()),
-        }
-        .into());
+    let avail = availability_into(site, parent, timeline, &mut errors);
+    if let Some(first) = errors.drain(..).next() {
+        return Err(first.error.into());
     }
-
-    let own_from = added.map(VersionId::index).unwrap_or(0);
-    let own_until = removed.map(VersionId::index).unwrap_or(timeline.len());
-    if own_from >= own_until {
-        return Err(VersioningError::EmptyAvailability {
-            decl: site.path.clone(),
-            added: added_name,
-            removed: removed_name,
-        }
-        .into());
-    }
-
-    if let Some(version) = added {
-        if version.index() < parent.from || version.index() >= parent.until {
-            return Err(VersioningError::ChildOutsideParent {
-                decl: site.path.clone(),
-                parent: site.parent_path.clone(),
-                version: added_name,
-            }
-            .into());
-        }
-    }
-    if let Some(version) = removed {
-        if version.index() >= parent.until || version.index() <= parent.from {
-            return Err(VersioningError::ChildOutsideParent {
-                decl: site.path.clone(),
-                parent: site.parent_path.clone(),
-                version: removed_name,
-            }
-            .into());
-        }
-    }
-
-    Ok(Availability {
-        from: own_from.max(parent.from),
-        until: own_until.min(parent.until),
-    })
+    Ok(avail)
 }
 
 /// Resolves an `Enum::member` version reference used by a lifecycle annotation.

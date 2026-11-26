@@ -4,6 +4,7 @@
 //! version projection, version-map construction, and protocol projection in a
 //! single pass without cyclic dependencies inside lower layers.
 
+mod diagnose;
 mod passes;
 #[cfg(test)]
 mod tests;
@@ -23,7 +24,11 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::path::{Path, PathBuf};
 
-pub use passes::{HttpUnionPass, UnionCasePass};
+pub use diagnose::DiagnoseOptions;
+pub use passes::{
+    CollectionBoundsPass, HttpUnionPass, JsonRpcProtocolPass, RestProtocolPass,
+    StructInheritancePass, UnionCasePass, VersioningPass,
+};
 use passes::{SourceAstPasses, SourceHirPasses};
 use versioned_include::VersionedIncludes;
 

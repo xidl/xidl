@@ -5,13 +5,26 @@ mod bindings;
 #[cfg(test)]
 mod tests;
 
-use crate::error::{ParseError, ParserResult};
+use crate::diagnostic::{Diagnostic, DiagnosticBag, DiagnosticCode};
+use crate::error::ParserResult;
 use crate::hir::{
     Annotation, ConstrTypeDcl, Declarator, Definition, Member, ScopedName, Specification,
     StructDcl, TypeDcl,
 };
 use crate::hir::{effective_wire_name, field_rename};
 use std::collections::{BTreeMap, BTreeSet};
+
+/// Validates single-base struct inheritance and flattens inherited wire members.
+pub(crate) struct StructInheritance;
+
+impl StructInheritance {
+    /// Collects all struct inheritance violations across `spec` into `bag`.
+    pub(crate) fn collect_diagnostics(spec: &Specification, bag: &mut DiagnosticBag) {
+        let structs = collect_structs(&spec.0);
+        let names = crate::hir::DeclarationNames::collect(&spec.0);
+        let _ = flatten(&structs, &names, bag);
+    }
+}
 
 /// Validates struct inheritance and records inherited members on each struct.
 ///
@@ -22,7 +35,9 @@ use std::collections::{BTreeMap, BTreeSet};
 pub(crate) fn analyze(spec: &mut Specification) -> ParserResult<()> {
     let structs = collect_structs(&spec.0);
     let names = crate::hir::DeclarationNames::collect(&spec.0);
-    let inherited = flatten(&structs, &names)?;
+    let mut bag = DiagnosticBag::new();
+    let inherited = flatten(&structs, &names, &mut bag);
+    bag.check_errors()?;
     apply(&mut spec.0, &[], &inherited);
     Ok(())
 }
@@ -88,24 +103,46 @@ fn collect_constr(constr: &ConstrTypeDcl, scope: &[String], out: &mut BTreeMap<S
 fn flatten(
     structs: &BTreeMap<String, StructDcl>,
     names: &crate::hir::DeclarationNames,
-) -> ParserResult<BTreeMap<String, Vec<Member>>> {
+    bag: &mut DiagnosticBag,
+) -> BTreeMap<String, Vec<Member>> {
     let mut out = BTreeMap::new();
     for key in structs.keys() {
         let mut chain = Vec::new();
         let mut cursor = Some(key.clone());
+        let mut chain_ok = true;
         while let Some(current) = cursor {
             if chain.iter().any(|seen| seen == &current) {
-                return Err(error(format!(
-                    "struct inheritance cycle includes '{current}' (from '{key}')"
-                )));
+                push_error(
+                    bag,
+                    key,
+                    format!("struct inheritance cycle includes '{current}' (from '{key}')"),
+                );
+                chain_ok = false;
+                break;
             }
-            let def = structs.get(&current).ok_or_else(|| {
-                error(format!(
-                    "struct '{key}' inherits '{current}', which is not a complete struct"
-                ))
-            })?;
-            cursor = parent_of(&current, def, structs)?;
-            chain.push(current);
+            let Some(def) = structs.get(&current) else {
+                push_error(
+                    bag,
+                    key,
+                    format!("struct '{key}' inherits '{current}', which is not a complete struct"),
+                );
+                chain_ok = false;
+                break;
+            };
+            match parent_of(&current, def, structs) {
+                Ok(next) => {
+                    cursor = next;
+                    chain.push(current);
+                }
+                Err(message) => {
+                    push_error(bag, &current, message);
+                    chain_ok = false;
+                    break;
+                }
+            }
+        }
+        if !chain_ok {
+            continue;
         }
         let mut inherited = Vec::new();
         for ancestor in chain.iter().skip(1).rev() {
@@ -117,37 +154,37 @@ fn flatten(
                 inherited.extend(wire_named_members(&member, &def.annotations));
             }
         }
-        validate_duplicates(key, &structs[key], &inherited)?;
+        validate_duplicates(key, &structs[key], &inherited, bag);
         out.insert(key.clone(), inherited);
     }
-    Ok(out)
+    out
 }
 
 fn parent_of(
     key: &str,
     def: &StructDcl,
     structs: &BTreeMap<String, StructDcl>,
-) -> ParserResult<Option<String>> {
+) -> Result<Option<String>, String> {
     let Some(parent) = def.parent.first() else {
         return Ok(None);
     };
     if def.parent.len() > 1 {
-        return Err(error(format!(
+        return Err(format!(
             "struct '{}' inherits {} structs; XIDL supports one base struct",
             key,
             def.parent.len()
-        )));
+        ));
     }
     let scope = scope_of(key);
     resolve(&scope, parent, structs).map(Some).ok_or_else(|| {
-        error(format!(
+        format!(
             "struct '{key}' inherits '{}', which is not a complete struct",
             parent.name.join("::")
-        ))
+        )
     })
 }
 
-fn validate_duplicates(key: &str, def: &StructDcl, inherited: &[Member]) -> ParserResult<()> {
+fn validate_duplicates(key: &str, def: &StructDcl, inherited: &[Member], bag: &mut DiagnosticBag) {
     let mut inherited_names = BTreeSet::new();
     for member in inherited {
         if crate::hir::is_skipped(&member.annotations) {
@@ -164,13 +201,16 @@ fn validate_duplicates(key: &str, def: &StructDcl, inherited: &[Member]) -> Pars
         for decl in &member.ident {
             let name = declarator_name(decl);
             if inherited_names.contains(name) {
-                return Err(error(format!(
-                    "struct '{key}' field '{name}' duplicates a field declared by an ancestor"
-                )));
+                push_error(
+                    bag,
+                    &format!("{key}::{name}"),
+                    format!(
+                        "struct '{key}' field '{name}' duplicates a field declared by an ancestor"
+                    ),
+                );
             }
         }
     }
-    Ok(())
 }
 
 /// Copies a base member with its effective wire name pinned as `@rename`.
@@ -305,6 +345,13 @@ fn declarator_name(decl: &Declarator) -> &str {
     }
 }
 
-fn error(message: String) -> ParseError {
-    ParseError::Message(format!("struct inheritance: {message}"))
+fn push_error(bag: &mut DiagnosticBag, location: &str, message: String) {
+    bag.push(
+        Diagnostic::error(
+            DiagnosticCode::SemanticError,
+            0..0,
+            format!("struct inheritance: {message}"),
+        )
+        .with_location(location.to_string()),
+    );
 }

@@ -6,4 +6,4 @@ mod semantics;
 mod tests;
 
 pub use model::*;
-pub use project::project;
+pub use project::{collect_diagnostics, project};
