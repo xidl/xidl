@@ -3,6 +3,7 @@ use crate::fmt::format_idl_source;
 use crate::library::LibraryLoader;
 use crate::units::UnitGraph;
 use similar::TextDiff;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use xidl_parser::hir::printer::IdlPrinter;
 use xidl_parser::hir::{Definition, Pragma, Specification};
@@ -14,6 +15,7 @@ pub(crate) struct VersionDiff {
     spec: Specification,
     record: VersioningRecord,
     imports: String,
+    imported_units: BTreeMap<String, String>,
     contract: String,
 }
 
@@ -24,12 +26,10 @@ impl VersionDiff {
         let resolved = LibraryLoader::new().resolve(&inputs)?;
         resolved.check_compiler()?;
         let graph = UnitGraph::build(&inputs, resolved.mounts())?;
-        let unit = graph.units().last().ok_or_else(|| {
-            IdlcError::fmt(format!(
-                "version diff: contract '{}' has no unit",
-                path.display()
-            ))
-        })?;
+        let unit = graph
+            .units()
+            .last()
+            .ok_or_else(|| IdlcError::fmt(format!("contract '{}' has no unit", path.display())))?;
         let mut resolver = crate::library::include_resolver(resolved.mounts());
         let typed = parser_text_with_resolver(unit.source(), path.to_str(), &mut *resolver)?;
         let spec = Specification::from_typed_ast_with_resolver(
@@ -40,7 +40,7 @@ impl VersionDiff {
         )?;
         let record = VersioningRecord::analyze(&spec)?.ok_or_else(|| {
             IdlcError::fmt(format!(
-                "version diff: contract '{}' requires a @version enum",
+                "contract '{}' requires a @version enum",
                 path.display()
             ))
         })?;
@@ -51,10 +51,12 @@ impl VersionDiff {
                 serde_json::to_string(import.path())?
             ));
         }
+        let imported_units = Self::collect_imported_units(&graph, &mut *resolver)?;
         Ok(Self {
             spec,
             record,
             imports,
+            imported_units,
             contract: path
                 .file_name()
                 .unwrap_or(path.as_os_str())
@@ -83,28 +85,21 @@ impl VersionDiff {
         &self.record
     }
 
-    /// Formats a canonical projection with the `@version` enum excluded so
-    /// adding or removing later timeline members never mutates frozen versions.
-    pub(crate) fn formatted_lock_projection(&self, version: VersionId) -> IdlcResult<String> {
-        let mut definitions = self.projected_definitions(version)?;
-        if let Some(path) = Self::find_version_enum_path(&self.spec.0, &[]) {
-            Self::strip_enum_at_path(&mut definitions, &path);
-        }
+    /// Returns canonicalized IDL text for each transitively imported unit, keyed by unit path.
+    pub(crate) fn imported_units(&self) -> &BTreeMap<String, String> {
+        &self.imported_units
+    }
+
+    /// Formats a canonical projection for `version`.
+    pub(crate) fn formatted_projection(&self, version: VersionId) -> IdlcResult<String> {
+        let definitions = Self::unwrap_projected(self.record.project(&self.spec, version)?);
         let body = format_idl_source(&IdlPrinter::render(&Specification(definitions)))?;
         Ok(self.imports.clone() + &body)
     }
 
-    fn formatted_projection(&self, version: VersionId) -> IdlcResult<String> {
-        let definitions = self.projected_definitions(version)?;
-        let body = format_idl_source(&IdlPrinter::render(&Specification(definitions)))?;
-        Ok(self.imports.clone() + &body)
-    }
-
-    fn projected_definitions(&self, version: VersionId) -> IdlcResult<Vec<Definition>> {
-        let projected = self.record.project(&self.spec, version)?;
+    fn unwrap_projected(projected: Specification) -> Vec<Definition> {
         // Projection's outer module and document version identify an artifact,
-        // while the diff header already identifies each side. Keep original
-        // modules inside that wrapper and every other contract pragma.
+        // while the diff header or lock metadata already identifies each side.
         let mut definitions = Vec::new();
         for definition in projected.0 {
             match definition {
@@ -113,66 +108,57 @@ impl VersionDiff {
                 definition => definitions.push(definition),
             }
         }
-        Ok(definitions)
+        definitions
     }
 
-    fn find_version_enum_path(definitions: &[Definition], scope: &[String]) -> Option<Vec<String>> {
-        for definition in definitions {
-            match definition {
-                Definition::ModuleDcl(module) => {
-                    let mut nested = scope.to_vec();
-                    nested.push(module.ident.clone());
-                    if let Some(found) = Self::find_version_enum_path(&module.definition, &nested) {
-                        return Some(found);
+    fn collect_imported_units(
+        graph: &UnitGraph,
+        resolver: &mut dyn xidl_parser::parser::IncludeResolver,
+    ) -> IdlcResult<BTreeMap<String, String>> {
+        let units = graph.units();
+        if units.len() <= 1 {
+            return Ok(BTreeMap::new());
+        }
+        let mut bound_versions: BTreeMap<&str, BTreeSet<&str>> = BTreeMap::new();
+        for unit in units {
+            for import in unit.imports() {
+                if let Some(version) = import.version() {
+                    bound_versions
+                        .entry(import.prefix())
+                        .or_default()
+                        .insert(version);
+                }
+            }
+        }
+        let mut canonical = BTreeMap::new();
+        for dep in &units[..units.len() - 1] {
+            let typed = parser_text_with_resolver(dep.source(), dep.file().to_str(), resolver)?;
+            let spec = Specification::from_typed_ast_with_resolver(
+                typed,
+                Default::default(),
+                dep.file(),
+                resolver,
+            )?;
+            let rendered = match (
+                VersioningRecord::analyze(&spec)?,
+                bound_versions.get(dep.prefix()),
+            ) {
+                (Some(dep_record), Some(versions)) if !versions.is_empty() => {
+                    let mut sections = String::new();
+                    for raw_version in versions {
+                        let version_id = dep_record.resolve_version(raw_version)?;
+                        let defs = Self::unwrap_projected(dep_record.project(&spec, version_id)?);
+                        let formatted =
+                            format_idl_source(&IdlPrinter::render(&Specification(defs)))?;
+                        sections.push_str(&format!("@version({raw_version})\n{formatted}"));
                     }
+                    sections
                 }
-                Definition::TypeDcl(xidl_parser::hir::TypeDcl::ConstrTypeDcl(
-                    xidl_parser::hir::ConstrTypeDcl::EnumDcl(enumeration),
-                ))
-                | Definition::ConstrTypeDcl(xidl_parser::hir::ConstrTypeDcl::EnumDcl(
-                    enumeration,
-                )) if enumeration.annotations.iter().any(|annotation| {
-                    matches!(
-                        annotation,
-                        xidl_parser::hir::Annotation::Version
-                            | xidl_parser::hir::Annotation::VersionParameter(_)
-                    )
-                }) =>
-                {
-                    let mut path = scope.to_vec();
-                    path.push(enumeration.ident.clone());
-                    return Some(path);
-                }
-                _ => {}
-            }
+                _ => format_idl_source(&IdlPrinter::render(&spec))?,
+            };
+            canonical.insert(dep.path().to_string(), rendered);
         }
-        None
-    }
-
-    fn strip_enum_at_path(definitions: &mut Vec<Definition>, path: &[String]) {
-        let Some((head, tail)) = path.split_first() else {
-            return;
-        };
-        if tail.is_empty() {
-            definitions.retain(|definition| {
-                !matches!(
-                    definition,
-                    Definition::TypeDcl(xidl_parser::hir::TypeDcl::ConstrTypeDcl(
-                        xidl_parser::hir::ConstrTypeDcl::EnumDcl(enumeration),
-                    )) | Definition::ConstrTypeDcl(xidl_parser::hir::ConstrTypeDcl::EnumDcl(
-                        enumeration,
-                    )) if enumeration.ident == *head
-                )
-            });
-            return;
-        }
-        for definition in definitions {
-            if let Definition::ModuleDcl(module) = definition
-                && module.ident == *head
-            {
-                Self::strip_enum_at_path(&mut module.definition, tail);
-            }
-        }
+        Ok(canonical)
     }
 
     fn header(&self, version: VersionId) -> IdlcResult<String> {

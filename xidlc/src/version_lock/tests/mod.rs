@@ -1,23 +1,24 @@
-use super::sha256::Sha256;
+mod cli;
+
 use super::*;
 
 #[test]
 fn sha256_matches_nist_test_vectors() {
     assert_eq!(
-        Sha256::prefixed_hex(b""),
+        VersionLock::fingerprint(b""),
         "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     );
     assert_eq!(
-        Sha256::prefixed_hex(b"abc"),
+        VersionLock::fingerprint(b"abc"),
         "sha256:ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
     );
     assert_eq!(
-        Sha256::prefixed_hex(b"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
+        VersionLock::fingerprint(b"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
         "sha256:248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
     );
     let repeated = vec![b'a'; 1000];
     assert_eq!(
-        Sha256::prefixed_hex(&repeated),
+        VersionLock::fingerprint(&repeated),
         "sha256:41edece42d63e8d9bf515a9ba6932e1c20cbc9f5a5d134645adb5db1b9737ea3"
     );
 }
@@ -147,22 +148,36 @@ fn detects_silent_edit_removed_version_and_parameter_changes() {
     )
     .unwrap();
 
+    let before_refusal = std::fs::read_to_string(&lock).unwrap();
     let report = VersionLock::from_file(&idl)
         .unwrap()
         .check(&lock, false)
         .unwrap();
     assert_eq!(report.drifts.len(), 2);
+    assert!(
+        report.drifts.iter().all(|drift| matches!(
+            drift,
+            LockDrift::Changed { expected, actual, .. } if expected != actual
+        )),
+        "{:?}",
+        report.drifts
+    );
     let rendered = report.render(&idl, &lock);
     assert!(rendered.contains("2026-12-01"), "{rendered}");
     assert!(rendered.contains("2027-06-01"), "{rendered}");
 
-    // Locking without --force refuses to overwrite drifted entries.
+    // Locking without --force refuses to overwrite drifted entries and preserves disk bytes.
     let refused = VersionLock::from_file(&idl)
         .unwrap()
         .write_lock(&lock, false)
         .unwrap();
     assert!(!refused.is_written());
     assert!(refused.render_drifts(&idl).contains("--force"));
+    assert_eq!(
+        std::fs::read_to_string(&lock).unwrap(),
+        before_refusal,
+        "unforced lock must not modify existing lock file"
+    );
 
     // Locking with --force updates the lock file.
     let forced = VersionLock::from_file(&idl)
@@ -200,6 +215,14 @@ fn detects_silent_edit_removed_version_and_parameter_changes() {
         .check(&lock, false)
         .unwrap();
     assert_eq!(param_drift.drifts.len(), 2);
+    assert!(
+        param_drift
+            .drifts
+            .iter()
+            .all(|drift| matches!(drift, LockDrift::Changed { .. })),
+        "{:?}",
+        param_drift.drifts
+    );
 
     // Removing a locked version is flagged as Removed.
     std::fs::write(
@@ -236,84 +259,27 @@ fn invalid_lock_files_and_missing_paths_return_typed_errors() {
     let lock = VersionLock::from_file(&idl).unwrap();
 
     let missing = dir.path().join("missing.lock.json");
-    assert!(lock.check(&missing, false).is_err());
+    let missing_err = lock.check(&missing, false).unwrap_err().to_string();
+    assert!(missing_err.contains("cannot read"), "{missing_err}");
 
     let bad_json = dir.path().join("bad.lock.json");
     std::fs::write(&bad_json, "not json").unwrap();
-    assert!(lock.check(&bad_json, false).is_err());
+    let bad_json_err = lock.check(&bad_json, false).unwrap_err().to_string();
+    assert!(bad_json_err.contains("invalid JSON"), "{bad_json_err}");
+    let write_bad_err = lock.write_lock(&bad_json, false).unwrap_err().to_string();
+    assert!(write_bad_err.contains("invalid JSON"), "{write_bad_err}");
 
     let bad_schema = dir.path().join("future.lock.json");
     std::fs::write(&bad_schema, r#"{"schema_version": 99, "versions": {}}"#).unwrap();
     let err = lock.check(&bad_schema, false).unwrap_err().to_string();
     assert!(err.contains("schema_version 99"), "{err}");
-}
 
-#[test]
-fn cli_version_lock_and_check_enforce_exit_codes() {
-    use clap::Parser;
-
-    let dir = tempfile::tempdir().unwrap();
-    let idl = dir.path().join("api.idl");
-    let lock = dir.path().join("api.versions.lock.json");
-    std::fs::write(
-        &idl,
-        r#"
-        @version(in = "header", name = "X-Version")
-        enum V { @rename("2026-12-01") v1 };
-        struct Workspace { string id; string name; };
-        "#,
-    )
-    .unwrap();
-
-    let cli = crate::cli::Cli::try_parse_from(["xidlc", "version", "lock", idl.to_str().unwrap()])
-        .unwrap();
-    cli.run().expect("initial lock succeeds");
-    assert!(lock.exists());
-
-    let cli = crate::cli::Cli::try_parse_from(["xidlc", "version", "check", idl.to_str().unwrap()])
-        .unwrap();
-    cli.run().expect("clean check exits 0");
-
-    // Mutate frozen field without @added/@removed.
-    std::fs::write(
-        &idl,
-        r#"
-        @version(in = "header", name = "X-Version")
-        enum V { @rename("2026-12-01") v1 };
-        struct Workspace { string id; string title; };
-        "#,
-    )
-    .unwrap();
-    let cli = crate::cli::Cli::try_parse_from(["xidlc", "version", "check", idl.to_str().unwrap()])
-        .unwrap();
-    let err = cli.run().unwrap_err();
-    assert!(matches!(err, IdlcError::CliExit { code: 1, .. }), "{err:?}");
-
-    let cli = crate::cli::Cli::try_parse_from(["xidlc", "version", "lock", idl.to_str().unwrap()])
-        .unwrap();
-    let err = cli.run().unwrap_err();
-    assert!(matches!(err, IdlcError::CliExit { code: 1, .. }), "{err:?}");
-
-    let cli = crate::cli::Cli::try_parse_from([
-        "xidlc",
-        "version",
-        "lock",
-        "--force",
-        idl.to_str().unwrap(),
-    ])
-    .unwrap();
-    cli.run().expect("forced relock exits 0");
-
-    let missing_lock = dir.path().join("missing.json");
-    let cli = crate::cli::Cli::try_parse_from([
-        "xidlc",
-        "version",
-        "check",
-        "-l",
-        missing_lock.to_str().unwrap(),
-        idl.to_str().unwrap(),
-    ])
-    .unwrap();
-    let err = cli.run().unwrap_err();
-    assert!(matches!(err, IdlcError::CliExit { code: 2, .. }), "{err:?}");
+    assert_eq!(
+        VersionLock::default_lock_path(Path::new("api.idl")),
+        PathBuf::from("api.versions.lock.json")
+    );
+    assert_eq!(
+        VersionLock::default_lock_path(Path::new("/")),
+        PathBuf::from("contract.versions.lock.json")
+    );
 }

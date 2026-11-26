@@ -42,6 +42,7 @@ gen-openapi = []
 gen-openrpc = []
 cli = [
   "dep:clap",
+  "dep:crown",
   "dep:tracing",
   "dep:tracing-subscriber",
   "dep:tree-sitter-highlight",
@@ -63,6 +64,7 @@ minijinja = { workspace = true, features = ["loader", "json"] }
 convert_case.workspace = true
 glob.workspace = true
 clap = { workspace = true, features = ["derive"], optional = true }
+crown = { workspace = true, optional = true }
 include_dir = "0.7"
 scopeguard = "1.2.0"
 tracing = { version = "0.1", optional = true }

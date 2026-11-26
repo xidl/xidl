@@ -1,18 +1,20 @@
 //! Version lock file generation and drift detection for frozen API versions.
 
-mod sha256;
-
 #[cfg(test)]
 mod tests;
 
 use crate::error::{IdlcError, IdlcResult};
 use crate::version_diff::VersionDiff;
+use crown::hash::sha256::sum256;
 use serde::{Deserialize, Serialize};
-use sha256::Sha256;
 use std::collections::BTreeMap;
+use std::fmt::Write as _;
+use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
 
 const LOCK_SCHEMA_VERSION: u32 = 1;
+static TEMP_FILE_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 /// Serialized version lock file containing one stable fingerprint per version.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -144,6 +146,17 @@ impl VersionLock {
         }
     }
 
+    /// Computes a `sha256:<hex>` digest string using `crown`.
+    pub(crate) fn fingerprint(input: &[u8]) -> String {
+        let digest = sum256(input);
+        let mut out = String::with_capacity(7 + 64);
+        out.push_str("sha256:");
+        for byte in digest {
+            let _ = write!(out, "{byte:02x}");
+        }
+        out
+    }
+
     /// Builds a deterministic lock document for every declared version.
     pub(crate) fn document(&self) -> IdlcResult<LockDocument> {
         let record = self.diff.record();
@@ -153,12 +166,15 @@ impl VersionLock {
         };
         let mut versions = BTreeMap::new();
         for (version_id, definition) in record.timeline().iter() {
-            let projection = self.diff.formatted_lock_projection(version_id)?;
-            let canonical = format!(
+            let projection = self.diff.formatted_projection(version_id)?;
+            let mut canonical = format!(
                 "xidl-version-lock-v1\nversion-value: {}\nversion-parameter: {}\n---\n{}",
                 definition.value, parameter_line, projection
             );
-            let fingerprint = Sha256::prefixed_hex(canonical.as_bytes());
+            for (unit_path, unit_source) in self.diff.imported_units() {
+                let _ = write!(canonical, "\n--- import {unit_path} ---\n{unit_source}");
+            }
+            let fingerprint = Self::fingerprint(canonical.as_bytes());
             versions.insert(
                 definition.value.clone(),
                 LockedVersion {
@@ -173,11 +189,10 @@ impl VersionLock {
         })
     }
 
-    /// Writes a lock file, refusing to overwrite drifted existing entries unless `force` is set.
+    /// Writes a lock file atomically, refusing to overwrite drifted existing entries unless `force` is set.
     pub(crate) fn write_lock(&self, lock_path: &Path, force: bool) -> IdlcResult<LockWriteReport> {
         let current = self.document()?;
-        if !force && lock_path.exists() {
-            let existing = Self::read_document(lock_path)?;
+        if !force && let Some(existing) = Self::read_document_if_exists(lock_path)? {
             let report = Self::compare(&existing, &current, false);
             if !report.is_clean() {
                 return Ok(LockWriteReport {
@@ -187,9 +202,10 @@ impl VersionLock {
                 });
             }
         }
-        if let Some(parent) = lock_path.parent()
-            && !parent.as_os_str().is_empty()
-        {
+        let parent = lock_path
+            .parent()
+            .filter(|parent| !parent.as_os_str().is_empty());
+        if let Some(parent) = parent {
             std::fs::create_dir_all(parent).map_err(|error| {
                 IdlcError::fmt(format!(
                     "version lock: cannot create directory '{}': {error}",
@@ -199,12 +215,7 @@ impl VersionLock {
         }
         let mut encoded = serde_json::to_string_pretty(&current)?;
         encoded.push('\n');
-        std::fs::write(lock_path, encoded).map_err(|error| {
-            IdlcError::fmt(format!(
-                "version lock: cannot write '{}': {error}",
-                lock_path.display()
-            ))
-        })?;
+        Self::write_atomic(lock_path, encoded.as_bytes())?;
         Ok(LockWriteReport {
             lock_path: lock_path.to_path_buf(),
             document: current,
@@ -219,6 +230,17 @@ impl VersionLock {
         Ok(Self::compare(&existing, &current, strict))
     }
 
+    fn read_document_if_exists(lock_path: &Path) -> IdlcResult<Option<LockDocument>> {
+        match std::fs::read_to_string(lock_path) {
+            Ok(raw) => Self::parse_document(lock_path, &raw).map(Some),
+            Err(error) if error.kind() == ErrorKind::NotFound => Ok(None),
+            Err(error) => Err(IdlcError::fmt(format!(
+                "version lock: cannot read '{}': {error}",
+                lock_path.display()
+            ))),
+        }
+    }
+
     fn read_document(lock_path: &Path) -> IdlcResult<LockDocument> {
         let raw = std::fs::read_to_string(lock_path).map_err(|error| {
             IdlcError::fmt(format!(
@@ -226,7 +248,11 @@ impl VersionLock {
                 lock_path.display()
             ))
         })?;
-        let document: LockDocument = serde_json::from_str(&raw).map_err(|error| {
+        Self::parse_document(lock_path, &raw)
+    }
+
+    fn parse_document(lock_path: &Path, raw: &str) -> IdlcResult<LockDocument> {
+        let document: LockDocument = serde_json::from_str(raw).map_err(|error| {
             IdlcError::fmt(format!(
                 "version lock: invalid JSON in '{}': {error}",
                 lock_path.display()
@@ -241,6 +267,36 @@ impl VersionLock {
             )));
         }
         Ok(document)
+    }
+
+    fn write_atomic(lock_path: &Path, bytes: &[u8]) -> IdlcResult<()> {
+        let file_name = lock_path
+            .file_name()
+            .and_then(|name| name.to_str())
+            .unwrap_or("versions.lock.json");
+        let seq = TEMP_FILE_COUNTER.fetch_add(1, Ordering::Relaxed);
+        let temp_name = format!(".{file_name}.tmp.{}.{seq}", std::process::id());
+        let temp_path = match lock_path.parent() {
+            Some(parent) if !parent.as_os_str().is_empty() => parent.join(temp_name),
+            _ => PathBuf::from(temp_name),
+        };
+        let cleanup = scopeguard::guard(temp_path.clone(), |path| {
+            let _ = std::fs::remove_file(path);
+        });
+        std::fs::write(&temp_path, bytes).map_err(|error| {
+            IdlcError::fmt(format!(
+                "version lock: cannot write '{}': {error}",
+                lock_path.display()
+            ))
+        })?;
+        std::fs::rename(&temp_path, lock_path).map_err(|error| {
+            IdlcError::fmt(format!(
+                "version lock: cannot replace '{}': {error}",
+                lock_path.display()
+            ))
+        })?;
+        scopeguard::ScopeGuard::into_inner(cleanup);
+        Ok(())
     }
 
     fn compare(existing: &LockDocument, current: &LockDocument, strict: bool) -> LockCheckReport {
