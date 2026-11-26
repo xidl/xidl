@@ -1,0 +1,147 @@
+{% from "interface/collection.rs.j2" import collect_values %}
+{#- Shared wire scalar parser for response and exception headers/cookies. -#}
+{% macro parse_wire_scalar(raw_expr, is_string, is_primitive) -%}
+    {% if is_string %}{{ raw_expr }}.to_string(){% elif is_primitive %}{{ raw_expr }}.parse()
+    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% else %}xidl_rust_axum::serde_json::from_str({{ raw_expr }})
+    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %}
+{%- endmacro %}
+
+{#- Shared ClientAuth conversion helper for interface-level auth constructors. -#}
+{% macro build_client_auth(auth_ty, binding) -%}
+    ::xidl_rust_axum::ClientAuth {
+        basic: {% if auth_ty == "xidl_rust_axum::auth::basic::BasicAuth" %}Some({{ binding }}){% else %}None{% endif %},
+        bearer: {% if auth_ty == "xidl_rust_axum::auth::bearer::BearerAuth" %}Some({{ binding }}.token){% else %}None{% endif %},
+        api_keys: {% if auth_ty == "xidl_rust_axum::ApiKeyAuth" %}::std::vec![{{ binding }}]{% else %}::std::vec![]{% endif %},
+    }
+{%- endmacro %}
+
+{#- Decode response header/cookie out-parameters into local variables. -#}
+{% macro response_header_decodes(method) %}
+    {% if method.response_header_params | length > 0 or method.response_cookie_params | length > 0 %}
+        let headers = resp.headers().clone();
+        {% for param in method.response_header_params %}
+            {% if param.is_sequence %}
+                let mut {{ param.name }}: Vec<{{ param.out_item_ty }}> = Vec::new();
+                for header_value in headers.get_all("{{ param.wire_name }}").iter() {
+                    let header_str = header_value
+                        .to_str()
+                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    let parsed: {{ param.out_item_ty }} = {{ parse_wire_scalar("header_str", param.header_item_is_string, param.header_item_is_primitive) }};
+                    {{ param.name }}.push(parsed);
+                }
+                {{ collect_values(param.name, param.out_ty, param.optional, param.is_bounded_sequence) }}
+            {% else %}
+                let {{ param.name }}: {{ param.out_ty }} = match headers.get("{{ param.wire_name }}") {
+                    Some(header_value) => {
+                        let header_str = header_value
+                            .to_str()
+                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                        {% if param.optional %}Some({{ parse_wire_scalar("header_str", param.header_item_is_string, param.header_item_is_primitive) }}){% else %}{{ parse_wire_scalar("header_str", param.header_item_is_string, param.header_item_is_primitive) }}{% endif %}
+                    }
+                    None => {% if param.optional %}None{% else %}::core::default::Default::default(){% endif %},
+                };
+            {% endif %}
+            let {{ param.name }}: {{ param.ty }} = {{ param.in_expr }};
+        {% endfor %}
+        {% if method.response_cookie_params | length > 0 %}
+            let cookie_map = xidl_rust_axum::http::parse_set_cookies(headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter());
+            {% for param in method.response_cookie_params %}
+                {% if param.is_sequence %}
+                    let mut {{ param.name }}: Vec<{{ param.out_item_ty }}> = Vec::new();
+                    if let Some(xidl_cookie_values) = cookie_map.get("{{ param.wire_name }}") {
+                        for xidl_cookie_value in xidl_cookie_values {
+                            let parsed: {{ param.out_item_ty }} = {{ parse_wire_scalar("xidl_cookie_value", param.cookie_item_is_string, param.cookie_item_is_primitive) }};
+                            {{ param.name }}.push(parsed);
+                        }
+                    }
+                    {{ collect_values(param.name, param.out_ty, param.optional, param.is_bounded_sequence) }}
+                {% elif param.optional and param.cookie_item_is_string %}
+                    let {{ param.name }}: {{ param.out_ty }} = cookie_map
+                        .get("{{ param.wire_name }}")
+                        .and_then(|values| values.first())
+                        .cloned();
+                {% else %}
+                    let {{ param.name }}: {{ param.out_ty }} = match cookie_map
+                        .get("{{ param.wire_name }}")
+                        .and_then(|values| values.first())
+                    {
+                        Some(value) => {% if param.optional %}Some({{ parse_wire_scalar("value", param.cookie_item_is_string, param.cookie_item_is_primitive) }}){% else %}{{ parse_wire_scalar("value", param.cookie_item_is_string, param.cookie_item_is_primitive) }}{% endif %},
+                        None => {% if param.optional %}None{% else %}::core::default::Default::default(){% endif %},
+                    };
+                {% endif %}
+                let {{ param.name }}: {{ param.ty }} = {{ param.in_expr }};
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+{% endmacro %}
+
+{#- Decode one raised exception from `status` and `resp`. -#}
+{% macro decode_exception(ex, method) %}
+    if status.as_u16() == {{ ex.status }} {
+        let headers = resp.headers().clone();
+        {% if ex.has_body %}
+            let mut value: {{ ex.wire_ty }} = resp
+                .json::<{{ ex.wire_ty }}>()
+                .await
+                .map_err(|err| xidl_rust_axum::Error::new(status.as_u16(), format!("exception {{ ex.ty }} body: {err}")))?;
+        {% else %}
+            let mut value: {{ ex.wire_ty }} = {{ ex.ty }}::default().into();
+        {% endif %}
+        {% for member in ex.headers %}
+            {% if member.is_multi %}
+                value.{{ member.field }} = {
+                    let mut values: Vec<{{ member.item_ty }}> = Vec::new();
+                    for header_value in headers.get_all("{{ member.wire_name }}").iter() {
+                        let header_str = header_value
+                            .to_str()
+                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                        for header_str in {% if member.item_is_string or member.item_is_primitive %}header_str.split(',').map(str::trim){% else %}::std::iter::once(header_str){% endif %} {
+                            let parsed: {{ member.item_ty }} = {{ parse_wire_scalar("header_str", member.item_is_string, member.item_is_primitive) }};
+                            values.push(parsed);
+                        }
+                    }
+                    {% if member.is_bounded_sequence %}
+                        let values = values.try_into().map_err(|error| xidl_rust_axum::Error::new(status.as_u16(), format!("exception {{ member.wire_name }}: {error}")))?;
+                    {% endif %}
+                    {% if member.optional %}if headers.contains_key("{{ member.wire_name }}") { Some(values) } else { None }{% else %}values{% endif %}
+                };
+            {% else %}
+                value.{{ member.field }} = match headers.get("{{ member.wire_name }}") {
+                    Some(header_value) => {
+                        let header_str = header_value
+                            .to_str()
+                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                        {% if member.optional %}Some({{ parse_wire_scalar("header_str", member.item_is_string, member.item_is_primitive) }}){% else %}{{ parse_wire_scalar("header_str", member.item_is_string, member.item_is_primitive) }}{% endif %}
+                    }
+                    None => {% if member.optional %}None{% else %}::core::default::Default::default(){% endif %},
+                };
+            {% endif %}
+        {% endfor %}
+        {% if ex.cookies | length > 0 %}
+            let cookie_map = xidl_rust_axum::http::parse_set_cookies(headers.get_all(::xidl_rust_axum::reqwest::header::SET_COOKIE).iter());
+            {% for member in ex.cookies %}
+                {% if member.is_multi %}
+                    value.{{ member.field }} = {
+                        let mut values: Vec<{{ member.item_ty }}> = Vec::new();
+                        if let Some(items) = cookie_map.get("{{ member.wire_name }}") {
+                            for value_str in items {
+                                let parsed: {{ member.item_ty }} = {{ parse_wire_scalar("value_str", member.item_is_string, member.item_is_primitive) }};
+                                values.push(parsed);
+                            }
+                        }
+                        {% if member.is_bounded_sequence %}
+                            let values = values.try_into().map_err(|error| xidl_rust_axum::Error::new(status.as_u16(), format!("exception {{ member.wire_name }}: {error}")))?;
+                        {% endif %}
+                        {% if member.optional %}if cookie_map.contains_key("{{ member.wire_name }}") { Some(values) } else { None }{% else %}values{% endif %}
+                    };
+                {% else %}
+                    value.{{ member.field }} = match cookie_map.get("{{ member.wire_name }}").and_then(|values| values.first()) {
+                        Some(value_str) => {% if member.optional %}Some({{ parse_wire_scalar("value_str", member.item_is_string, member.item_is_primitive) }}){% else %}{{ parse_wire_scalar("value_str", member.item_is_string, member.item_is_primitive) }}{% endif %},
+                        None => {% if member.optional %}None{% else %}::core::default::Default::default(){% endif %},
+                    };
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        return Err({{ method.error_ty }}::{{ ex.variant }}(value.into()));
+    }
+{% endmacro %}

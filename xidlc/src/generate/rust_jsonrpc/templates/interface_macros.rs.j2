@@ -1,0 +1,33 @@
+{#- Shared response encoding and decoding helpers for JSON-RPC interfaces. -#}
+{% macro encode_rpc_response(method) %}
+    {% if method.response_kind == "empty" %}
+        Ok(::serde_json::json!({}))
+    {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
+        let wire = {{ method.response_struct }} { {{ method.response_single_field }}: result };
+        Ok(::serde_json::to_value(wire)?)
+    {% else %}
+        Ok(::serde_json::to_value(result)?)
+    {% endif %}
+{% endmacro %}
+
+{% macro decode_stream_response(method) %}
+    {% if method.response_kind == "empty" %}
+        let _ = value;
+        Ok(())
+    {% elif method.response_kind == "single_return" or method.response_kind == "single_output" %}
+        let result: {{ method.response_struct }} = ::serde_json::from_value(value)?;
+        Ok(result.{{ method.response_single_field }})
+    {% else %}
+        ::serde_json::from_value(value).map_err(xidl_jsonrpc::Error::from)
+    {% endif %}
+{% endmacro %}
+
+{% macro connect_stream_endpoint(error_msg) %}
+    let endpoint = self
+        .endpoint
+        .clone()
+        .ok_or(xidl_jsonrpc::Error::Protocol("{{ error_msg }}"))?;
+    let mut io = xidl_jsonrpc::connect(&endpoint)
+        .await
+        .map_err(xidl_jsonrpc::Error::Io)?;
+{% endmacro %}
