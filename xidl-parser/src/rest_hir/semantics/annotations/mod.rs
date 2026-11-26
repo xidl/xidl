@@ -6,43 +6,9 @@ use super::annotation_parse::{parse_raw_params, render_const_expr, trim_quotes};
 #[cfg(test)]
 mod tests;
 
-pub use crate::hir::annotation_name;
-
-pub fn annotation_params(annotation: &hir::Annotation) -> Option<&hir::AnnotationParams> {
-    match annotation {
-        hir::Annotation::Builtin { params, .. } => params.as_ref(),
-        hir::Annotation::ScopedName { params, .. } => params.as_ref(),
-        _ => None,
-    }
-}
-
-pub fn has_annotation(annotations: &[hir::Annotation], target: &str) -> bool {
-    annotations.iter().any(|annotation| {
-        annotation_name(annotation)
-            .map(|name| name.eq_ignore_ascii_case(target))
-            .unwrap_or(false)
-    })
-}
-
-pub fn find_annotation<'a>(
-    annotations: &'a [hir::Annotation],
-    target: &str,
-) -> Option<&'a hir::Annotation> {
-    annotations.iter().find(|annotation| {
-        annotation_name(annotation)
-            .map(|name| name.eq_ignore_ascii_case(target))
-            .unwrap_or(false)
-    })
-}
-
-pub fn has_optional_annotation(annotations: &[hir::Annotation]) -> bool {
-    annotations.iter().any(|annotation| {
-        matches!(annotation, hir::Annotation::Optional { .. })
-            || annotation_name(annotation)
-                .map(|name| name.eq_ignore_ascii_case("optional"))
-                .unwrap_or(false)
-    })
-}
+pub use crate::hir::{
+    annotation_name, annotation_params, find_annotation, has_annotation, has_optional_annotation,
+};
 
 pub fn normalize_annotation_params(params: &hir::AnnotationParams) -> HashMap<String, String> {
     let mut out = HashMap::new();

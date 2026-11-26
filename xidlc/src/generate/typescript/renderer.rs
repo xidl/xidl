@@ -47,8 +47,18 @@ impl TypescriptRenderer {
     /// The model file is the module the rest of the file set imports from, so
     /// it re-exports each unit a reference may name, including one only a
     /// client or server file references.
+    /// Every unit the file imports, by prefix.
+    ///
+    /// The model file is the module the rest of the file set imports from, so
+    /// it re-exports each unit a reference may name, including one only a
+    /// client or server file references.
     pub fn imported_units(&self) -> Vec<String> {
         crate::generate::utils::imported_units(&self.properties)
+    }
+
+    /// Loads a shared template such as `macros.j2` for sibling TypeScript targets.
+    pub(crate) fn load_shared_template(name: &str) -> std::result::Result<String, Error> {
+        load_template(name)
     }
 }
 

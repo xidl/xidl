@@ -4,8 +4,8 @@ use xidl_parser::rest_hir::semantics::{
     validate_http_stream_method, validate_http_stream_target,
 };
 
-use super::http::method_name;
-use super::method::HttpMethod;
+use super::operation::http_method_name;
+use xidl_parser::rest_hir::HttpMethod;
 
 pub(crate) fn validate_target(op_ident: &str, stream: HttpStreamConfig) -> IdlcResult<()> {
     validate_http_stream_target(op_ident, stream, target_support()).map_err(IdlcError::rpc)
@@ -16,7 +16,7 @@ pub(crate) fn validate_method(
     stream: Option<HttpStreamKind>,
     method: HttpMethod,
 ) -> IdlcResult<()> {
-    validate_http_stream_method(op_ident, stream, method_name(method), target_support())
+    validate_http_stream_method(op_ident, stream, http_method_name(method), target_support())
         .map_err(IdlcError::rpc)
 }
 

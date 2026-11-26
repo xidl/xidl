@@ -1,8 +1,8 @@
 use crate::error::IdlcResult;
-use crate::generate::typescript::TypescriptRenderer;
 use crate::generate::typescript::definition::names::ts_ident;
 
 use super::model::{MethodModel, ServerClassContext};
+use super::renderer::TypescriptRestRenderer;
 
 pub(super) struct ServerClass {
     context: ServerClassContext,
@@ -27,7 +27,7 @@ impl ServerClass {
         })
     }
 
-    pub(super) fn render(&self, renderer: &TypescriptRenderer) -> IdlcResult<String> {
-        renderer.render_template("http/server_class.ts.j2", &self.context)
+    pub(super) fn render(&self, renderer: &TypescriptRestRenderer) -> IdlcResult<String> {
+        renderer.render_template("server_class.ts.j2", &self.context)
     }
 }

@@ -1,7 +1,7 @@
 use super::model::{ClientClassContext, MethodModel, TsHttpBlocks};
+use super::renderer::TypescriptRestRenderer;
 use super::server::ServerClass;
 use crate::error::IdlcResult;
-use crate::generate::typescript::TypescriptRenderer;
 use crate::generate::typescript::definition::names::ts_ident;
 use method::OperationModelInput;
 use render_types::{render_request_types, render_response_types};
@@ -21,7 +21,7 @@ mod websocket_helpers;
 pub(crate) fn render_interface(
     interface: &hir::InterfaceDcl,
     module_path: &[String],
-    renderer: &TypescriptRenderer,
+    renderer: &TypescriptRestRenderer,
     rest_hir: &RestHirDocument,
     text_aliases: &text_aliases::TextAliases,
 ) -> IdlcResult<TsHttpBlocks> {

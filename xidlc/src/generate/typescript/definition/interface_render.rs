@@ -3,7 +3,8 @@ use crate::generate::typescript::TypescriptRenderer;
 use xidl_parser::hir;
 
 use super::contexts::{
-    ClientClassContext, ParamDeclContext, RequestContext, RequestZodContext, TsType, ZodSchema,
+    ClientClassContext, ParamDeclContext, RequestContext, RequestZodContext, TsRenderCtx, TsType,
+    ZodSchema,
 };
 use super::method::{MethodInfo, TypeRefTarget};
 use super::names::{ts_ident, ts_prop_name};
@@ -16,20 +17,23 @@ use super::type_expr::{
 pub(crate) fn render_interface(
     interface: &hir::InterfaceDcl,
     module_path: &[String],
-    renderer: &TypescriptRenderer,
+    ctx: &TsRenderCtx<'_>,
 ) -> IdlcResult<TsRenderOutput> {
     let def = match &interface.decl {
         hir::InterfaceDclInner::InterfaceDef(def) => def,
         _ => return Ok(TsRenderOutput::default()),
     };
-    let methods = collect_methods(def, module_path)?;
+    let http_interface = ctx
+        .rest_hir
+        .and_then(|doc| doc.find_interface(module_path, &def.header.ident));
+    let methods = collect_methods(def, module_path, http_interface)?;
     let mut out = TsRenderOutput::default();
     for method in &methods {
-        render_request(out_ref(&mut out), method, module_path, renderer)?;
-        render_response(out_ref(&mut out), method, module_path, renderer)?;
+        render_request(out_ref(&mut out), method, module_path, ctx.renderer)?;
+        render_response(out_ref(&mut out), method, module_path, ctx.renderer)?;
     }
     out.client.push(
-        renderer.render_template(
+        ctx.renderer.render_template(
             "client_class.ts.j2",
             &ClientClassContext {
                 client_name: ts_ident(&def.header.ident), // Template adds 'Client'
@@ -43,13 +47,23 @@ pub(crate) fn render_interface(
     Ok(out)
 }
 
-fn collect_methods(def: &hir::InterfaceDef, module_path: &[String]) -> IdlcResult<Vec<MethodInfo>> {
+fn collect_methods(
+    def: &hir::InterfaceDef,
+    module_path: &[String],
+    http_interface: Option<&xidl_parser::rest_hir::HttpInterface>,
+) -> IdlcResult<Vec<MethodInfo>> {
     let mut methods = Vec::new();
     if let Some(body) = &def.interface_body {
         for export in &body.0 {
             match export {
                 hir::Export::OpDcl(op) => {
-                    methods.push(render_op(op, &def.header.ident, module_path)?)
+                    let http_op = http_interface.and_then(|iface| {
+                        iface.operations.iter().find(|item| {
+                            item.meta.source == xidl_parser::rest_hir::HttpOperationSource::Method
+                                && item.meta.name == op.ident
+                        })
+                    });
+                    methods.push(render_op(op, &def.header.ident, module_path, http_op)?)
                 }
                 hir::Export::AttrDcl(attr) => {
                     methods.extend(super::attr::render_attr(

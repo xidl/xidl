@@ -37,10 +37,19 @@ impl TsGenerator {
         mode: TsMode,
         recursive: &std::collections::HashSet<Vec<String>>,
     ) -> IdlcResult<TypescriptRenderOutput> {
+        let rest_hir = if mode.allows_interfaces() && has_interface_def(&spec.0) {
+            Some(
+                xidl_parser::rest_hir::project(spec)
+                    .map_err(|err| crate::error::IdlcError::rpc(err.to_string()))?,
+            )
+        } else {
+            None
+        };
         let ctx = TsRenderCtx {
             renderer,
             file_stem: &self.file_stem,
             recursive,
+            rest_hir: rest_hir.as_ref(),
         };
         let blocks = render_module_body(&spec.0, &[], mode, &ctx)?;
         let imports = renderer.imported_units();
@@ -124,7 +133,7 @@ pub(crate) fn render_module_body(
                 out.extend(render_exception(except, module_path, ctx)?);
             }
             hir::Definition::InterfaceDcl(interface) if mode.allows_interfaces() => {
-                out.extend(render_interface(interface, module_path, ctx.renderer)?);
+                out.extend(render_interface(interface, module_path, ctx)?);
             }
             hir::Definition::ConstDcl(_) | hir::Definition::Pragma(_) => {}
             _ => {}
@@ -182,4 +191,14 @@ fn merge_blocks(blocks: &[TsRenderOutput]) -> TsRenderOutput {
         out.client.extend(block.client.iter().cloned());
     }
     out
+}
+
+fn has_interface_def(defs: &[hir::Definition]) -> bool {
+    defs.iter().any(|def| match def {
+        hir::Definition::InterfaceDcl(interface) => {
+            matches!(interface.decl, hir::InterfaceDclInner::InterfaceDef(_))
+        }
+        hir::Definition::ModuleDcl(module) => has_interface_def(&module.definition),
+        _ => false,
+    })
 }
