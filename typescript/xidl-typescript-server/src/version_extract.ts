@@ -112,14 +112,29 @@ function extractVersionCookie(
     : { kind: 'ok', value };
 }
 
+export function varyTokenForParameter(
+  parameter: VersionParameterSpec,
+): string | undefined {
+  if (parameter.in === 'header') {
+    return parameter.name;
+  }
+  if (parameter.in === 'cookie') {
+    return 'Cookie';
+  }
+  return undefined;
+}
+
 export function withVersionHeaders(
   response: Response,
   headerName: string,
   versionValue: string,
+  varyToken?: string,
 ): Response {
   const headers = new Headers(response.headers);
   headers.set(headerName, versionValue);
-  addVaryToken(headers, headerName);
+  if (varyToken) {
+    addVaryToken(headers, varyToken);
+  }
   return new Response(response.body, {
     headers,
     status: response.status,

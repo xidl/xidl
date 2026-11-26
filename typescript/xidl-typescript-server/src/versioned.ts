@@ -3,6 +3,7 @@ import type { Awaitable, WebHandler } from './types.ts';
 import {
   addVaryToken,
   extractVersionParameter,
+  varyTokenForParameter,
   withVersionHeaders,
 } from './version_extract.ts';
 
@@ -75,6 +76,13 @@ export interface VersionedRouterOptions<TVersionId extends string = string> {
   ) => Awaitable<Response>;
 }
 
+interface VersionRouterIndex<TVersionId extends string> {
+  byId: Map<TVersionId, VersionEntry<TVersionId>>;
+  byValue: Map<string, VersionEntry<TVersionId>>;
+  options: VersionedRouterOptions<TVersionId>;
+  supportedVersions: readonly string[];
+}
+
 /**
  * Mounts every version of an HTTP contract behind a single Web-standard handler.
  */
@@ -85,13 +93,36 @@ export function createVersionedRouter<TVersionId extends string = string>(
   const byValue = new Map<string, VersionEntry<TVersionId>>();
   const supportedVersions: string[] = [];
   for (const entry of options.versions) {
+    if (byId.has(entry.id)) {
+      throw new Error(`duplicate version id '${entry.id}'`);
+    }
+    if (byValue.has(entry.value)) {
+      throw new Error(`duplicate version value '${entry.value}'`);
+    }
     byId.set(entry.id, entry);
     byValue.set(entry.value, entry);
-    if (entry.status !== 'retired') {
+    if (entry.status !== 'retired' && entry.handler) {
       supportedVersions.push(entry.value);
     }
   }
+  if (
+    options.defaultVersion !== undefined &&
+    !byId.has(options.defaultVersion)
+  ) {
+    throw new Error(
+      `defaultVersion '${options.defaultVersion}' is not declared in versions`,
+    );
+  }
+  const index: VersionRouterIndex<TVersionId> = {
+    byId,
+    byValue,
+    options,
+    supportedVersions,
+  };
   const echoHeader = options.echoHeader ?? options.parameter.in === 'header';
+  const varyToken = echoHeader
+    ? varyTokenForParameter(options.parameter)
+    : undefined;
 
   return async request => {
     try {
@@ -108,24 +139,17 @@ export function createVersionedRouter<TVersionId extends string = string>(
           },
           request,
           options,
-          echoHeader,
+          varyToken,
         );
       }
 
-      const resolved = resolveEntry(
-        extracted.value,
-        request,
-        options,
-        byId,
-        byValue,
-        supportedVersions,
-      );
+      const resolved = resolveEntry(extracted.value, request, index);
       if ('error' in resolved) {
         return await respondVersionError(
           resolved.error,
           request,
           options,
-          echoHeader,
+          varyToken,
         );
       }
 
@@ -143,7 +167,7 @@ export function createVersionedRouter<TVersionId extends string = string>(
           },
           request,
           options,
-          echoHeader,
+          varyToken,
         );
       }
 
@@ -160,7 +184,12 @@ export function createVersionedRouter<TVersionId extends string = string>(
       if (!echoHeader) {
         return response;
       }
-      return withVersionHeaders(response, options.parameter.name, entry.value);
+      return withVersionHeaders(
+        response,
+        options.parameter.name,
+        entry.value,
+        varyToken,
+      );
     } catch (error) {
       return errorResponse(error);
     }
@@ -170,11 +199,9 @@ export function createVersionedRouter<TVersionId extends string = string>(
 function resolveEntry<TVersionId extends string>(
   raw: string | undefined,
   request: Request,
-  options: VersionedRouterOptions<TVersionId>,
-  byId: Map<TVersionId, VersionEntry<TVersionId>>,
-  byValue: Map<string, VersionEntry<TVersionId>>,
-  supportedVersions: readonly string[],
+  index: VersionRouterIndex<TVersionId>,
 ): { entry: VersionEntry<TVersionId> } | { error: VersionResolutionError } {
+  const { byId, byValue, options, supportedVersions } = index;
   if (options.resolveVersion) {
     const outcome = options.resolveVersion(raw, {
       request,
@@ -270,7 +297,7 @@ async function respondVersionError<TVersionId extends string>(
   error: VersionResolutionError,
   request: Request,
   options: VersionedRouterOptions<TVersionId>,
-  echoHeader: boolean,
+  varyToken: string | undefined,
 ): Promise<Response> {
   const response = options.onVersionError
     ? await options.onVersionError(error, request)
@@ -289,11 +316,11 @@ async function respondVersionError<TVersionId extends string>(
           status: error.status,
         },
       );
-  if (!echoHeader) {
+  if (!varyToken) {
     return response;
   }
   const headers = new Headers(response.headers);
-  addVaryToken(headers, options.parameter.name);
+  addVaryToken(headers, varyToken);
   return new Response(response.body, {
     headers,
     status: response.status,
