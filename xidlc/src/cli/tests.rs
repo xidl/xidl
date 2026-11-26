@@ -14,19 +14,66 @@ fn version_diff_uses_three_positional_arguments_and_rejects_legacy_options() {
     assert_eq!(args.from, "v1");
     assert_eq!(args.to, "2026-07");
     assert_eq!(args.idl, PathBuf::from("api.idl"));
-    for args in [
-        vec![
-            "xidlc", "version", "diff", "--from", "v1", "--to", "v2", "api.idl",
-        ],
-        vec!["xidlc", "version", "diff", "v1", "v2"],
-        vec!["xidlc", "version", "verify", "api.idl"],
+    for (args, expected_kind) in [
+        (
+            vec![
+                "xidlc", "version", "diff", "--from", "v1", "--to", "v2", "api.idl",
+            ],
+            clap::error::ErrorKind::UnknownArgument,
+        ),
+        (
+            vec!["xidlc", "version", "diff", "v1", "v2"],
+            clap::error::ErrorKind::MissingRequiredArgument,
+        ),
+        (
+            vec!["xidlc", "version", "verify", "api.idl"],
+            clap::error::ErrorKind::InvalidSubcommand,
+        ),
     ] {
-        assert!(Cli::try_parse_from(args).is_err());
+        let err = Cli::try_parse_from(args).expect_err("invalid version args must fail");
+        assert_eq!(err.kind(), expected_kind);
     }
 }
 
 #[test]
 fn version_lock_and_check_parse_idl_and_options() {
+    let lock_default = Cli::try_parse_from(["xidlc", "version", "lock", "api.idl"])
+        .expect("parse default version lock");
+    let Command::Version(args) = lock_default.command else {
+        panic!("expected version command");
+    };
+    let VersionCommand::Lock(args) = args.command else {
+        panic!("expected version lock command");
+    };
+    assert_eq!(args.lock_file, None);
+    assert!(!args.force);
+    assert_eq!(args.idl, PathBuf::from("api.idl"));
+
+    let check_default = Cli::try_parse_from(["xidlc", "version", "check", "api.idl"])
+        .expect("parse default version check");
+    let Command::Version(args) = check_default.command else {
+        panic!("expected version command");
+    };
+    let VersionCommand::Check(args) = args.command else {
+        panic!("expected version check command");
+    };
+    assert_eq!(args.lock_file, None);
+    assert!(!args.strict);
+    assert_eq!(args.idl, PathBuf::from("api.idl"));
+
+    assert_eq!(
+        Cli::try_parse_from(["xidlc", "version", "lock", "--strict", "api.idl"])
+            .expect_err("lock must reject --strict")
+            .kind(),
+        clap::error::ErrorKind::UnknownArgument
+    );
+    assert_eq!(
+        Cli::try_parse_from(["xidlc", "version", "check", "--force", "api.idl"])
+            .expect_err("check must reject --force")
+            .kind(),
+        clap::error::ErrorKind::UnknownArgument
+    );
+
     let lock = Cli::try_parse_from([
         "xidlc",
         "version",
@@ -186,7 +233,7 @@ fn parses_multiple_api_version_selection() {
 
 #[test]
 fn rejects_conflicting_api_version_selection() {
-    let result = Cli::try_parse_from([
+    let err = Cli::try_parse_from([
         "xidlc",
         "gen",
         "--api-version",
@@ -195,9 +242,10 @@ fn rejects_conflicting_api_version_selection() {
         "v2",
         "rust",
         "demo.idl",
-    ]);
+    ])
+    .expect_err("conflicting flags should not parse");
 
-    assert!(result.is_err(), "conflicting flags should not parse");
+    assert_eq!(err.kind(), clap::error::ErrorKind::ArgumentConflict);
 }
 
 #[test]
@@ -227,9 +275,11 @@ fn openapi_defaults_to_auto_version() {
 
 #[test]
 fn openapi_version_only_parses_for_the_openapi_target() {
-    let result = Cli::try_parse_from(["xidlc", "gen", "rust", "--version", "3.1", "demo.idl"]);
-    assert!(result.is_err(), "`rust` must reject --version");
+    let err = Cli::try_parse_from(["xidlc", "gen", "rust", "--version", "3.1", "demo.idl"])
+        .expect_err("`rust` must reject --version");
+    assert_eq!(err.kind(), clap::error::ErrorKind::UnknownArgument);
 
-    let result = Cli::try_parse_from(["xidlc", "gen", "openapi", "--version", "3.2", "demo.idl"]);
-    assert!(result.is_err(), "only auto and 3.1 are accepted");
+    let err = Cli::try_parse_from(["xidlc", "gen", "openapi", "--version", "3.2", "demo.idl"])
+        .expect_err("only auto and 3.1 are accepted");
+    assert_eq!(err.kind(), clap::error::ErrorKind::InvalidValue);
 }
