@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.112.0](https://github.com/xidl/xidl/compare/v0.111.0...v0.112.0) (2026-11-26)
+
+
+### Features
+
+* **typescript-server:** add multi-version router and adapter bridge ([072412f](https://github.com/xidl/xidl/commit/072412f3eacab46ba8cc04da8f99409149c62485)), closes [#486](https://github.com/xidl/xidl/issues/486)
+* **xidlc:** add version lock and check commands ([5a63a6b](https://github.com/xidl/xidl/commit/5a63a6b07363c6c30141555eb0eb5de05550d138)), closes [#487](https://github.com/xidl/xidl/issues/487)
+
+
+### Bug Fixes
+
+* **ci:** use macos-15 runner for aarch64-apple-darwin releases ([9011dac](https://github.com/xidl/xidl/commit/9011dac7f511ed9202d0d49c6aaa583862c79ab6)), closes [#488](https://github.com/xidl/xidl/issues/488)
+* **xidlc:** use renamed enumerator values for union wire tags ([e97f879](https://github.com/xidl/xidl/commit/e97f879043f09344e6a532d41e4f3f0f8add27b2)), closes [#485](https://github.com/xidl/xidl/issues/485)
+
 ## [0.111.0](https://github.com/xidl/xidl/compare/v0.110.0...v0.111.0) (2026-11-04)
 
 
