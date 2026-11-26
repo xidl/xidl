@@ -1,60 +1,9 @@
 use std::ops::Range;
 
+use crate::diagnostic::{Diagnostic, DiagnosticCode, Severity};
 use crate::typed_ast::{AnnotationAppl, AnnotationName};
-use serde::Serialize;
 
 use super::{AnnotationDefinition, AnnotationKind, BUILTIN_ANNOTATIONS, Site};
-
-/// Stable identifier of an annotation diagnostic.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "kebab-case")]
-pub enum DiagnosticCode {
-    /// An unknown name is within edit distance two of a built-in name.
-    MisspelledAnnotation,
-    /// A built-in annotation targets an unsupported declaration.
-    MisplacedAnnotation,
-    /// Arguments do not satisfy the annotation's contract.
-    BadAnnotationArgs,
-    /// An unknown annotation may be interpreted by an external plugin.
-    UnknownAnnotation,
-}
-
-impl DiagnosticCode {
-    /// Stable spelling used by command-line output and editor integrations.
-    pub fn as_str(self) -> &'static str {
-        match self {
-            Self::MisspelledAnnotation => "misspelled-annotation",
-            Self::MisplacedAnnotation => "misplaced-annotation",
-            Self::BadAnnotationArgs => "bad-annotation-args",
-            Self::UnknownAnnotation => "unknown-annotation",
-        }
-    }
-}
-
-/// Diagnostic severity before a caller applies its warning policy.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "lowercase")]
-pub enum Severity {
-    /// The annotation contract is invalid.
-    Error,
-    /// The annotation is not known to the built-in vocabulary.
-    Warning,
-}
-
-/// A source-located annotation diagnostic, with no IO or rendering dependencies.
-#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
-pub struct Diagnostic {
-    /// Stable rule identifier.
-    pub code: DiagnosticCode,
-    /// Severity independent of a CLI's `--deny warnings` policy.
-    pub severity: Severity,
-    /// Half-open byte range in the parsed source.
-    pub span: Range<usize>,
-    /// Description of the failing annotation contract.
-    pub message: String,
-    /// Suggested spelling, when a nearby built-in name exists.
-    pub suggestion: Option<String>,
-}
 
 #[derive(Default)]
 pub(super) struct Checker {
@@ -113,22 +62,18 @@ impl Checker {
             return;
         }
         if !definition.allows(site) {
-            self.diagnostics.push(Diagnostic {
-                code: DiagnosticCode::MisplacedAnnotation,
-                severity: Severity::Error,
-                span: span.clone(),
-                message: format!("@{name} is not allowed on {site:?}"),
-                suggestion: None,
-            });
+            self.diagnostics.push(Diagnostic::error(
+                DiagnosticCode::MisplacedAnnotation,
+                span.clone(),
+                format!("@{name} is not allowed on {site:?}"),
+            ));
         }
         if let Err(reason) = definition.check_arguments(annotation, site) {
-            self.diagnostics.push(Diagnostic {
-                code: DiagnosticCode::BadAnnotationArgs,
-                severity: Severity::Error,
+            self.diagnostics.push(Diagnostic::error(
+                DiagnosticCode::BadAnnotationArgs,
                 span,
-                message: format!("@{name}: {reason}"),
-                suggestion: None,
-            });
+                format!("@{name}: {reason}"),
+            ));
         }
     }
 
@@ -152,6 +97,7 @@ impl Checker {
             span,
             message: format!("unknown annotation `@{name}`"),
             suggestion,
+            location: None,
         });
     }
 }

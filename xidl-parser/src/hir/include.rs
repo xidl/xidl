@@ -1,22 +1,32 @@
+use crate::hir::Definition;
 use crate::parser::IncludeResolver;
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::{Path, PathBuf};
 
-/// Splits an include or import path at its trailing `@<version>` selector.
-///
-/// A leading `@` belongs to the path, so `"@xidl/http"` keeps its name, and a
-/// path without a usable selector keeps the `@` it was written with.
-pub fn split_version_selector(path: &str) -> (&str, Option<&str>) {
-    let Some(index) = path.rfind('@').filter(|index| *index > 0) else {
-        return (path, None);
-    };
-    let (target, selector) = path.split_at(index);
-    let selector = selector.trim_start_matches('@');
-    if selector.is_empty() {
-        return (path, None);
+pub use crate::parser::split_version_selector;
+
+/// Callback used during HIR lowering to splice versioned `#include` directives.
+pub(crate) trait VersionedIncludeExpander {
+    /// Splices the projected definitions for `raw_path` into `out`.
+    fn expand(
+        &mut self,
+        raw_path: &str,
+        out: &mut Vec<Definition>,
+    ) -> crate::error::ParserResult<()>;
+}
+
+/// No-op versioned include expander for standalone or builtin specifications.
+pub(crate) struct NoopVersionedIncludes;
+
+impl VersionedIncludeExpander for NoopVersionedIncludes {
+    fn expand(
+        &mut self,
+        _raw_path: &str,
+        _out: &mut Vec<Definition>,
+    ) -> crate::error::ParserResult<()> {
+        Ok(())
     }
-    (target, Some(selector))
 }
 
 /// Resolves `#include` paths relative to the including file on disk.

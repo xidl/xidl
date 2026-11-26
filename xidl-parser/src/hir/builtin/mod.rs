@@ -12,8 +12,7 @@ impl HttpBuiltins {
         let source = xidl_http::ContentType::IDL;
         let typed = crate::parser::parser_text(source)?;
         let mut definitions = Vec::new();
-        let mut resolver = super::FsIncludeResolver;
-        let mut includes = super::VersionedIncludes::new(&mut resolver, None);
+        let mut includes = super::NoopVersionedIncludes;
         super::spec::collect_defs(typed.0, &mut definitions, &mut includes)?;
         Ok(definitions)
     }

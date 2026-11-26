@@ -12,6 +12,8 @@ pub enum ParseError {
     UnexpectedNode(String),
     /// Failure reported by tree-sitter itself.
     TreeSitterError(String),
+    /// Structured syntax or validation diagnostics collected by a pass.
+    Diagnostics(Vec<crate::diagnostic::Diagnostic>),
     /// Failure reported by API versioning analysis or projection.
     Versioning(crate::versioning::VersioningError),
 }
@@ -23,6 +25,15 @@ impl fmt::Display for ParseError {
             Self::Utf8Error(err) => write!(f, "{err}"),
             Self::UnexpectedNode(node) => write!(f, "Unexpected node: {node}"),
             Self::TreeSitterError(message) => write!(f, "TreeSitterError: {message}"),
+            Self::Diagnostics(diagnostics) => {
+                for (idx, diagnostic) in diagnostics.iter().enumerate() {
+                    if idx > 0 {
+                        f.write_str("; ")?;
+                    }
+                    f.write_str(&diagnostic.message)?;
+                }
+                Ok(())
+            }
             Self::Versioning(error) => write!(f, "{error}"),
         }
     }

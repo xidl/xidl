@@ -39,8 +39,7 @@ fn version_namespace_removal_visits_bounds_without_rewriting_dependency_names() 
     "#,
     )
     .expect("valid collection-bound syntax");
-    let mut resolver = hir::FsIncludeResolver;
-    let mut includes = hir::VersionedIncludes::new(&mut resolver, None);
+    let mut includes = hir::NoopVersionedIncludes;
     let mut definitions = Vec::new();
     // Import binding visits source references before semantic size resolution.
     hir::spec::collect_defs(typed.0, &mut definitions, &mut includes).unwrap();

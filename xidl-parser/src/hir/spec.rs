@@ -1,24 +1,29 @@
 use super::{
     Definition, FsIncludeResolver, InterfaceDcl, ModuleDcl, ParserProperties, Specification,
-    TypeDcl, VersionedIncludes, expand_annotations, parse_xidlc_pragma,
+    TypeDcl, VersionedIncludeExpander, expand_annotations, parse_xidlc_pragma,
 };
-use crate::jsonrpc_hir;
 use crate::parser::IncludeResolver;
-use crate::rest_hir::{self, HirProjectionKind, ProjectedHir};
-use crate::semantic;
-use crate::versioning::{self, VersionedProjection, VersioningRecord};
-use serde_json::Value;
+use crate::pipeline::{CompileOptions, Pipeline, ProjectedHir};
+use crate::versioning::VersionedProjection;
 use std::path::Path;
 
 impl From<crate::typed_ast::Specification> for Specification {
     fn from(value: crate::typed_ast::Specification) -> Self {
-        let mut resolver = FsIncludeResolver;
-        let mut includes = VersionedIncludes::new(&mut resolver, None);
-        spec_from_typed_ast(value, &mut includes)
+        Pipeline::lower_spec_default(value).expect("HIR conversion should not fail")
     }
 }
 
 impl Specification {
+    /// Lowers a typed AST into raw HIR definitions without running validation passes.
+    pub(crate) fn lower_raw(
+        value: crate::typed_ast::Specification,
+        includes: &mut dyn VersionedIncludeExpander,
+    ) -> crate::error::ParserResult<Self> {
+        let mut definitions = Vec::new();
+        collect_defs(value.0, &mut definitions, includes)?;
+        Ok(Self(definitions))
+    }
+
     /// Lowers source declarations for an export index without evaluating them.
     ///
     /// Includes use the caller's resolver. Version projection and semantic
@@ -28,11 +33,10 @@ impl Specification {
         path: impl AsRef<Path>,
         resolver: &mut dyn IncludeResolver,
     ) -> crate::error::ParserResult<Self> {
-        let current = Self::current_path(path.as_ref());
-        let mut includes = VersionedIncludes::new(resolver, current);
-        Self::lower_source(value, &mut includes)
+        Pipeline::lower_source_spec(value, path.as_ref(), resolver)
     }
 
+    /// Lowers an unprojected typed AST using the default filesystem include resolver.
     pub fn from_typed_ast_with_properties_and_path(
         value: crate::typed_ast::Specification,
         properties: ParserProperties,
@@ -52,20 +56,21 @@ impl Specification {
         path: impl AsRef<Path>,
         resolver: &mut dyn IncludeResolver,
     ) -> crate::error::ParserResult<Self> {
-        let current = Self::current_path(path.as_ref());
-        let mut includes = VersionedIncludes::new(resolver, current);
-        let imports = semantic::IntegerImports::from_properties(&properties)?;
-        Self::lower(value, &mut includes, &imports)
+        Pipeline::lower_spec(value, &properties, path.as_ref(), resolver)
     }
 
+    /// Lowers an unprojected typed AST with default properties and filesystem resolver.
     pub fn from_typed_ast_with_path(
         value: crate::typed_ast::Specification,
         path: impl AsRef<Path>,
     ) -> crate::error::ParserResult<Self> {
         let mut resolver = FsIncludeResolver;
-        let current = Self::current_path(path.as_ref());
-        let mut includes = VersionedIncludes::new(&mut resolver, current);
-        Self::lower(value, &mut includes, &semantic::IntegerImports::default())
+        Pipeline::lower_spec(
+            value,
+            &ParserProperties::default(),
+            path.as_ref(),
+            &mut resolver,
+        )
     }
 
     /// Lowers a typed AST and returns one HIR projection per requested version.
@@ -99,66 +104,8 @@ impl Specification {
         path: impl AsRef<Path>,
         resolver: &mut dyn IncludeResolver,
     ) -> crate::error::ParserResult<Vec<VersionedProjection>> {
-        let current = Self::current_path(path.as_ref());
-        let mut includes = VersionedIncludes::new(resolver, current);
-        let layout = versioning::VersionLayout::from_properties(&properties)?;
-        let selection = versioning::selection_from_properties(&properties)?;
-        let integer_imports = semantic::IntegerImports::from_properties(&properties)?;
-        let source = Self::lower_source(value, &mut includes)?;
-        let Some(record) = VersioningRecord::analyze(&source)? else {
-            if let Some(selection) = &selection {
-                return Err(versioning::unversioned_selection_error(selection));
-            }
-            let spec = Self::finalize_projection(source, &integer_imports)?;
-            return Ok(vec![VersionedProjection {
-                versions: Vec::new(),
-                version: None,
-                hir: Self::project_hir(spec, &properties, None, Vec::new())?,
-            }]);
-        };
-        let versions = versioning::selected_versions(selection.as_ref(), &record)?;
-        let version_parameter = record.parameter();
-        let version_values = |defs: &[versioning::VersionDef]| {
-            defs.iter()
-                .filter(|_| version_parameter.is_some())
-                .map(|def| (def.ident.clone(), def.value.clone()))
-                .collect::<Vec<_>>()
-        };
-        match layout {
-            versioning::VersionLayout::Merged => {
-                let selected = versions
-                    .iter()
-                    .filter_map(|version| record.timeline().get(*version).cloned())
-                    .collect::<Vec<_>>();
-                let values = version_values(&selected);
-                let spec = record.merge_source(&source, &versions)?;
-                let spec = Self::finalize_projection(spec, &integer_imports)?;
-                Ok(vec![VersionedProjection {
-                    versions: selected,
-                    version: None,
-                    hir: Self::project_hir(spec, &properties, version_parameter, values)?,
-                }])
-            }
-            versioning::VersionLayout::PerVersion => {
-                let mut projections = Vec::new();
-                for version in versions {
-                    let spec = record.project_source(&source, version)?;
-                    let spec = Self::finalize_projection(spec, &integer_imports)?;
-                    let definition = record.timeline().get(version).cloned();
-                    let values = definition
-                        .iter()
-                        .filter(|_| version_parameter.is_some())
-                        .map(|def| (def.ident.clone(), def.value.clone()))
-                        .collect();
-                    projections.push(VersionedProjection {
-                        versions: definition.clone().into_iter().collect(),
-                        version: definition,
-                        hir: Self::project_hir(spec, &properties, version_parameter, values)?,
-                    });
-                }
-                Ok(projections)
-            }
-        }
+        let options = CompileOptions::new(path.as_ref(), properties);
+        Pipeline::compile_typed_ast(value, options, resolver).map(|unit| unit.projections)
     }
 
     /// Lowers a typed AST and projects the first request of the merged layout.
@@ -178,91 +125,12 @@ impl Specification {
             )),
         }
     }
-
-    fn project_hir(
-        spec: Specification,
-        properties: &ParserProperties,
-        version_parameter: Option<&super::VersionParameter>,
-        version_values: Vec<(String, String)>,
-    ) -> crate::error::ParserResult<ProjectedHir> {
-        match hir_projection_kind(properties) {
-            HirProjectionKind::Rpc => Ok(ProjectedHir::Rpc(spec)),
-            HirProjectionKind::Http => {
-                let options = rest_hir::ProjectOptions {
-                    version_parameter: version_parameter.cloned(),
-                    version_values,
-                };
-                rest_hir::project_with_options(&spec, &options).map(ProjectedHir::Http)
-            }
-            HirProjectionKind::JsonRpc => jsonrpc_hir::project(&spec).map(ProjectedHir::JsonRpc),
-        }
-    }
-
-    /// Builds the source HIR: definitions plus shared source validation.
-    fn lower_source(
-        value: crate::typed_ast::Specification,
-        includes: &mut VersionedIncludes<'_>,
-    ) -> crate::error::ParserResult<Self> {
-        crate::lint::AnnotationKind::Webhooks.validate_source(&value.0)?;
-        let mut definitions = Vec::new();
-        collect_defs(value.0, &mut definitions, includes)?;
-        let spec = Self(definitions);
-        semantic::UnionCaseLabels::validate(&spec.0)?;
-        // All source targets share HTTP declaration validation; builtins belong
-        // to its temporary type environment, not the generated user models.
-        rest_hir::HttpUnion::validate_source(&spec.0)?;
-        Ok(spec)
-    }
-
-    /// Resolves integer expressions in the selected source declarations.
-    fn finalize_projection(
-        mut spec: Self,
-        imports: &semantic::IntegerImports,
-    ) -> crate::error::ParserResult<Self> {
-        semantic::IntegerDeclarations::normalize(&mut spec, imports)?;
-        Self::finalize(spec, imports)
-    }
-
-    /// Validates collection bounds and structure on an already lowered spec.
-    fn finalize(
-        mut spec: Self,
-        imports: &semantic::IntegerImports,
-    ) -> crate::error::ParserResult<Self> {
-        semantic::CollectionBounds::normalize(&mut spec, imports)?;
-        semantic::Analysis::structure(&mut spec)?;
-        Ok(spec)
-    }
-
-    fn lower(
-        value: crate::typed_ast::Specification,
-        includes: &mut VersionedIncludes<'_>,
-        imports: &semantic::IntegerImports,
-    ) -> crate::error::ParserResult<Self> {
-        let spec = Self::lower_source(value, includes)?;
-        // API versioning annotations are validated on every compile, even when
-        // no version is projected.
-        VersioningRecord::analyze(&spec)?;
-        Self::finalize(spec, imports)
-    }
-
-    /// Path handed to include resolution, when it is valid utf-8.
-    fn current_path(path: &Path) -> Option<String> {
-        path.to_str().map(str::to_string)
-    }
-}
-
-pub(crate) fn spec_from_typed_ast(
-    value: crate::typed_ast::Specification,
-    includes: &mut VersionedIncludes<'_>,
-) -> Specification {
-    Specification::lower(value, includes, &semantic::IntegerImports::default())
-        .expect("HIR conversion should not fail")
 }
 
 pub(super) fn collect_defs(
     defs: Vec<crate::typed_ast::Definition>,
     out: &mut Vec<Definition>,
-    includes: &mut VersionedIncludes<'_>,
+    includes: &mut dyn VersionedIncludeExpander,
 ) -> crate::error::ParserResult<()> {
     for def in defs {
         match def {
@@ -321,17 +189,5 @@ fn include_path_text(include: &crate::typed_ast::PreprocInclude) -> Option<Strin
         }
         crate::typed_ast::PreprocIncludePath::SystemLibString(_)
         | crate::typed_ast::PreprocIncludePath::Identifier(_) => None,
-    }
-}
-
-fn hir_projection_kind(properties: &ParserProperties) -> HirProjectionKind {
-    match properties.get("hir_kind").and_then(Value::as_str) {
-        Some(value) if value.eq_ignore_ascii_case("http") => HirProjectionKind::Http,
-        Some(value)
-            if value.eq_ignore_ascii_case("jsonrpc") || value.eq_ignore_ascii_case("json-rpc") =>
-        {
-            HirProjectionKind::JsonRpc
-        }
-        _ => HirProjectionKind::Rpc,
     }
 }

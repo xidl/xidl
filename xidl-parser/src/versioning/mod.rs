@@ -33,7 +33,7 @@ use lifecycle::VersionVisitor as _;
 
 use crate::error::{ParseError, ParserResult};
 use crate::hir::{ParserProperties, Specification, VersionParameter};
-use crate::rest_hir::ProjectedHir;
+use crate::pipeline::ProjectedHir;
 
 /// Generation property that selects one API version by member ident or value.
 pub const API_VERSION_PROPERTY: &str = "api_version";
