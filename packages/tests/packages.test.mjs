@@ -83,6 +83,15 @@ test('the release workflow publishes through the npm scripts', () => {
   assert.match(workflow, /id-token: write/);
 });
 
+test('the release workflow uses a supported macOS arm64 runner', () => {
+  const workflow = readWorkflow();
+  assert.doesNotMatch(workflow, /^\s+os:\s+macos-14\b/m);
+  assert.match(
+    workflow,
+    /- target: aarch64-apple-darwin\n\s+os:\s+(macos-15|macos-latest)\b/,
+  );
+});
+
 test('git ignores the fetched binaries and copied licenses', () => {
   const ignore = readFileSync(join(REPO_ROOT, '.gitignore'), 'utf8');
   assert.match(ignore, /^\/packages\/xidlc-\*\/bin\/$/m);
