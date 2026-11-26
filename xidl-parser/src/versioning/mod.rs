@@ -31,9 +31,16 @@ pub use timeline::{VersionDef, VersionId, VersionTimeline};
 
 use lifecycle::VersionVisitor as _;
 
+use crate::diagnostic::{Diagnostic, DiagnosticBag, DiagnosticCode};
 use crate::error::{ParseError, ParserResult};
 use crate::hir::{ParserProperties, Specification, VersionParameter};
 use crate::pipeline::ProjectedHir;
+
+/// One versioning error together with its logical declaration path.
+pub(crate) struct VersioningDiagnostic {
+    pub(crate) location: String,
+    pub(crate) error: VersioningError,
+}
 
 /// Generation property that selects one API version by member ident or value.
 pub const API_VERSION_PROPERTY: &str = "api_version";
@@ -112,34 +119,83 @@ impl VersioningRecord {
     /// `None` for specifications without a `@version` enum, and fails when
     /// lifecycle annotations appear without one.
     pub fn analyze(spec: &Specification) -> ParserResult<Option<VersioningRecord>> {
-        let discovery = lifecycle::discover(&spec.0)?;
+        let (record, errors) = Self::analyze_all(spec);
+        if let Some(first) = errors.into_iter().next() {
+            return Err(first.error.into());
+        }
+        Ok(record)
+    }
+
+    /// Collects all API versioning violations across `spec` into `bag`.
+    ///
+    /// Returns the discovered [`VersioningRecord`] when a valid `@version`
+    /// timeline was constructed, allowing downstream passes to continue
+    /// inspecting projected versions even when lifecycle diagnostics occurred.
+    pub fn collect_diagnostics(
+        spec: &Specification,
+        bag: &mut DiagnosticBag,
+    ) -> Option<VersioningRecord> {
+        let (record, errors) = Self::analyze_all(spec);
+        for item in errors {
+            bag.push(
+                Diagnostic::error(
+                    DiagnosticCode::VersioningError,
+                    0..0,
+                    item.error.to_string(),
+                )
+                .with_location(item.location),
+            );
+        }
+        record
+    }
+
+    fn analyze_all(spec: &Specification) -> (Option<VersioningRecord>, Vec<VersioningDiagnostic>) {
+        let (discovery, mut errors) = lifecycle::discover_all(&spec.0);
         let Some((ident, members)) = discovery.version_enum else {
-            if let Some((annotation, decl)) = discovery.saw_lifecycle {
-                return Err(VersioningError::MissingVersionEnum { annotation, decl }.into());
+            for (annotation, decl) in discovery.saw_lifecycle {
+                errors.push(VersioningDiagnostic {
+                    location: decl.clone(),
+                    error: VersioningError::MissingVersionEnum { annotation, decl },
+                });
             }
-            claims::check(spec, None)?;
-            return Ok(None);
+            claims::collect_diagnostics(spec, None, &mut errors);
+            return (None, errors);
         };
-        let timeline = VersionTimeline::from_members(ident.clone(), &members)?;
+        let timeline = match VersionTimeline::from_members(ident.clone(), &members) {
+            Ok(timeline) => timeline,
+            Err(error) => {
+                errors.push(VersioningDiagnostic {
+                    location: ident,
+                    error,
+                });
+                return (None, errors);
+            }
+        };
         if let Some(parameter) = &discovery.version_parameter {
             for (_, version) in timeline.iter() {
-                parameter.validate_value(&version.value).map_err(|reason| {
-                    VersioningError::MalformedVersionParameter {
-                        decl: format!("{ident}::{}", version.ident),
-                        reason,
-                    }
-                })?;
+                if let Err(reason) = parameter.validate_value(&version.value) {
+                    let decl = format!("{ident}::{}", version.ident);
+                    errors.push(VersioningDiagnostic {
+                        location: decl.clone(),
+                        error: VersioningError::MalformedVersionParameter { decl, reason },
+                    });
+                }
             }
         }
-        let mut validator = lifecycle::LifecycleValidator {
+        let mut validator = lifecycle::LifecycleCollector {
             timeline: &timeline,
+            errors: Vec::new(),
         };
-        validator.walk(&spec.0, "", lifecycle::Availability::full())?;
-        claims::check(spec, Some(&timeline))?;
-        Ok(Some(VersioningRecord {
-            timeline,
-            parameter: discovery.version_parameter,
-        }))
+        let _ = validator.walk(&spec.0, "", lifecycle::Availability::full());
+        errors.extend(validator.errors);
+        claims::collect_diagnostics(spec, Some(&timeline), &mut errors);
+        (
+            Some(VersioningRecord {
+                timeline,
+                parameter: discovery.version_parameter,
+            }),
+            errors,
+        )
     }
 
     /// The wire location and name carried by clients of this version timeline.

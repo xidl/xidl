@@ -1,4 +1,5 @@
 mod attr;
+pub(crate) mod diagnostics;
 mod exceptions;
 pub mod mapping;
 mod model;
@@ -14,6 +15,7 @@ mod unions;
 mod validate;
 
 pub use crate::pipeline::{HirProjectionKind, ProjectedHir};
+pub use diagnostics::collect_diagnostics;
 pub use mapping::is_byte_sequence;
 pub use model::ProjectOptions;
 pub use model::*;

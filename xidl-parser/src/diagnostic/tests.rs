@@ -53,3 +53,15 @@ fn diagnostic_code_strings_are_stable() {
     assert_eq!(DiagnosticCode::VersioningError.as_str(), "versioning-error");
     assert_eq!(DiagnosticCode::ProtocolError.as_str(), "protocol-error");
 }
+
+#[test]
+fn diagnostic_bag_dedup_preserves_order_and_removes_duplicates() {
+    let mut bag = DiagnosticBag::new();
+    let first = Diagnostic::error(DiagnosticCode::SemanticError, 0..0, "dup").with_location("A");
+    let second = Diagnostic::error(DiagnosticCode::ProtocolError, 0..0, "other").with_location("B");
+    bag.push(first.clone());
+    bag.push(second.clone());
+    bag.push(first.clone());
+    bag.dedup();
+    assert_eq!(bag.as_slice(), &[first, second]);
+}

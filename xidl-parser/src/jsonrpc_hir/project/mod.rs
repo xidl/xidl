@@ -1,9 +1,10 @@
 use std::collections::HashSet;
 
+use crate::diagnostic::{Diagnostic, DiagnosticBag, DiagnosticCode};
 use crate::error::ParserResult;
 use crate::hir;
 
-use super::attr::project_attr;
+use super::attr::{collect_attr_diagnostics, project_attr};
 use super::semantics::{has_optional_annotation, param_is_input, param_is_output, stream_kind};
 use super::{
     JsonRpcField, JsonRpcFieldSource, JsonRpcHirDocument, JsonRpcInterface, JsonRpcMethod,
@@ -20,6 +21,63 @@ pub fn project(spec: &hir::Specification) -> ParserResult<JsonRpcHirDocument> {
         spec: spec.clone(),
         interfaces,
     })
+}
+
+/// Collects all JSON-RPC protocol diagnostics across `spec` into `bag`.
+pub fn collect_diagnostics(spec: &hir::Specification, bag: &mut DiagnosticBag) {
+    collect_interface_diagnostics(&spec.0, &mut Vec::new(), bag);
+}
+
+fn collect_interface_diagnostics(
+    defs: &[hir::Definition],
+    module_path: &mut Vec<String>,
+    bag: &mut DiagnosticBag,
+) {
+    for def in defs {
+        match def {
+            hir::Definition::ModuleDcl(module) => {
+                module_path.push(module.ident.clone());
+                collect_interface_diagnostics(&module.definition, module_path, bag);
+                module_path.pop();
+            }
+            hir::Definition::InterfaceDcl(interface) => {
+                let hir::InterfaceDclInner::InterfaceDef(def) = &interface.decl else {
+                    continue;
+                };
+                let iface_path = module_path
+                    .iter()
+                    .map(String::as_str)
+                    .chain(std::iter::once(def.header.ident.as_str()))
+                    .collect::<Vec<_>>()
+                    .join("::");
+                let user_ops = collect_user_ops(def);
+                let Some(body) = &def.interface_body else {
+                    continue;
+                };
+                for export in &body.0 {
+                    match export {
+                        hir::Export::OpDcl(op) => {
+                            if let Err(err) = stream_kind(&op.annotations) {
+                                bag.push(
+                                    Diagnostic::error(
+                                        DiagnosticCode::ProtocolError,
+                                        0..0,
+                                        err.to_string(),
+                                    )
+                                    .with_location(format!("{iface_path}::{}", op.ident)),
+                                );
+                            }
+                        }
+                        hir::Export::AttrDcl(attr) => {
+                            collect_attr_diagnostics(attr, &iface_path, &user_ops, bag);
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
 }
 
 fn collect_interfaces(

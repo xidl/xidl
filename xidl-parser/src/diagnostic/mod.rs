@@ -157,6 +157,17 @@ impl DiagnosticBag {
         &self.diagnostics
     }
 
+    /// Removes duplicate diagnostics while preserving insertion order.
+    pub fn dedup(&mut self) {
+        let mut unique = Vec::with_capacity(self.diagnostics.len());
+        for diagnostic in self.diagnostics.drain(..) {
+            if !unique.contains(&diagnostic) {
+                unique.push(diagnostic);
+            }
+        }
+        self.diagnostics = unique;
+    }
+
     /// Consumes the bag and returns diagnostics sorted by source offset.
     pub fn into_sorted(mut self) -> Vec<Diagnostic> {
         self.diagnostics

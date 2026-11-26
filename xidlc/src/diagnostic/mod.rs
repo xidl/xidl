@@ -55,26 +55,43 @@ impl<'a> DiagnosticDisplay<'a> {
         }
     }
 
-    /// Prints this diagnostic to stderr with line/column location and suggestion.
+    /// Prints this diagnostic to stderr with source or symbol location and suggestion.
     pub fn print(&self) {
         let diagnostic = self.diagnostic;
-        let offset = diagnostic.span.start.min(self.source.len());
-        let prefix = &self.source[..offset];
-        let line = prefix.bytes().filter(|byte| *byte == b'\n').count() + 1;
-        let column = prefix
-            .rsplit('\n')
-            .next()
-            .map_or(1, |line| line.chars().count() + 1);
         let severity = match diagnostic.severity {
             Severity::Error => "error",
             Severity::Warning => "warning",
         };
-        eprintln!(
-            "{}:{line}:{column}: {severity}[{}]: {}",
-            self.filename,
-            diagnostic.code.as_str(),
-            diagnostic.message
-        );
+        if diagnostic.has_span() {
+            let offset = diagnostic.span.start.min(self.source.len());
+            let prefix = &self.source[..offset];
+            let line = prefix.bytes().filter(|byte| *byte == b'\n').count() + 1;
+            let column = prefix
+                .rsplit('\n')
+                .next()
+                .map_or(1, |line| line.chars().count() + 1);
+            eprintln!(
+                "{}:{line}:{column}: {severity}[{}]: {}",
+                self.filename,
+                diagnostic.code.as_str(),
+                diagnostic.message
+            );
+        } else if let Some(location) = diagnostic.location.as_deref().filter(|loc| !loc.is_empty())
+        {
+            eprintln!(
+                "{} ({location}): {severity}[{}]: {}",
+                self.filename,
+                diagnostic.code.as_str(),
+                diagnostic.message
+            );
+        } else {
+            eprintln!(
+                "{}: {severity}[{}]: {}",
+                self.filename,
+                diagnostic.code.as_str(),
+                diagnostic.message
+            );
+        }
         if let Some(suggestion) = &diagnostic.suggestion {
             eprintln!("  did you mean `@{suggestion}`?");
         }

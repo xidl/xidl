@@ -283,3 +283,19 @@ fn openapi_version_only_parses_for_the_openapi_target() {
         .expect_err("only auto and 3.1 are accepted");
     assert_eq!(err.kind(), clap::error::ErrorKind::InvalidValue);
 }
+
+#[test]
+fn lint_parses_full_protocol_and_deny_flags() {
+    let cli = Cli::try_parse_from([
+        "xidlc",
+        "lint",
+        "--deny",
+        "warnings",
+        "--full",
+        "--protocol",
+        "http",
+        "api.idl",
+    ])
+    .expect("lint command with flags should parse");
+    assert!(matches!(cli.command, Command::Lint(_)));
+}

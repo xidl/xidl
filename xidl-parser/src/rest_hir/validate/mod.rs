@@ -10,7 +10,7 @@ use super::{HttpMethod, HttpParam, HttpParamKind, HttpRoute, RestHirResult};
 mod routes;
 mod version_parameter;
 
-pub(super) use routes::validate_unique_route_bindings;
+pub(super) use routes::{validate_unique_route_bindings, validate_unique_route_bindings_into};
 
 #[cfg(test)]
 mod tests;

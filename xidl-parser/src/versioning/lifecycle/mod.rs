@@ -4,10 +4,11 @@
 mod availability;
 mod discovery;
 mod intervals;
+mod site;
 mod walk;
 
 pub(crate) use availability::{
     Availability, Site, SiteKind, VersionVisitor, availability, is_versioning_annotation,
 };
-pub(crate) use discovery::{LifecycleValidator, discover};
+pub(crate) use discovery::{LifecycleCollector, discover_all};
 pub(crate) use intervals::collect_intervals;

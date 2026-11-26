@@ -13,6 +13,7 @@ pub use constants::{INTEGER_IMPORTS_PROPERTY, IntegerExports, IntegerImports};
 pub(crate) use union_cases::{UnionCaseLabels, UnionWireTags};
 
 pub(crate) use bounds::CollectionBounds;
+pub(crate) use inheritance::StructInheritance;
 
 pub(crate) struct Analysis;
 
