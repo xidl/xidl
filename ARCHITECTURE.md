@@ -24,10 +24,10 @@ Today that pipeline is:
 tree-sitter-idl -> typed_ast -> hir -> codegen
 ```
 
-For HTTP-oriented outputs, there is an additional protocol-semantic layer:
+For HTTP and JSON-RPC outputs, there is an additional protocol-semantic layer:
 
 ```text
-tree-sitter-idl -> typed_ast -> hir -> rest_hir -> http generators
+tree-sitter-idl -> typed_ast -> hir -> rest_hir / jsonrpc_hir -> protocol generators
 ```
 
 This layered model is intentional. The project prefers explicit intermediate
@@ -156,11 +156,29 @@ HTTP-related code generation has an additional semantic projection:
 - renderer complexity stays lower
 
 Current consumers include the HTTP-oriented generators under
-`xidlc/src/generate/`, especially Axum, Go HTTP, Python HTTP, and OpenAPI.
+`xidlc/src/generate/` (Axum, Go REST, TypeScript REST, OpenAPI, and version
+adapters) as well as external compilation-scoped plugins such as
+`crates/xidl-http-docs`.
 
-This pattern is expected to generalize. There is no `jsonrpc_hir` today, but it
-would be architecturally consistent to add one in the future if JSON-RPC
-semantics become complex enough to justify a shared protocol layer.
+JSON-RPC follows the same pattern through `xidl-parser/src/jsonrpc_hir/`:
+`rust-jsonrpc` and `openrpc` consume the shared `JsonRpcHirDocument` projection
+rather than interpreting JSON-RPC semantics independently.
+
+## Diagnostics and Compilation Pipeline
+
+`xidl-parser` separates syntax, AST, HIR, and protocol validation into layered
+passes coordinated by `xidl-parser/src/pipeline/`:
+
+- `xidl-parser/src/diagnostic/` defines `Diagnostic`, `DiagnosticCode`,
+  `Severity`, `DiagnosticBag`, `SyntaxPass`, `AstDiagnosticPass`, and
+  `HirDiagnosticPass`.
+- `xidl-parser/src/parser/` runs `SyntaxPass` on the parsed tree-sitter tree so
+  syntax diagnostics are collected without a redundant parse pass.
+- `xidl-parser/src/pipeline/` orchestrates single-pass compilation from IDL
+  source to `ProjectedHir` (`Rpc`, `Http`, `JsonRpc`) and `VersionMap`, keeping
+  `hir`, `rest_hir`, and `jsonrpc_hir` free of cyclic dependencies.
+- `xidlc/src/diagnostic/` renders diagnostics uniformly across `gen`, `fmt`, and
+  `lint`.
 
 ## API Versioning Flow
 
@@ -344,44 +362,65 @@ This code map focuses on ownership boundaries rather than every file.
 
 - `xidl-parser/`
   - owns parsing from `tree-sitter-idl`
+  - owns `diagnostic` passes and `lint` vocabulary
   - owns `typed_ast`
-  - owns `hir`
+  - owns `hir` and `semantic` analysis
+  - owns `rest_hir` and `jsonrpc_hir` protocol projections
+  - owns `versioning` timeline, lifecycle validation, and version-map collection
+  - owns `pipeline` single-pass compilation orchestration
   - owns parser-focused tests and snapshots
 
 Important subtrees:
 
+- `xidl-parser/src/diagnostic/`: unified diagnostics and syntax/AST/HIR pass
+  traits
 - `xidl-parser/src/typed_ast/`: syntax-shaped typed AST
-- `xidl-parser/src/hir/`: semantic HIR
-- `xidl-parser/src/versioning/`: `@version` timeline, lifecycle validation, and
-  per-version HIR projection
+- `xidl-parser/src/hir/`: semantic HIR and shared annotation helpers
+- `xidl-parser/src/semantic/`: constant, bound, inheritance, recursion, and
+  union analyses
+- `xidl-parser/src/rest_hir/`: shared HTTP semantic projection
+- `xidl-parser/src/jsonrpc_hir/`: shared JSON-RPC semantic projection
+- `xidl-parser/src/versioning/`: `@version` timeline, lifecycle validation,
+  per-version projection, and version-map facts
+- `xidl-parser/src/pipeline/`: unidirectional compilation orchestration
 - `xidl-parser/tests/`: parser and lowering tests
 
 ### Compiler Driver and Built-In Generators
 
 - `xidlc/`
-  - owns the CLI
+  - owns the CLI (`gen`, `lint`, `fmt`, `import`, `version diff/lock/check`)
   - owns diagnostics presentation
-  - owns the generation driver
-  - owns built-in generators
-  - owns the plugin RPC contract
+  - owns the unit import graph (`units/`) and library resolution (`library/`)
+  - owns the generation driver (unit-scoped and `CompilationInput`
+    whole-compilation scope)
+  - owns built-in generators and version adapters (`generate/adapter/`,
+    `rust_axum_adapters/`, `ts_rest_adapters/`)
+  - owns the plugin RPC contract (`jsonrpc/`)
 
 Important subtrees:
 
-- `xidlc/src/driver/`: language resolution, generator orchestration, staging
-- `xidlc/src/generate/`: built-in generators and intermediate generator stages
-- `xidlc/src/generate/rest_hir/`: shared HTTP semantic projection
+- `xidlc/src/driver/`: language resolution, generator orchestration, staging,
+  compilation output
+- `xidlc/src/units/`: multi-file `import` dependency graph and interface index
+- `xidlc/src/generate/`: built-in generators, language-neutral adapter planner,
+  and target adapters
 - `xidlc/src/jsonrpc/ipc.idl`: generator IPC contract
-- `xidlc/tests/`: codegen snapshot tests
+- `xidlc/src/version_diff/` and `xidlc/src/version_lock/`: contract diffing and
+  frozen-version lock checks
+- `xidlc/tests/`: codegen snapshot and integration tests
 
 ### Runtime and Support Crates
 
 - `xidl-build/`: `build.rs` integration for generation during Cargo builds
-- `xidl-jsonrpc/`: runtime and transport support for generated JSON-RPC clients
-  and servers (not used by the xidlc compiler itself)
-- `xidl-rust-axum/`: runtime support for generated Rust Axum code
+- `crates/xidl-http/`: shared HTTP protocol types for compilers and runtimes
+- `crates/xidl-http-docs/`: external compilation-scoped plugin generating
+  versioned HTTP API documentation sites
+- `crates/xidl-jsonrpc/`: runtime and transport support for generated JSON-RPC
+  clients and servers (not used by the xidlc compiler itself)
+- `crates/xidl-rust-axum/`: runtime support for generated Rust Axum code
 
-These crates exist to support generated code and transport/runtime behavior.
-They are not alternate compilers.
+These crates exist to support generated code, documentation plugins, and
+transport/runtime behavior. They are not alternate compilers.
 
 ### Examples and Executable Contracts
 
@@ -393,10 +432,12 @@ They are not alternate compilers.
 
 This crate acts as both documentation and an integration surface.
 
-### Python and Other Language Runtime Helpers
+### Multi-Language Runtime Helpers
 
-- `python/`: Python runtime helpers and tests for generated Python-facing flows
-- `golang/` if present in local workflows: Go-side runtime/codegen validation
+- `golang/`: Go runtime packages (`xidl-go`, `xidl-go-codec`, `xidl-go-rest`)
+- `typescript/`: TypeScript runtime packages (`xidl-typescript-codec`,
+  `xidl-typescript-client`, `xidl-typescript-server`)
+- `packages/`: npm wrapper and platform-specific `xidlc` binary packages
 
 ## Layer Responsibilities
 

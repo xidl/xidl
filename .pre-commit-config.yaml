@@ -92,8 +92,8 @@ repos:
             bdd/boilerplate/e2e_test/rust/src/main\.rs|
             bdd/boilerplate/e2e_test/ts/server\.ts|
             xidlc-examples/src/e2e_test\.rs|
-            xidlc/src/import/openapi\.rs|
-            xidlc/src/jsonrpc/ipc\.rs|
+            xidlc/src/import/openapi/mod\.rs|
+            xidlc/src/jsonrpc/ipc/mod\.rs|
             xidlc/src/openapi/.*\.rs
           )$
       - id: move-module-mod
