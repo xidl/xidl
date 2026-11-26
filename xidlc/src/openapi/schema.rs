@@ -10,7 +10,6 @@ use serde_json::Value;
 use super::RefOr;
 use super::extensions::Extensions;
 use super::{Deprecated, Response, builder, security::SecurityScheme, set_value, xml::Xml};
-use crate::{ToResponse, ToSchema};
 
 macro_rules! component_from_builder {
     ( $name:ident ) => {
@@ -139,18 +138,6 @@ impl ComponentsBuilder {
         self
     }
 
-    /// Add [`Schema`] to [`Components`].
-    ///
-    /// This is effectively same as calling [`ComponentsBuilder::schema`] but expects to be called
-    /// with one generic argument that implements [`ToSchema`][trait@ToSchema] trait.
-    pub fn schema_from<I: ToSchema>(mut self) -> Self {
-        let name = I::name();
-        let schema = I::schema();
-        self.schemas.insert(name.to_string(), schema);
-
-        self
-    }
-
     /// Add [`Schema`]s from iterator.
     ///
     /// # Examples
@@ -197,16 +184,6 @@ impl ComponentsBuilder {
     ) -> Self {
         self.responses.insert(name.into(), response.into());
         self
-    }
-
-    /// Add [`struct@Response`] to [`Components`].
-    ///
-    /// This behaves the same way as [`ComponentsBuilder::schema_from`] but for responses. It
-    /// allows adding response from type implementing [`trait@ToResponse`] trait. Method is
-    /// expected to be called with one generic argument that implements the trait.
-    pub fn response_from<'r, I: ToResponse<'r>>(self) -> Self {
-        let (name, response) = I::response();
-        self.response(name, response)
     }
 
     /// Add multiple [`struct@Response`]s to [`Components`] from iterator.
@@ -959,11 +936,7 @@ builder! {
 
         /// Map of fields with their [`Schema`] types.
         ///
-        /// With **preserve_order** feature flag [`indexmap::IndexMap`] will be used as
-        /// properties map backing implementation to retain property order of [`ToSchema`][to_schema].
-        /// By default [`BTreeMap`] will be used.
-        ///
-        /// [to_schema]: crate::ToSchema
+        /// Uses [`indexmap::IndexMap`] when order preservation is enabled, or [`BTreeMap`] otherwise.
         #[serde(skip_serializing_if = "ObjectPropertiesMap::is_empty", default = "ObjectPropertiesMap::new")]
         pub properties: ObjectPropertiesMap<String, RefOr<Schema>>,
 

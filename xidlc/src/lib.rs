@@ -21,32 +21,7 @@ use std::path::Path as FsPath;
 
 use crate::error::IdlcResult;
 
-pub trait PartialSchema {
-    fn schema() -> openapi::RefOr<openapi::schema::Schema>;
-}
-
-pub trait ToSchema: PartialSchema {
-    fn name() -> std::borrow::Cow<'static, str> {
-        std::borrow::Cow::Borrowed(std::any::type_name::<Self>())
-    }
-
-    fn schemas(_schemas: &mut Vec<(String, openapi::RefOr<openapi::schema::Schema>)>) {}
-}
-
-pub trait Path {
-    fn methods() -> Vec<openapi::path::HttpMethod>;
-    fn path() -> String;
-    fn operation() -> openapi::path::Operation;
-}
-
-pub trait IntoResponses {
-    fn responses() -> std::collections::BTreeMap<String, openapi::RefOr<openapi::response::Response>>;
-}
-
-pub trait ToResponse<'r> {
-    fn response() -> (&'r str, openapi::RefOr<openapi::response::Response>);
-}
-
+/// Generates target artifacts directly from an in-memory IDL source string.
 pub fn generate_from_source(
     lang: &str,
     idl: &str,

@@ -1,7 +1,6 @@
-use crate::Path;
 use serde::Serialize;
 
-use super::{HttpMethod, Operation, PathItem, PathItemBuilder, PathsMap};
+use super::{HttpMethod, Operation, PathItem, PathsMap};
 use crate::openapi::{builder, extensions::Extensions, set_value};
 
 builder! {
@@ -85,28 +84,5 @@ impl PathsBuilder {
 
     pub fn extensions(mut self, extensions: Option<Extensions>) -> Self {
         set_value!(self extensions extensions)
-    }
-
-    pub fn path_from<P: Path>(self) -> Self {
-        let methods = P::methods();
-        let operation = P::operation();
-        let path_item = if methods.len() == 1 {
-            PathItem::new(
-                methods
-                    .into_iter()
-                    .next()
-                    .expect("must have one operation method"),
-                operation,
-            )
-        } else {
-            methods
-                .into_iter()
-                .fold(PathItemBuilder::new(), |path_item, method| {
-                    path_item.operation(method, operation.clone())
-                })
-                .build()
-        };
-
-        self.path(P::path(), path_item)
     }
 }
