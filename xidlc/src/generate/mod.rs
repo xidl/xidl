@@ -11,6 +11,7 @@ pub mod go_rest;
 pub mod hir_gen;
 #[cfg(any(feature = "gen-go", feature = "gen-rust"))]
 mod integer_expr;
+pub mod jsonrpc_hir_gen;
 #[cfg(feature = "gen-openapi")]
 pub mod openapi;
 #[cfg(feature = "gen-openrpc")]

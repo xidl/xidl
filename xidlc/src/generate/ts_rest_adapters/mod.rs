@@ -34,7 +34,7 @@ impl Codegen for TypescriptRestAdaptersCodegen {
         path: String,
         props: ParserProperties,
     ) -> Result<Vec<Artifact>, RpcError> {
-        let http = input.into_rest_hir();
+        let http = input.try_into_rest_hir()?;
         let plan = AdapterPlanner::from_props(&http, &props)
             .and_then(|planner| planner.plan())
             .map_err(|error| RpcError::new(error.to_string()))?;

@@ -72,16 +72,19 @@ fn removing_all_operations_removes_playgrounds_and_downloads() {
         ..DocumentationConfig::default()
     };
     let files = Site::build(compilation(), &config).unwrap();
-    assert!(
-        !files
-            .iter()
-            .any(|artifact| artifact.as_file().path.starts_with("public/openapi/"))
-    );
+    assert!(!files.iter().any(|artifact| {
+        artifact
+            .try_as_file()
+            .unwrap()
+            .path
+            .starts_with("public/openapi/")
+    }));
     let navigation = files
         .iter()
-        .find(|artifact| artifact.as_file().path == "xidl-site.json")
+        .find(|artifact| artifact.try_as_file().unwrap().path == "xidl-site.json")
         .unwrap();
-    let navigation: Value = serde_json::from_str(&navigation.as_file().content).unwrap();
+    let navigation: Value =
+        serde_json::from_str(&navigation.try_as_file().unwrap().content).unwrap();
     assert_eq!(navigation["playgrounds"], serde_json::json!([]));
 }
 
@@ -100,9 +103,12 @@ fn published_closure_keeps_keyword_named_fields_and_excludes_private_interface_t
     let files = Site::build(compilation_for(source), &config).unwrap();
     let text = &files
         .iter()
-        .find(|artifact| artifact.as_file().path == "public/openapi/catalog/unversioned.json")
+        .find(|artifact| {
+            artifact.try_as_file().unwrap().path == "public/openapi/catalog/unversioned.json"
+        })
         .unwrap()
-        .as_file()
+        .try_as_file()
+        .unwrap()
         .content;
     let document: Value = serde_json::from_str(text).unwrap();
     assert!(document["paths"].get("/private").is_none());
@@ -148,9 +154,12 @@ fn a_newly_reachable_type_with_identical_source_has_an_explicit_empty_diff() {
     let files = Site::build(compilation_for(&source), &DocumentationConfig::default()).unwrap();
     let changes = &files
         .iter()
-        .find(|artifact| artifact.as_file().path == "public/changelog/catalog/v1-to-v2.md")
+        .find(|artifact| {
+            artifact.try_as_file().unwrap().path == "public/changelog/catalog/v1-to-v2.md"
+        })
         .unwrap()
-        .as_file()
+        .try_as_file()
+        .unwrap()
         .content;
     assert!(changes.contains("No IDL changes for this declaration."));
     assert!(changes.contains("No declaration published in this version."));

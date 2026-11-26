@@ -64,7 +64,7 @@ impl crate::jsonrpc::Codegen for RustCodegen {
         input: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
-        let hir = input_hir.into_rpc_hir();
+        let hir = input_hir.try_into_rpc_hir()?;
         generate_with_properties(&hir, Path::new(&input), &props)
             .map_err(crate::jsonrpc::RpcError::from)
     }
@@ -89,7 +89,7 @@ mod tests {
         .expect("rust generation should succeed");
 
         assert_eq!(artifacts.len(), 1);
-        assert_eq!(artifacts[0].as_file().path, "e2e_test.rs");
+        assert_eq!(artifacts[0].try_as_file().unwrap().path, "e2e_test.rs");
     }
 
     #[test]

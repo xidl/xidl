@@ -43,7 +43,7 @@ impl crate::jsonrpc::Codegen for OpenRpcCodegen {
         _path: String,
         props: ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
-        let hir = input_hir.into_jsonrpc_hir();
+        let hir = input_hir.try_into_jsonrpc_hir()?;
         let units = DocumentUnits::of(&props);
         let openrpc = render_openrpc(&hir, &units);
         let content = serde_json::to_string_pretty(&openrpc)?;

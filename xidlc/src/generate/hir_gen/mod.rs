@@ -3,7 +3,8 @@ use xidl_parser::parser::IncludeResolver;
 use xidl_parser::rest_hir::ProjectedHir;
 use xidl_parser::versioning::{self, VersionedProjection};
 
-use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir, ArtifactJsonRpcHir};
+use crate::driver::lang::Plugin;
+use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir, ArtifactJsonRpcHir, RpcError};
 use crate::library::MOUNT_PROPERTY;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -27,9 +28,8 @@ impl crate::jsonrpc::Codegen for HirGen {
         input: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
-        let source: String = serde_json::from_value(props.get("idl").unwrap().clone()).unwrap();
-        let target_lang: String =
-            serde_json::from_value(props.get("target_lang").unwrap().clone()).unwrap();
+        let source = Self::required_string_prop(&props, "idl")?;
+        let target_lang = Self::required_string_prop(&props, "target_lang")?;
 
         let mut resolver = include_resolver(&props);
         let typed =
@@ -86,8 +86,17 @@ impl crate::jsonrpc::Codegen for HirGen {
 }
 
 impl HirGen {
+    fn required_string_prop(props: &ParserProperties, key: &str) -> Result<String, RpcError> {
+        let value = props.get(key).ok_or_else(|| {
+            RpcError::invalid_params(format!("hir: missing required property '{key}'"))
+        })?;
+        serde_json::from_value(value.clone()).map_err(|err| {
+            RpcError::invalid_params(format!("hir: invalid property '{key}': {err}"))
+        })
+    }
+
     fn is_version_map_target(target_lang: &str) -> bool {
-        matches!(target_lang, "version-map" | "version_map")
+        Plugin::from(target_lang) == Plugin::VersionMap
     }
 
     fn build_version_map(
@@ -174,9 +183,10 @@ fn projection_artifact(
     input: &str,
     props: ParserProperties,
 ) -> Result<Artifact, crate::jsonrpc::RpcError> {
+    let plugin = Plugin::from(target_lang);
     Ok(match projection.hir {
         ProjectedHir::Rpc(hir) => {
-            if target_lang == "hir" {
+            if plugin == Plugin::Hir {
                 Artifact::new_file(ArtifactFile {
                     path: input.to_string(),
                     content: serde_json::to_string(&hir)?,
@@ -190,7 +200,7 @@ fn projection_artifact(
             }
         }
         ProjectedHir::Http(rest_hir) => {
-            if target_lang == "rest-hir" {
+            if plugin == Plugin::RestHir {
                 Artifact::new_file(ArtifactFile {
                     path: input.replace(".idl", ".rest_hir.json"),
                     content: serde_json::to_string_pretty(&rest_hir)?,
@@ -204,7 +214,7 @@ fn projection_artifact(
             }
         }
         ProjectedHir::JsonRpc(jsonrpc_hir) => {
-            if target_lang == "jsonrpc-hir" {
+            if plugin == Plugin::JsonRpcHir {
                 Artifact::new_file(ArtifactFile {
                     path: input.replace(".idl", ".jsonrpc_hir.json"),
                     content: serde_json::to_string_pretty(&jsonrpc_hir)?,

@@ -79,6 +79,7 @@ impl CodegenSession {
         let generator: Box<dyn Codegen + Send + Sync> = match plugin {
             Plugin::Hir => Box::new(crate::generate::hir_gen::HirGen),
             Plugin::RestHir => Box::new(crate::generate::rest_hir_gen::RestHirCodegen),
+            Plugin::JsonRpcHir => Box::new(crate::generate::jsonrpc_hir_gen::JsonRpcHirCodegen),
             Plugin::TypedAst => Box::new(crate::generate::typed_ast_gen::TypedAstGen),
             #[cfg(feature = "gen-go")]
             Plugin::Go => Box::new(crate::generate::go::GoCodegen),
