@@ -183,13 +183,6 @@ fn renamed_enum_discriminators_populate_union_wire_tags_across_scopes() {
     )
     .expect("renamed enum discriminators resolve");
 
-    let debug = format!("{spec:?}");
-    assert!(debug.contains("wire_tags"), "{debug}");
-    assert!(debug.contains("sms-text"), "{debug}");
-    assert!(debug.contains("root-a"), "{debug}");
-    assert!(debug.contains("mms-wire"), "{debug}");
-    assert!(debug.contains("\"on\""), "{debug}");
-
     let serialized = serde_json::to_value(&spec).expect("serialize HIR");
     let direct_cases = &serialized[2]["ModuleDcl"]["definition"][2]["TypeDcl"]["TypedefDcl"]["ty"]
         ["ConstrTypeDcl"]["UnionDef"]["case"];
@@ -203,6 +196,11 @@ fn renamed_enum_discriminators_populate_union_wire_tags_across_scopes() {
     );
     assert!(direct_cases[2].get("wire_tags").is_none());
     assert!(direct_cases[3].get("wire_tags").is_none());
+
+    let inner_cases = &serialized[2]["ModuleDcl"]["definition"][3]["InterfaceDcl"]["decl"]["InterfaceDef"]
+        ["interface_body"][1]["TypeDcl"]["ConstrTypeDcl"]["UnionDef"]["case"][0]["element"]["ty"]["ConstrTypeDcl"]
+        ["UnionDef"]["case"];
+    assert_eq!(inner_cases[0]["wire_tags"], serde_json::json!(["on"]));
 }
 
 #[test]
@@ -232,13 +230,69 @@ fn versioned_projections_recompute_union_wire_tags_per_version() {
     )
     .expect("project versions");
     assert_eq!(projections.len(), 2);
-    let tags: Vec<String> = projections
+    let union_wire_tags: Vec<serde_json::Value> = projections
         .iter()
         .map(|projection| match &projection.hir {
-            crate::rest_hir::ProjectedHir::Rpc(spec) => format!("{spec:?}"),
+            crate::rest_hir::ProjectedHir::Rpc(spec) => {
+                let value = serde_json::to_value(spec).expect("serialize projected HIR");
+                let cases = value
+                    .as_array()
+                    .expect("spec array")
+                    .iter()
+                    .find_map(|def| def.pointer("/ModuleDcl/definition"))
+                    .and_then(serde_json::Value::as_array)
+                    .expect("version module definitions")
+                    .iter()
+                    .find_map(|def| def.pointer("/TypeDcl/ConstrTypeDcl/UnionDef/case"))
+                    .expect("projected union U cases");
+                serde_json::json!([cases[0].get("wire_tags"), cases[1].get("wire_tags")])
+            }
             other => panic!("expected Rpc projection, got {other:?}"),
         })
         .collect();
-    assert!(tags[0].contains("kind-v1") && !tags[0].contains("kind-v2"));
-    assert!(tags[1].contains("kind-v2") && !tags[1].contains("kind-v1"));
+    assert_eq!(union_wire_tags[0], serde_json::json!([["kind-v1"], null]));
+    assert_eq!(union_wire_tags[1], serde_json::json!([["kind-v2"], null]));
+}
+
+#[test]
+fn union_wire_tags_handle_mixed_labels_array_typedefs_and_alias_cycles() {
+    let spec = lower(
+        r#"
+        enum Kind { @rename("kind-a") alpha, beta };
+        typedef Kind KindArr[3];
+        module shadowed {
+            typedef KindLoopA KindLoopB;
+            typedef KindLoopB KindLoopA;
+            typedef KindLoopA Kind;
+            union CycleUnion switch(long) {
+                case Kind::alpha: string cycle_case;
+            };
+        };
+        union Mixed switch(Kind) {
+            case Kind::alpha:
+            case Kind::beta: string combined;
+        };
+        union ArrayAliasTest switch(long) {
+            case KindArr::alpha: string should_not_resolve;
+        };
+        "#,
+    )
+    .expect("parse edge-case unions");
+    let serialized = serde_json::to_value(&spec).expect("serialize HIR");
+    let cycle_cases = &serialized[2]["ModuleDcl"]["definition"][3]["TypeDcl"]["ConstrTypeDcl"]["UnionDef"]
+        ["case"];
+    assert!(
+        cycle_cases[0].get("wire_tags").is_none(),
+        "cyclic local alias must not fall through to outer enum: {cycle_cases}"
+    );
+    let mixed_cases = &serialized[3]["TypeDcl"]["ConstrTypeDcl"]["UnionDef"]["case"];
+    assert_eq!(
+        mixed_cases[0]["wire_tags"],
+        serde_json::json!(["kind-a", null])
+    );
+    let array_cases = &serialized[4]["TypeDcl"]["ConstrTypeDcl"]["UnionDef"]["case"];
+    assert!(
+        array_cases[0].get("wire_tags").is_none(),
+        "array typedef must not be treated as enum alias: {array_cases}"
+    );
 }

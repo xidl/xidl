@@ -153,13 +153,6 @@ expression: documents
             "type_path"
           ],
           "type": "object"
-        },
-        "v1.Versions": {
-          "enum": [
-            "2025-01-01",
-            "2025-04-01"
-          ],
-          "type": "string"
         }
       }
     },
@@ -937,13 +930,6 @@ expression: documents
             "type_path"
           ],
           "type": "object"
-        },
-        "v2.Versions": {
-          "enum": [
-            "2025-01-01",
-            "2025-04-01"
-          ],
-          "type": "string"
         }
       }
     },

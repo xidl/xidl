@@ -26,13 +26,6 @@ openapi_version_parameter_header.v1.json
         ],
         "type": "object"
       },
-      "v1.Versions": {
-        "enum": [
-          "2026-04",
-          "2026-07"
-        ],
-        "type": "string"
-      },
       "v1.business.Conflict": {
         "properties": {
           "message": {
@@ -981,13 +974,6 @@ openapi_version_parameter_header.v2.json
           "msg"
         ],
         "type": "object"
-      },
-      "v2.Versions": {
-        "enum": [
-          "2026-04",
-          "2026-07"
-        ],
-        "type": "string"
       },
       "v2.business.Conflict": {
         "properties": {

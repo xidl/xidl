@@ -125,7 +125,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType2Schema: z.ZodType<types.v1.geo.Anchor> = z.lazy(() =>
+    const wireType1Schema: z.ZodType<types.v1.geo.Anchor> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -150,9 +150,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["checkpoint"]: z.string().nullish().transform((value) => value ?? undefined),
         
-            ["parent"]: wireType2Schema.nullish().transform((value) => value ?? undefined),
+            ["parent"]: wireType1Schema.nullish().transform((value) => value ?? undefined),
         
-            ["previous"]: z.array(wireType2Schema).nullish().transform((value) => value ?? undefined),
+            ["previous"]: z.array(wireType1Schema).nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -178,19 +178,19 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType5Schema: z.ZodType<types.v1.geo.Coordinates> = z.lazy(() =>
+    const wireType4Schema: z.ZodType<types.v1.geo.Coordinates> = z.lazy(() =>
     
         z.array(z.number()).length(2)
     
     );
 
-    const wireType10Schema: z.ZodType<types.v1.geo.MapPosition> = z.lazy(() =>
+    const wireType9Schema: z.ZodType<types.v1.geo.MapPosition> = z.lazy(() =>
     
-        wireType5Schema
+        wireType4Schema
     
     );
 
-    const wireType13Schema: z.ZodType<types.v1.shipping.Change> = z.lazy(() =>
+    const wireType12Schema: z.ZodType<types.v1.shipping.Change> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -235,13 +235,13 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["parent"]: wireType2Schema.nullish().transform((value) => value ?? undefined),
+            ["parent"]: wireType1Schema.nullish().transform((value) => value ?? undefined),
         
             ["delivery_reference"]: wireType0Schema.nullish().transform((value) => value ?? undefined),
         
             ["delivery_note"]: z.string().nullish().transform((value) => value ?? undefined),
         
-            ["coordinates"]: wireType10Schema.nullish().transform((value) => value ?? undefined),
+            ["coordinates"]: wireType9Schema.nullish().transform((value) => value ?? undefined),
         
             ["line"]: z.string().nullish().transform((value) => value ?? undefined),
         
@@ -310,7 +310,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType13Schema),
+            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType12Schema),
         
     })).transform((value) => ({
         
@@ -367,7 +367,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType22Schema: z.ZodType<types.v2.geo.Anchor> = z.lazy(() =>
+    const wireType20Schema: z.ZodType<types.v2.geo.Anchor> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -392,9 +392,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["checkpoint"]: z.string().nullish().transform((value) => value ?? undefined),
         
-            ["parent"]: wireType22Schema.nullish().transform((value) => value ?? undefined),
+            ["parent"]: wireType20Schema.nullish().transform((value) => value ?? undefined),
         
-            ["previous"]: z.array(wireType22Schema).nullish().transform((value) => value ?? undefined),
+            ["previous"]: z.array(wireType20Schema).nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -414,31 +414,31 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType20Schema: z.ZodType<types.v2.DeliveryReference> = z.lazy(() =>
+    const wireType19Schema: z.ZodType<types.v2.DeliveryReference> = z.lazy(() =>
     
         z.string()
     
     );
 
-    const wireType25Schema: z.ZodType<types.v2.geo.Coordinates> = z.lazy(() =>
+    const wireType23Schema: z.ZodType<types.v2.geo.Coordinates> = z.lazy(() =>
     
         z.array(z.number()).length(2)
     
     );
 
-    const wireType30Schema: z.ZodType<types.v2.geo.MapPosition> = z.lazy(() =>
+    const wireType28Schema: z.ZodType<types.v2.geo.MapPosition> = z.lazy(() =>
     
-        wireType25Schema
+        wireType23Schema
     
     );
 
-    const wireType26Schema: z.ZodType<types.v2.geo.Country> = z.lazy(() =>
+    const wireType24Schema: z.ZodType<types.v2.geo.Country> = z.lazy(() =>
     
         z.enum(["US", "CA"])
     
     );
 
-    const wireType33Schema: z.ZodType<types.v2.shipping.Change> = z.lazy(() =>
+    const wireType31Schema: z.ZodType<types.v2.shipping.Change> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -483,17 +483,17 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["parent"]: wireType22Schema.nullish().transform((value) => value ?? undefined),
+            ["parent"]: wireType20Schema.nullish().transform((value) => value ?? undefined),
         
-            ["delivery_reference"]: wireType20Schema.nullish().transform((value) => value ?? undefined),
+            ["delivery_reference"]: wireType19Schema.nullish().transform((value) => value ?? undefined),
         
             ["delivery_note"]: z.string().nullish().transform((value) => value ?? undefined),
         
-            ["coordinates"]: wireType30Schema.nullish().transform((value) => value ?? undefined),
+            ["coordinates"]: wireType28Schema.nullish().transform((value) => value ?? undefined),
         
             ["street"]: z.string().nullish().transform((value) => value ?? undefined),
         
-            ["country_code_v2"]: wireType26Schema.nullish().transform((value) => value ?? undefined),
+            ["country_code_v2"]: wireType24Schema.nullish().transform((value) => value ?? undefined),
         
             ["priority"]: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer").nullish().transform((value) => value ?? undefined),
         
@@ -558,7 +558,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType33Schema),
+            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType31Schema),
         
     })).transform((value) => ({
         
@@ -615,7 +615,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType42Schema: z.ZodType<types.v3.geo.Anchor> = z.lazy(() =>
+    const wireType39Schema: z.ZodType<types.v3.geo.Anchor> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -640,9 +640,9 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["checkpoint"]: z.string().nullish().transform((value) => value ?? undefined),
         
-            ["parent"]: wireType42Schema.nullish().transform((value) => value ?? undefined),
+            ["parent"]: wireType39Schema.nullish().transform((value) => value ?? undefined),
         
-            ["previous"]: z.array(wireType42Schema).nullish().transform((value) => value ?? undefined),
+            ["previous"]: z.array(wireType39Schema).nullish().transform((value) => value ?? undefined),
         
     })).transform((value) => ({
         
@@ -662,25 +662,25 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     
     );
 
-    const wireType45Schema: z.ZodType<types.v3.geo.Coordinates> = z.lazy(() =>
+    const wireType42Schema: z.ZodType<types.v3.geo.Coordinates> = z.lazy(() =>
     
         z.array(z.number()).length(2)
     
     );
 
-    const wireType50Schema: z.ZodType<types.v3.geo.MapPosition> = z.lazy(() =>
+    const wireType47Schema: z.ZodType<types.v3.geo.MapPosition> = z.lazy(() =>
     
-        wireType45Schema
+        wireType42Schema
     
     );
 
-    const wireType46Schema: z.ZodType<types.v3.geo.Country> = z.lazy(() =>
+    const wireType43Schema: z.ZodType<types.v3.geo.Country> = z.lazy(() =>
     
         z.enum(["US", "CA"])
     
     );
 
-    const wireType53Schema: z.ZodType<types.v3.shipping.Change> = z.lazy(() =>
+    const wireType50Schema: z.ZodType<types.v3.shipping.Change> = z.lazy(() =>
     
         z.unknown().superRefine(rejectPrototypeKey).pipe(z.object({
         
@@ -721,15 +721,15 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
     }))
     .pipe(z.object({
         
-            ["parent"]: wireType42Schema.nullish().transform((value) => value ?? undefined),
+            ["parent"]: wireType39Schema.nullish().transform((value) => value ?? undefined),
         
             ["signature_required"]: z.boolean().nullish().transform((value) => value ?? undefined),
         
-            ["coordinates"]: wireType50Schema.nullish().transform((value) => value ?? undefined),
+            ["coordinates"]: wireType47Schema.nullish().transform((value) => value ?? undefined),
         
             ["street"]: z.string().nullish().transform((value) => value ?? undefined),
         
-            ["country_code_v2"]: wireType46Schema.nullish().transform((value) => value ?? undefined),
+            ["country_code_v2"]: wireType43Schema.nullish().transform((value) => value ?? undefined),
         
             ["priority"]: z.number().min(-2147483648).max(2147483647).refine(Number.isInteger, "expected an integer").nullish().transform((value) => value ?? undefined),
         
@@ -790,7 +790,7 @@ function flattenWire(wire: Record<string, unknown>, keys: string[], occupied: st
         
             ["id"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(z.string()),
         
-            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType53Schema),
+            ["patch"]: z.unknown().refine((value): boolean => value !== undefined, "required wire field is missing").pipe(wireType50Schema),
         
     })).transform((value) => ({
         

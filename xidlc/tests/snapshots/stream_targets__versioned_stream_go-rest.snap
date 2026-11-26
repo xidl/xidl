@@ -540,95 +540,12 @@ func decodeV2BillingExportsImportRowsFailure(failure xidlgohttp.HTTPFailure) err
 
 package stream_versions
 
-import (
-	"fmt"
-	"github.com/xidl/xidl/golang/xidl-go-codec"
-)
-
-type V1Version string
-
-const (
-	V1VersionV1 V1Version = "2026-01-01"
-	V1VersionV2 V1Version = "2026-07-01"
-)
-
-
-
-// MarshalText validates the enum's published wire value.
-func (value V1Version) MarshalText() ([]byte, error) {
-    switch string(value) {
-    case "2026-01-01", "2026-07-01":
-        return []byte(value), nil
-    default:
-        return nil, fmt.Errorf("enum V1Version has an invalid value %q", value)
-    }
-}
-
-// UnmarshalText accepts only values declared by the IDL enum.
-func (value *V1Version) UnmarshalText(data []byte) error {
-    decoded := V1Version(data)
-    if _, err := decoded.MarshalText(); err != nil { return err }
-    *value = decoded
-    return nil
-}
-
-func (value V1Version) MarshalJSON() ([]byte, error) {
-    text, err := value.MarshalText()
-    if err != nil { return nil, err }
-    return json.Marshal(string(text))
-}
-
-func (value *V1Version) UnmarshalJSON(data []byte) error {
-    var text string
-    if err := json.Unmarshal(data, &text); err != nil { return err }
-    return value.UnmarshalText([]byte(text))
-}
-
 type V1BillingConflict struct {
 	Reason string `xjson:"reason"`
 }
 
 func (e *V1BillingConflict) Error() string {
 	return "V1BillingConflict"
-}
-
-type V2Version string
-
-const (
-	V2VersionV1 V2Version = "2026-01-01"
-	V2VersionV2 V2Version = "2026-07-01"
-)
-
-
-
-// MarshalText validates the enum's published wire value.
-func (value V2Version) MarshalText() ([]byte, error) {
-    switch string(value) {
-    case "2026-01-01", "2026-07-01":
-        return []byte(value), nil
-    default:
-        return nil, fmt.Errorf("enum V2Version has an invalid value %q", value)
-    }
-}
-
-// UnmarshalText accepts only values declared by the IDL enum.
-func (value *V2Version) UnmarshalText(data []byte) error {
-    decoded := V2Version(data)
-    if _, err := decoded.MarshalText(); err != nil { return err }
-    *value = decoded
-    return nil
-}
-
-func (value V2Version) MarshalJSON() ([]byte, error) {
-    text, err := value.MarshalText()
-    if err != nil { return nil, err }
-    return json.Marshal(string(text))
-}
-
-func (value *V2Version) UnmarshalJSON(data []byte) error {
-    var text string
-    if err := json.Unmarshal(data, &text); err != nil { return err }
-    return value.UnmarshalText([]byte(text))
 }
 
 type V2BillingConflict struct {
