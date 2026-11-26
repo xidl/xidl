@@ -55,7 +55,7 @@ impl crate::jsonrpc::Codegen for TypescriptCodegen {
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
-        let hir = input_hir.into_rpc_hir();
+        let hir = input_hir.try_into_rpc_hir()?;
         generate(hir, Path::new(&path), props)
             .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))
     }

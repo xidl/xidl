@@ -95,7 +95,7 @@ impl crate::jsonrpc::Codegen for GoCodegen {
         input: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
-        let hir = input_hir.into_rpc_hir();
+        let hir = input_hir.try_into_rpc_hir()?;
         generate_with_properties(&hir, Path::new(&input), &props)
             .map_err(crate::jsonrpc::RpcError::from)
     }

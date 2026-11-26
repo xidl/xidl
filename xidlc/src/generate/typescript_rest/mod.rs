@@ -107,7 +107,7 @@ impl crate::jsonrpc::Codegen for TypescriptRestCodegen {
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
-        let rest_hir = input_hir.into_rest_hir();
+        let rest_hir = input_hir.try_into_rest_hir()?;
         generate(rest_hir, Path::new(&path), props)
             .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))
     }

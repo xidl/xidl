@@ -6,6 +6,8 @@ pub enum Plugin {
     Hir,
     #[serde(alias = "rest_hir", alias = "rest-hir")]
     RestHir,
+    #[serde(alias = "jsonrpc_hir", alias = "jsonrpc-hir")]
+    JsonRpcHir,
     #[serde(alias = "typed_ast", alias = "typed-ast")]
     TypedAst,
     #[serde(alias = "rs", alias = "rust")]
@@ -69,6 +71,8 @@ mod tests {
             ("hir", Plugin::Hir),
             ("rest_hir", Plugin::RestHir),
             ("rest-hir", Plugin::RestHir),
+            ("jsonrpc_hir", Plugin::JsonRpcHir),
+            ("jsonrpc-hir", Plugin::JsonRpcHir),
             ("typed_ast", Plugin::TypedAst),
             ("typed-ast", Plugin::TypedAst),
             ("rs", Plugin::Rust),

@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use xidl_parser::hir;
 
+use crate::driver::lang::Plugin;
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactRestHir};
 
 pub(crate) struct RestHirCodegen;
@@ -31,9 +32,9 @@ impl crate::jsonrpc::Codegen for RestHirCodegen {
                 .unwrap_or_else(|| serde_json::Value::String("rest-hir".to_string())),
         )
         .map_err(|err| crate::jsonrpc::RpcError::invalid_params(err.to_string()))?;
-        let rest_hir = input_hir.into_rest_hir();
+        let rest_hir = input_hir.try_into_rest_hir()?;
 
-        if target_lang == "rest-hir" {
+        if Plugin::from(target_lang.as_str()) == Plugin::RestHir {
             let content = serde_json::to_string_pretty(&rest_hir)?;
             Ok(vec![Artifact::new_file(ArtifactFile {
                 path: path.replace(".idl", ".rest_hir.json"),

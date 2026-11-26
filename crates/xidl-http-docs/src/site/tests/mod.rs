@@ -143,6 +143,6 @@ fn excluded_referenced_type_fails_but_excluding_its_only_operation_publishes_an_
     assert!(
         !files
             .iter()
-            .any(|artifact| artifact.as_file().path.contains("types/"))
+            .any(|artifact| artifact.try_as_file().unwrap().path.contains("types/"))
     );
 }

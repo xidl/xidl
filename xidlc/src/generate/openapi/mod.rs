@@ -51,7 +51,7 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
         input: String,
         props: ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
-        let rest_hir = input_hir.into_rest_hir();
+        let rest_hir = input_hir.try_into_rest_hir()?;
         let units = DocumentUnits::of(&props);
         let version = OpenApiVersion::from_props(&props)?;
         let openapi = render_openapi_json(&rest_hir.spec, &rest_hir, &units, version)?;

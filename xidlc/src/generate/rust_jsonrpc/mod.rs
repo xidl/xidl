@@ -85,7 +85,7 @@ impl crate::jsonrpc::Codegen for RustJsonRpcCodegen {
         path: String,
         props: ::xidl_parser::hir::ParserProperties,
     ) -> Result<Vec<Artifact>, crate::jsonrpc::RpcError> {
-        let jsonrpc_hir = input_hir.into_jsonrpc_hir();
+        let jsonrpc_hir = input_hir.try_into_jsonrpc_hir()?;
         generate(jsonrpc_hir, Path::new(&path), props)
             .map_err(|err| crate::jsonrpc::RpcError::new(err.to_string()))
     }

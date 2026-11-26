@@ -171,59 +171,91 @@ impl Artifact {
         matches!(self, Self::File(_))
     }
 
-    pub fn as_hir(&self) -> &ArtifactHir {
+    /// Borrows the `Hir` payload or returns a typed [`RpcError`].
+    pub fn try_as_hir(&self) -> Result<&ArtifactHir, RpcError> {
         match self {
-            Self::Hir(value) => value,
-            other => panic!("artifact is not Hir: {:?}", other.tag()),
+            Self::Hir(value) => Ok(value),
+            other => Err(RpcError::invalid_params(format!(
+                "xidlc ipc: expected Hir artifact, got {:?}",
+                other.tag()
+            ))),
         }
     }
 
-    pub fn as_rest_hir(&self) -> &ArtifactRestHir {
+    /// Borrows the `RestHir` payload or returns a typed [`RpcError`].
+    pub fn try_as_rest_hir(&self) -> Result<&ArtifactRestHir, RpcError> {
         match self {
-            Self::RestHir(value) => value,
-            other => panic!("artifact is not RestHir: {:?}", other.tag()),
+            Self::RestHir(value) => Ok(value),
+            other => Err(RpcError::invalid_params(format!(
+                "xidlc ipc: expected RestHir artifact, got {:?}",
+                other.tag()
+            ))),
         }
     }
 
-    pub fn as_jsonrpc_hir(&self) -> &ArtifactJsonRpcHir {
+    /// Borrows the `JsonRpcHir` payload or returns a typed [`RpcError`].
+    pub fn try_as_jsonrpc_hir(&self) -> Result<&ArtifactJsonRpcHir, RpcError> {
         match self {
-            Self::JsonRpcHir(value) => value,
-            other => panic!("artifact is not JsonRpcHir: {:?}", other.tag()),
+            Self::JsonRpcHir(value) => Ok(value),
+            other => Err(RpcError::invalid_params(format!(
+                "xidlc ipc: expected JsonRpcHir artifact, got {:?}",
+                other.tag()
+            ))),
         }
     }
 
-    pub fn as_file(&self) -> &ArtifactFile {
+    /// Borrows the `File` payload or returns a typed [`RpcError`].
+    pub fn try_as_file(&self) -> Result<&ArtifactFile, RpcError> {
         match self {
-            Self::File(value) => value,
-            other => panic!("artifact is not File: {:?}", other.tag()),
+            Self::File(value) => Ok(value),
+            other => Err(RpcError::invalid_params(format!(
+                "xidlc ipc: expected File artifact, got {:?}",
+                other.tag()
+            ))),
         }
     }
 
-    pub fn into_hir(self) -> ArtifactHir {
+    /// Consumes this artifact as `Hir` or returns a typed [`RpcError`].
+    pub fn try_into_hir(self) -> Result<ArtifactHir, RpcError> {
         match self {
-            Self::Hir(value) => value,
-            other => panic!("artifact is not Hir: {:?}", other.tag()),
+            Self::Hir(value) => Ok(value),
+            other => Err(RpcError::invalid_params(format!(
+                "xidlc ipc: expected Hir artifact, got {:?}",
+                other.tag()
+            ))),
         }
     }
 
-    pub fn into_rest_hir(self) -> ArtifactRestHir {
+    /// Consumes this artifact as `RestHir` or returns a typed [`RpcError`].
+    pub fn try_into_rest_hir(self) -> Result<ArtifactRestHir, RpcError> {
         match self {
-            Self::RestHir(value) => value,
-            other => panic!("artifact is not RestHir: {:?}", other.tag()),
+            Self::RestHir(value) => Ok(value),
+            other => Err(RpcError::invalid_params(format!(
+                "xidlc ipc: expected RestHir artifact, got {:?}",
+                other.tag()
+            ))),
         }
     }
 
-    pub fn into_jsonrpc_hir(self) -> ArtifactJsonRpcHir {
+    /// Consumes this artifact as `JsonRpcHir` or returns a typed [`RpcError`].
+    pub fn try_into_jsonrpc_hir(self) -> Result<ArtifactJsonRpcHir, RpcError> {
         match self {
-            Self::JsonRpcHir(value) => value,
-            other => panic!("artifact is not JsonRpcHir: {:?}", other.tag()),
+            Self::JsonRpcHir(value) => Ok(value),
+            other => Err(RpcError::invalid_params(format!(
+                "xidlc ipc: expected JsonRpcHir artifact, got {:?}",
+                other.tag()
+            ))),
         }
     }
 
-    pub fn into_file(self) -> ArtifactFile {
+    /// Consumes this artifact as `File` or returns a typed [`RpcError`].
+    pub fn try_into_file(self) -> Result<ArtifactFile, RpcError> {
         match self {
-            Self::File(value) => value,
-            other => panic!("artifact is not File: {:?}", other.tag()),
+            Self::File(value) => Ok(value),
+            other => Err(RpcError::invalid_params(format!(
+                "xidlc ipc: expected File artifact, got {:?}",
+                other.tag()
+            ))),
         }
     }
 }
@@ -264,24 +296,59 @@ impl CodegenInput {
         matches!(self, Self::JsonRpcHir(_))
     }
 
-    pub fn into_rpc_hir(self) -> xidl_parser::hir::Specification {
+    /// Returns the kind label of this input variant.
+    pub fn kind_name(&self) -> &'static str {
         match self {
-            Self::RpcHir(value) => value,
-            _ => panic!("codegen input is not RpcHir"),
+            Self::RpcHir(_) => "RpcHir",
+            Self::RestHir(_) => "RestHir",
+            Self::JsonRpcHir(_) => "JsonRpcHir",
+            Self::Compilation(_) => "Compilation",
         }
     }
 
-    pub fn into_rest_hir(self) -> xidl_parser::rest_hir::RestHirDocument {
+    /// Consumes this input as `RpcHir` or returns a typed [`RpcError`].
+    pub fn try_into_rpc_hir(self) -> Result<xidl_parser::hir::Specification, RpcError> {
         match self {
-            Self::RestHir(value) => value,
-            _ => panic!("codegen input is not RestHir"),
+            Self::RpcHir(value) => Ok(value),
+            other => Err(RpcError::invalid_params(format!(
+                "xidlc ipc: expected RpcHir input, got {}",
+                other.kind_name()
+            ))),
         }
     }
 
-    pub fn into_jsonrpc_hir(self) -> xidl_parser::jsonrpc_hir::JsonRpcHirDocument {
+    /// Consumes this input as `RestHir` or returns a typed [`RpcError`].
+    pub fn try_into_rest_hir(self) -> Result<xidl_parser::rest_hir::RestHirDocument, RpcError> {
         match self {
-            Self::JsonRpcHir(value) => value,
-            _ => panic!("codegen input is not JsonRpcHir"),
+            Self::RestHir(value) => Ok(value),
+            other => Err(RpcError::invalid_params(format!(
+                "xidlc ipc: expected RestHir input, got {}",
+                other.kind_name()
+            ))),
+        }
+    }
+
+    /// Consumes this input as `JsonRpcHir` or returns a typed [`RpcError`].
+    pub fn try_into_jsonrpc_hir(
+        self,
+    ) -> Result<xidl_parser::jsonrpc_hir::JsonRpcHirDocument, RpcError> {
+        match self {
+            Self::JsonRpcHir(value) => Ok(value),
+            other => Err(RpcError::invalid_params(format!(
+                "xidlc ipc: expected JsonRpcHir input, got {}",
+                other.kind_name()
+            ))),
+        }
+    }
+
+    /// Consumes this input as `Compilation` or returns a typed [`RpcError`].
+    pub fn try_into_compilation(self) -> Result<Box<super::CompilationInput>, RpcError> {
+        match self {
+            Self::Compilation(value) => Ok(value),
+            other => Err(RpcError::invalid_params(format!(
+                "xidlc ipc: expected Compilation input, got {}",
+                other.kind_name()
+            ))),
         }
     }
 }
@@ -546,6 +613,27 @@ mod tests {
         let encoded = serde_json::to_string(&artifact).unwrap();
         assert!(encoded.contains(r#""kind":"File""#), "{encoded}");
         let decoded: Artifact = serde_json::from_str(&encoded).unwrap();
-        assert_eq!(decoded.as_file().path, "x.rs");
+        assert_eq!(decoded.try_as_file().unwrap().path, "x.rs");
+    }
+
+    #[test]
+    fn mismatched_artifact_and_input_variants_return_rpc_error() {
+        let file = Artifact::new_file(ArtifactFile {
+            path: "a.rs".into(),
+            content: String::new(),
+        });
+        assert!(file.try_as_hir().is_err());
+        assert!(file.try_as_rest_hir().is_err());
+        assert!(file.try_as_jsonrpc_hir().is_err());
+        assert!(file.clone().try_into_hir().is_err());
+        assert!(file.clone().try_into_rest_hir().is_err());
+        assert!(file.clone().try_into_jsonrpc_hir().is_err());
+        assert_eq!(file.try_into_file().unwrap().path, "a.rs");
+
+        let rpc_input = CodegenInput::new_rpc_hir(xidl_parser::hir::Specification(vec![]));
+        assert!(rpc_input.clone().try_into_rest_hir().is_err());
+        assert!(rpc_input.clone().try_into_jsonrpc_hir().is_err());
+        assert!(rpc_input.clone().try_into_compilation().is_err());
+        assert!(rpc_input.try_into_rpc_hir().is_ok());
     }
 }

@@ -2,7 +2,9 @@ use super::File;
 use crate::diagnostic::DiagnosticRunner;
 use crate::driver::generate_session::CodegenSession;
 use crate::error::{IdlcError, IdlcResult};
-use crate::jsonrpc::{Artifact, ArtifactKind, CodegenInput};
+use crate::jsonrpc::{
+    Artifact, ArtifactFile, ArtifactHir, ArtifactJsonRpcHir, ArtifactRestHir, CodegenInput,
+};
 use crate::macros::{hashmap, log_info};
 use std::collections::HashMap;
 use std::path::Path;
@@ -90,23 +92,20 @@ impl Generator {
         input: &Path,
         properties: &HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
-        match artifact.tag() {
-            ArtifactKind::Hir => self.expand_hir_artifact(artifact, input, properties),
-            ArtifactKind::RestHir => self.expand_rest_hir_artifact(artifact, input, properties),
-            ArtifactKind::JsonRpcHir => {
-                self.expand_jsonrpc_hir_artifact(artifact, input, properties)
-            }
-            ArtifactKind::File => Ok(vec![Self::artifact_to_file(artifact)]),
+        match artifact {
+            Artifact::Hir(data) => self.expand_hir_artifact(data, input, properties),
+            Artifact::RestHir(data) => self.expand_rest_hir_artifact(data, input, properties),
+            Artifact::JsonRpcHir(data) => self.expand_jsonrpc_hir_artifact(data, input, properties),
+            Artifact::File(data) => Ok(vec![Self::artifact_to_file(data)]),
         }
     }
 
     fn expand_hir_artifact(
         &mut self,
-        artifact: Artifact,
+        data: ArtifactHir,
         input: &Path,
         properties: &HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
-        let data = artifact.into_hir();
         let mut props = properties.clone();
         props.extend(data.props);
         self.generate_for_lang(
@@ -119,11 +118,10 @@ impl Generator {
 
     fn expand_rest_hir_artifact(
         &mut self,
-        artifact: Artifact,
+        data: ArtifactRestHir,
         input: &Path,
         properties: &HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
-        let data = artifact.into_rest_hir();
         let mut props = properties.clone();
         props.extend(data.props);
         self.generate_for_lang(
@@ -136,11 +134,10 @@ impl Generator {
 
     fn expand_jsonrpc_hir_artifact(
         &mut self,
-        artifact: Artifact,
+        data: ArtifactJsonRpcHir,
         input: &Path,
         properties: &HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
-        let data = artifact.into_jsonrpc_hir();
         let mut props = properties.clone();
         props.extend(data.props);
         self.generate_for_lang(
@@ -151,8 +148,7 @@ impl Generator {
         )
     }
 
-    fn artifact_to_file(artifact: Artifact) -> File {
-        let data = artifact.into_file();
+    fn artifact_to_file(data: ArtifactFile) -> File {
         File {
             path: data.path,
             content: data.content,
