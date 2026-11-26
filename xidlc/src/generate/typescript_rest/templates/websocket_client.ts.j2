@@ -1,5 +1,5 @@
 {% from "macros.j2" import render_type %}
-{% from "http/version_parameter.ts.j2" import pin_headers %}
+{% from "version_parameter.ts.j2" import pin_headers %}
 export async function open_{{ name }}Session(
 baseUrl: string,
 options?: {% if version_parameter %}import('xidl-typescript-client').OpenWsOptions{% else %}{ subprotocol?: string; WebSocketImpl?: typeof WebSocket }{% endif %},

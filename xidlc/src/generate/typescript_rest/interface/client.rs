@@ -1,6 +1,6 @@
 use super::super::model::ClientClassContext;
+use super::super::renderer::TypescriptRestRenderer;
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::typescript::TypescriptRenderer;
 use serde::Serialize;
 use xidl_parser::hir::VersionParameter;
 
@@ -12,11 +12,11 @@ struct VersionClientContext<'a> {
 }
 
 pub(super) fn render(
-    renderer: &TypescriptRenderer,
+    renderer: &TypescriptRestRenderer,
     context: &ClientClassContext,
     version: Option<(&VersionParameter, &str)>,
 ) -> IdlcResult<String> {
-    let mut output = renderer.render_template("http/client_class.ts.j2", context)?;
+    let mut output = renderer.render_template("client_class.ts.j2", context)?;
     let Some((parameter, value)) = version else {
         return Ok(output);
     };
@@ -25,8 +25,7 @@ pub(super) fn render(
         client_name: &context.client_name,
         parameter,
     };
-    let static_block =
-        renderer.render_template("http/version_client_static.ts.j2", &snippet_context)?;
+    let static_block = renderer.render_template("version_client_static.ts.j2", &snippet_context)?;
     let marker = format!("export class {}Client {{", context.client_name);
     let replacement = format!("{marker}\n{static_block}");
     if !output.contains(&marker) {
@@ -35,7 +34,7 @@ pub(super) fn render(
         )));
     }
     output = output.replacen(&marker, &replacement, 1);
-    let pin = renderer.render_template("http/version_client_pin.ts.j2", &snippet_context)?;
+    let pin = renderer.render_template("version_client_pin.ts.j2", &snippet_context)?;
     let pin = pin
         .lines()
         .map(|line| format!("                {line}\n"))

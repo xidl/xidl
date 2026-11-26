@@ -1,7 +1,6 @@
 pub(crate) mod annotations;
 mod attr;
 pub(crate) mod contexts;
-mod http;
 mod interface_render;
 mod method;
 mod module_render;
@@ -9,7 +8,6 @@ pub(crate) mod names;
 mod operation;
 mod output;
 mod root_imports;
-mod route_template;
 mod stream_validation;
 mod struct_fields;
 pub(crate) mod type_expr;

@@ -1,6 +1,5 @@
 use crate::error::{IdlcError, IdlcResult};
-use xidl_parser::hir;
-use xidl_parser::rest_hir::semantics::effective_deprecated;
+use xidl_parser::hir::{self, effective_deprecated};
 
 /// Attribute opener shared by the noted `deprecated` form.
 const DEPRECATED_ATTR: &str = "deprecated(note = ";

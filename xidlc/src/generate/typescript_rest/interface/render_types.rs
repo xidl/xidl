@@ -1,19 +1,19 @@
 use super::super::model::{MethodModel, TsHttpBlocks};
+use super::super::renderer::TypescriptRestRenderer;
 use crate::error::IdlcResult;
-use crate::generate::typescript::TypescriptRenderer;
 use crate::generate::typescript::definition::contexts::{RequestContext, RequestZodContext};
 
 pub(super) fn render_request_types(
     out: &mut TsHttpBlocks,
     method: &MethodModel,
     _module_path: &[String],
-    renderer: &TypescriptRenderer,
+    renderer: &TypescriptRestRenderer,
 ) -> IdlcResult<()> {
     let Some(name) = method.request_name.as_ref() else {
         return Ok(());
     };
     out.types.push(renderer.render_template(
-        "http/request.d.ts.j2",
+        "request.d.ts.j2",
         &RequestContext {
             name: name.to_string(),
             params: method.request_fields.clone(),
@@ -21,7 +21,7 @@ pub(super) fn render_request_types(
         },
     )?);
     out.zod.push(renderer.render_template(
-        "http/request.zod.ts.j2",
+        "request.zod.ts.j2",
         &RequestZodContext {
             schema_name: name.clone(), // Template adds 'Schema'
             name: name.to_string(),
@@ -35,13 +35,13 @@ pub(super) fn render_response_types(
     out: &mut TsHttpBlocks,
     method: &MethodModel,
     _module_path: &[String],
-    renderer: &TypescriptRenderer,
+    renderer: &TypescriptRestRenderer,
 ) -> IdlcResult<()> {
     let Some(name) = method.response_name.as_ref() else {
         return Ok(());
     };
     out.types.push(renderer.render_template(
-        "http/request.d.ts.j2",
+        "request.d.ts.j2",
         &RequestContext {
             name: name.to_string(),
             params: method.response_fields.clone(),
@@ -49,7 +49,7 @@ pub(super) fn render_response_types(
         },
     )?);
     out.zod.push(renderer.render_template(
-        "http/request.zod.ts.j2",
+        "request.zod.ts.j2",
         &RequestZodContext {
             schema_name: name.clone(), // Template adds 'Schema'
             name: name.to_string(),

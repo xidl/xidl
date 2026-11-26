@@ -1,6 +1,6 @@
 use super::super::model::MethodModel;
+use super::super::renderer::TypescriptRestRenderer;
 use crate::error::IdlcResult;
-use crate::generate::typescript::TypescriptRenderer;
 use crate::generate::typescript::definition::contexts::{FieldTypeContext, TsType};
 use crate::generate::typescript::definition::names::ts_prop_name;
 use serde::Serialize;
@@ -121,7 +121,7 @@ export const {name}_ws_subprotocol: string | undefined = {subproto};
 
     pub(super) fn render(
         methods: &[MethodModel],
-        renderer: &TypescriptRenderer,
+        renderer: &TypescriptRestRenderer,
         version: Option<(&VersionParameter, &str)>,
     ) -> IdlcResult<(Vec<String>, Vec<String>)> {
         if version.is_none() {
@@ -143,8 +143,8 @@ export const {name}_ws_subprotocol: string | undefined = {subproto};
                 version_parameter: version.map(|(parameter, _)| parameter),
                 api_version: version.map(|(_, value)| value),
             };
-            client.push(renderer.render_template("http/websocket_client.ts.j2", &context)?);
-            server.push(renderer.render_template("http/websocket_server.ts.j2", &context)?);
+            client.push(renderer.render_template("websocket_client.ts.j2", &context)?);
+            server.push(renderer.render_template("websocket_server.ts.j2", &context)?);
         }
         Ok((client, server))
     }

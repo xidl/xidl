@@ -6,8 +6,7 @@ use crate::generate::rust::util::{
 use crate::generate::rust::{RustRender, RustRenderOutput, RustRenderer};
 use crate::generate::utils::doc_lines_from_annotations;
 use serde_json::json;
-use xidl_parser::hir;
-use xidl_parser::rest_hir::semantics::has_annotation;
+use xidl_parser::hir::{self, has_annotation};
 
 impl RustRender for hir::ExceptDcl {
     fn render(&self, renderer: &RustRenderer) -> IdlcResult<RustRenderOutput> {

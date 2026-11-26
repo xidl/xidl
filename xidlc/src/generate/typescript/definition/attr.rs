@@ -2,8 +2,6 @@ use crate::generate::typescript::definition::annotations::has_annotation;
 use crate::generate::typescript::definition::method::{MethodInfo, ParamInfo, ReturnType};
 use xidl_parser::hir;
 
-use super::http::method_http_code;
-use super::method::HttpMethod;
 use super::names::{default_path, method_struct_prefix, scoped_name, ts_ident};
 
 pub(crate) fn render_attr(
@@ -131,7 +129,7 @@ fn getter(
         params: Vec::new(),
         ret: ReturnType::new(ty),
         response_name: None,
-        http_method: method_http_code(HttpMethod::Get),
+        http_method: "GET".to_string(),
         path: default_path(module_path, interface_name, &raw_name),
         request_name: None,
         request_schema_ref: None,
@@ -175,7 +173,7 @@ fn setter(
         params: vec![param.clone()],
         ret: ReturnType::void(),
         response_name: None,
-        http_method: method_http_code(HttpMethod::Post),
+        http_method: "POST".to_string(),
         path: default_path(module_path, interface_name, &setter_raw),
         request_name,
         request_schema_ref,

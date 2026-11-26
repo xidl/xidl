@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use serde::Serialize;
 
 use crate::generate::typescript::TypescriptRenderer;
+use xidl_parser::rest_hir::RestHirDocument;
 
 /// Shared render state threaded through the TypeScript generator.
 ///
@@ -14,6 +15,7 @@ pub(crate) struct TsRenderCtx<'a> {
     pub(crate) renderer: &'a TypescriptRenderer,
     pub(crate) file_stem: &'a str,
     pub(crate) recursive: &'a HashSet<Vec<String>>,
+    pub(crate) rest_hir: Option<&'a RestHirDocument>,
 }
 
 #[derive(Serialize)]

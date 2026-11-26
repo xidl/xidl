@@ -3,12 +3,16 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 
 mod convert;
+mod deprecation;
 mod location;
 pub(super) mod params;
+mod query;
 #[cfg(test)]
 mod tests;
 
+pub use deprecation::{DeprecatedInfo, deprecated_info, effective_deprecated};
 pub use location::{HttpParameterLocation, VersionParameter};
+pub use query::{find_annotation, has_annotation, has_optional_annotation};
 
 #[cfg(test)]
 use convert::apply_rename_rule;

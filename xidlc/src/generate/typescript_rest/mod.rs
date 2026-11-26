@@ -1,12 +1,13 @@
 mod interface;
 mod model;
+mod renderer;
 mod server;
 mod spec;
 
 use crate::error::{IdlcError, IdlcResult};
-use crate::generate::typescript::TypescriptRenderer;
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir};
 use crate::macros::hashmap;
+use renderer::TypescriptRestRenderer;
 use std::collections::HashMap;
 use std::path::Path;
 use xidl_parser::hir;
@@ -32,8 +33,11 @@ pub fn generate(
     }
 
     let spec = rest_hir.spec.clone();
-    let file_name = input_path.file_stem().unwrap().to_str().unwrap();
-    let mut renderer = TypescriptRenderer::new()?;
+    let file_name = input_path
+        .file_stem()
+        .and_then(|stem| stem.to_str())
+        .ok_or_else(|| IdlcError::rpc("typescript-rest: invalid input file path"))?;
+    let mut renderer = TypescriptRestRenderer::new()?;
     renderer.extend(&props);
 
     let output = spec::render_spec(&spec, file_name, &renderer, &rest_hir)?;

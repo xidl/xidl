@@ -4,9 +4,7 @@ use super::contexts::{
     BodyParamContext, ClientMethodContext, ClientParamContext, CookieParamContext,
     HeaderParamContext, PathParamContext, QueryParamContext, RequestPayloadEntry, TsType,
 };
-use super::http::is_sequence_type;
 use super::names::scoped_name;
-use super::route_template::path_param_is_catch_all;
 use super::type_expr::ts_type_for_type_spec;
 
 #[derive(Clone)]
@@ -265,35 +263,10 @@ pub(crate) enum TypeRefTarget {
     Client,
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(crate) enum HttpMethod {
-    Get,
-    Post,
-    Put,
-    Patch,
-    Delete,
-    Head,
-    Options,
+fn path_param_is_catch_all(path: &str, name: &str) -> bool {
+    path.contains(&format!("{{*{name}}}"))
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(crate) enum ParamSource {
-    Path,
-    Query,
-    Header,
-    Cookie,
-    Body,
-}
-
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(crate) enum ParamDirection {
-    In,
-    Out,
-    InOut,
-}
-
-pub(crate) struct RouteTemplate {
-    pub(crate) path: String,
-    pub(crate) path_params: std::collections::HashSet<String>,
-    pub(crate) query_params: std::collections::HashSet<String>,
+fn is_sequence_type(ty: &hir::TypeSpec) -> bool {
+    matches!(ty, hir::TypeSpec::SequenceType(_))
 }

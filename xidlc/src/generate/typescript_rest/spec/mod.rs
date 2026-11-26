@@ -1,5 +1,4 @@
 use crate::error::IdlcResult;
-use crate::generate::typescript::TypescriptRenderer;
 use crate::generate::typescript::definition::TypeRefTarget;
 use crate::generate::typescript::definition::annotations::ts_doc_lines;
 use crate::generate::typescript::definition::contexts::TsType;
@@ -10,6 +9,7 @@ use xidl_parser::rest_hir::RestHirDocument;
 
 use super::interface::render_interface;
 use super::model::{TsHttpBlocks, TsRaisesContext};
+use super::renderer::TypescriptRestRenderer;
 use zod_imports::ZodImportCollector;
 
 #[cfg(test)]
@@ -117,7 +117,7 @@ fn format_source(source: &str) -> String {
 pub(crate) fn render_spec(
     spec: &hir::Specification,
     file_stem: &str,
-    renderer: &TypescriptRenderer,
+    renderer: &TypescriptRestRenderer,
     rest_hir: &RestHirDocument,
 ) -> IdlcResult<TsHttpOutput> {
     let text_aliases = super::interface::text_aliases::TextAliases::collect(spec);
@@ -208,7 +208,7 @@ pub(crate) fn render_spec(
         String::new()
     } else {
         renderer.render_template(
-            "http/errors.ts.j2",
+            "errors.ts.j2",
             &ErrorsFileContext {
                 file_stem: file_stem.to_string(),
                 exceptions: exception_contexts.clone(),
@@ -221,7 +221,7 @@ pub(crate) fn render_spec(
 
     Ok(TsHttpOutput {
         types: renderer.render_template(
-            "http/types.d.ts.j2",
+            "types.d.ts.j2",
             &TypesFileContext {
                 file_stem: file_stem.to_string(),
                 imports: type_imports,
@@ -229,7 +229,7 @@ pub(crate) fn render_spec(
             },
         )?,
         zod: renderer.render_template(
-            "http/zod.ts.j2",
+            "zod.ts.j2",
             &ZodFileContext {
                 file_stem: file_stem.to_string(),
                 imports: zod_imports.clone(),
@@ -237,7 +237,7 @@ pub(crate) fn render_spec(
             },
         )?,
         client: renderer.render_template(
-            "http/client.ts.j2",
+            "client.ts.j2",
             &ClientFileContext {
                 file_stem: file_stem.to_string(),
                 blocks: blocks.client,
@@ -246,7 +246,7 @@ pub(crate) fn render_spec(
             },
         )?,
         server: renderer.render_template(
-            "http/server.ts.j2",
+            "server.ts.j2",
             &ServerFileContext {
                 file_stem: file_stem.to_string(),
                 blocks: blocks.server,
@@ -261,7 +261,7 @@ pub(crate) fn render_spec(
 fn render_defs(
     defs: &[hir::Definition],
     module_path: &[String],
-    renderer: &TypescriptRenderer,
+    renderer: &TypescriptRestRenderer,
     rest_hir: &RestHirDocument,
     text_aliases: &super::interface::text_aliases::TextAliases,
 ) -> IdlcResult<TsHttpBlocks> {
@@ -305,7 +305,7 @@ fn render_defs(
 
 /// One namespace block of the HTTP output, rendered once per file kind.
 struct ModuleBlock<'a> {
-    renderer: &'a TypescriptRenderer,
+    renderer: &'a TypescriptRestRenderer,
     ident: &'a str,
     doc: &'a [String],
 }
@@ -313,7 +313,7 @@ struct ModuleBlock<'a> {
 impl ModuleBlock<'_> {
     fn render(&self, body: &str) -> IdlcResult<String> {
         self.renderer.render_template(
-            "http/module.ts.j2",
+            "module.ts.j2",
             &ModuleContext {
                 ident: self.ident.to_string(),
                 doc: self.doc.to_vec(),
