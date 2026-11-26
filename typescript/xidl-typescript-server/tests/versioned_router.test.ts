@@ -153,9 +153,9 @@ test('createVersionedRouter routes by header, enforces lifecycles, echoes versio
   });
 });
 
-test('createVersionedRouter supports query, cookie, defaultVersion, and custom resolver', async () => {
-  const handler = async () =>
-    new Response(JSON.stringify({ ok: true }), {
+test('createVersionedRouter supports query, cookie, defaultVersion, Vary semantics, and custom resolver', async () => {
+  const taggedHandler = (version: string) => async () =>
+    new Response(JSON.stringify({ version }), {
       headers: { 'Content-Type': 'application/json', Vary: 'Accept' },
     });
 
@@ -163,61 +163,134 @@ test('createVersionedRouter supports query, cookie, defaultVersion, and custom r
     defaultVersion: 'v2',
     parameter: { in: 'query', name: 'api_version' },
     versions: [
-      { handler, id: 'v1', value: '1' },
-      { handler, id: 'v2', value: '2' },
+      { handler: taggedHandler('v1'), id: 'v1', value: '1' },
+      { handler: taggedHandler('v2'), id: 'v2', value: '2' },
     ],
   });
-  assert.equal(
-    (await queryRouter(new Request('http://localhost/items'))).status,
-    200,
+  const fallbackRes = await queryRouter(new Request('http://localhost/items'));
+  assert.equal(fallbackRes.status, 200);
+  assert.deepEqual(await fallbackRes.json(), { version: 'v2' });
+  assert.equal(fallbackRes.headers.get('api_version'), null);
+  assert.equal(fallbackRes.headers.get('Vary'), 'Accept');
+
+  const explicitQuery = await queryRouter(
+    new Request('http://localhost/items?api_version=1'),
   );
-  assert.equal(
-    (
-      await queryRouter(
-        new Request('http://localhost/items?api_version=1&api_version=2'),
-      )
-    ).status,
-    400,
+  assert.equal(explicitQuery.status, 200);
+  assert.deepEqual(await explicitQuery.json(), { version: 'v1' });
+
+  const repeatedQuery = await queryRouter(
+    new Request('http://localhost/items?api_version=1&api_version=2'),
   );
+  assert.equal(repeatedQuery.status, 400);
+  assert.equal((await repeatedQuery.json()).kind, 'repeated');
+
+  const queryEchoRouter = createVersionedRouter({
+    echoHeader: true,
+    parameter: { in: 'query', name: 'api_version' },
+    versions: [{ handler: taggedHandler('v1'), id: 'v1', value: '1' }],
+  });
+  const queryEchoRes = await queryEchoRouter(
+    new Request('http://localhost/items?api_version=1'),
+  );
+  assert.equal(queryEchoRes.status, 200);
+  assert.equal(queryEchoRes.headers.get('api_version'), '1');
+  assert.equal(queryEchoRes.headers.get('Vary'), 'Accept');
 
   const cookieRouter = createVersionedRouter({
     echoHeader: false,
     parameter: { in: 'cookie', name: 'api_version' },
-    versions: [{ handler, id: 'v1', value: '2026-01-01' }],
+    versions: [{ handler: taggedHandler('v1'), id: 'v1', value: '2026-01-01' }],
   });
-  assert.equal(
-    (
-      await cookieRouter(
-        new Request('http://localhost/items', {
-          headers: { Cookie: 'other=1; api_version=2026-01-01' },
-        }),
-      )
-    ).status,
-    200,
+  const cookieOk = await cookieRouter(
+    new Request('http://localhost/items', {
+      headers: { Cookie: 'other=1; api_version=2026-01-01' },
+    }),
   );
-  assert.equal(
-    (
-      await cookieRouter(
-        new Request('http://localhost/items', {
-          headers: {
-            Cookie: 'api_version=2026-01-01; api_version=2026-06-01',
-          },
-        }),
-      )
-    ).status,
-    400,
+  assert.equal(cookieOk.status, 200);
+  assert.deepEqual(await cookieOk.json(), { version: 'v1' });
+  assert.equal(cookieOk.headers.get('api_version'), null);
+  assert.equal(cookieOk.headers.get('Vary'), 'Accept');
+
+  const cookieRepeated = await cookieRouter(
+    new Request('http://localhost/items', {
+      headers: {
+        Cookie: 'api_version=2026-01-01; api_version=2026-06-01',
+      },
+    }),
   );
+  assert.equal(cookieRepeated.status, 400);
+  assert.equal((await cookieRepeated.json()).kind, 'repeated');
+
+  const cookieMalformed = await cookieRouter(
+    new Request('http://localhost/items', {
+      headers: { Cookie: 'api_version=%E0%A4%A' },
+    }),
+  );
+  assert.equal(cookieMalformed.status, 400);
+  assert.equal((await cookieMalformed.json()).kind, 'malformed');
+
+  const cookieEchoRouter = createVersionedRouter({
+    echoHeader: true,
+    parameter: { in: 'cookie', name: 'api_version' },
+    versions: [{ handler: taggedHandler('v1'), id: 'v1', value: '2026-01-01' }],
+  });
+  const cookieEchoRes = await cookieEchoRouter(
+    new Request('http://localhost/items', {
+      headers: { Cookie: 'api_version=2026-01-01' },
+    }),
+  );
+  assert.equal(cookieEchoRes.status, 200);
+  assert.equal(cookieEchoRes.headers.get('api_version'), '2026-01-01');
+  assert.equal(cookieEchoRes.headers.get('Vary'), 'Accept, Cookie');
 
   const headerRouter = createVersionedRouter({
     parameter: { in: 'header', name: 'X-Version' },
     resolveVersion: raw => (raw === 'latest' ? 'v2' : undefined),
-    versions: [{ handler, id: 'v2', value: '2026-06-01' }],
+    versions: [{ handler: taggedHandler('v2'), id: 'v2', value: '2026-06-01' }],
   });
   const res = await headerRouter(
     new Request('http://localhost/items', {
       headers: { 'X-Version': 'latest' },
     }),
   );
+  assert.equal(res.status, 200);
+  assert.deepEqual(await res.json(), { version: 'v2' });
   assert.equal(res.headers.get('X-Version'), '2026-06-01');
   assert.equal(res.headers.get('Vary'), 'Accept, X-Version');
+});
+
+test('createVersionedRouter validates duplicate versions and invalid defaultVersion eagerly', () => {
+  const noop = async () => new Response('ok');
+  assert.throws(
+    () =>
+      createVersionedRouter({
+        parameter: { in: 'header', name: 'X-Version' },
+        versions: [
+          { handler: noop, id: 'v1', value: '1' },
+          { handler: noop, id: 'v1', value: '2' },
+        ],
+      }),
+    /duplicate version id/,
+  );
+  assert.throws(
+    () =>
+      createVersionedRouter({
+        parameter: { in: 'header', name: 'X-Version' },
+        versions: [
+          { handler: noop, id: 'v1', value: '1' },
+          { handler: noop, id: 'v2', value: '1' },
+        ],
+      }),
+    /duplicate version value/,
+  );
+  assert.throws(
+    () =>
+      createVersionedRouter({
+        defaultVersion: 'v9',
+        parameter: { in: 'header', name: 'X-Version' },
+        versions: [{ handler: noop, id: 'v1', value: '1' }],
+      }),
+    /defaultVersion/,
+  );
 });

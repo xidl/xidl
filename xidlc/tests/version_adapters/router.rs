@@ -20,24 +20,60 @@ fn typescript_adapters_export_versions_and_interface_dispatchers() {
         };
     "#;
     let files = render(source, "items.idl");
-    let adapters = &files[0].1;
+    assert_eq!(files.len(), 1);
+    let compact = files[0].1.split_whitespace().collect::<Vec<_>>().join(" ");
     assert!(
-        adapters.contains(
+        compact.contains(
             r#"export const VERSIONS = [{ id: "v1", value: "2026-01-01" }, { id: "v2", value: "2026-06-01" }] as const;"#
+        ) || compact.contains(
+            r#"export const VERSIONS = [ { id: "v1", value: "2026-01-01" }, { id: "v2", value: "2026-06-01" } ] as const;"#
         ),
-        "{adapters}"
+        "{compact}"
     );
     assert!(
-        adapters.contains(r#"export type VersionId = (typeof VERSIONS)[number]["id"];"#),
-        "{adapters}"
+        compact.contains(r#"export type VersionId = (typeof VERSIONS)[number]["id"];"#),
+        "{compact}"
     );
     assert!(
-        adapters.contains("export const ItemsDispatchers ="),
-        "{adapters}"
+        compact.contains(
+            "export const ItemsDispatchers = { _get: dispatchItemsGet, create: dispatchItemsCreate, } as const;"
+        ),
+        "{compact}"
     );
-    assert!(adapters.contains("get: dispatchItemsGet,"), "{adapters}");
+}
+
+#[test]
+fn typescript_adapters_export_scoped_interface_dispatchers_and_reject_reserved_symbol_collisions() {
+    let scoped = r#"
+        @version enum V { v1, v2 };
+        module catalog {
+            struct Item { string id; @added(V::v2) @optional string title; };
+            interface Items {
+                @get(path = "/items/{id}")
+                Item get(@path string id);
+            };
+        };
+    "#;
+    let files = render(scoped, "catalog.idl");
+    assert_eq!(files.len(), 1);
+    let compact = files[0].1.split_whitespace().collect::<Vec<_>>().join(" ");
     assert!(
-        adapters.contains("create: dispatchItemsCreate,"),
-        "{adapters}"
+        compact.contains(
+            "export const catalog_ItemsDispatchers = { _get: dispatchcatalog_ItemsGet, } as const;"
+        ),
+        "{compact}"
     );
+
+    let colliding = r#"
+        @version enum V { v1, v2 };
+        struct Item { string id; @added(V::v2) @optional string title; };
+        interface VERSIONS {
+            @get(path = "/items")
+            Item get();
+        };
+    "#;
+    // `VERSIONS` as an interface generates `VERSIONSDispatchers`, whereas a type dispatcher or
+    // decision colliding with `VERSIONS` / `VersionId` must be rejected by symbol validation.
+    let files = render(colliding, "ok.idl");
+    assert_eq!(files.len(), 1);
 }

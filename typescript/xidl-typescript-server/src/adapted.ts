@@ -1,3 +1,4 @@
+import { z } from 'zod';
 import { XidlServerError } from './error.ts';
 import { createRouter } from './router.ts';
 import type {
@@ -92,7 +93,53 @@ export function createAdaptedRouter<TVersionId extends string, TService>(
     };
   }
 
-  return createRouter(list, service as TService, options);
+  const adaptedOperations = list.map(operation => {
+    const handlerKey = operation.handler as keyof TService;
+    return bindings[handlerKey]
+      ? preserveWireBodyForAdapter(operation)
+      : operation;
+  });
+
+  return createRouter(adaptedOperations, service as TService, options);
+}
+
+function preserveWireBodyForAdapter<TService>(
+  operation: OperationDescriptor<TService>,
+): OperationDescriptor<TService> {
+  if (
+    operation.request.kind !== 'object' ||
+    operation.request.body.kind !== 'value'
+  ) {
+    return operation;
+  }
+  const bodyKeys = new Set<string>();
+  if (operation.request.body.singleKey) {
+    bodyKeys.add(operation.request.body.singleKey);
+  }
+  for (const field of operation.request.body.fields) {
+    bodyKeys.add(field.key);
+  }
+  let schema: OperationDescriptor<TService>['request']['schema'];
+  if (operation.request.schema instanceof z.ZodObject) {
+    const shape: Record<string, z.ZodTypeAny> = {
+      ...operation.request.schema.shape,
+    };
+    for (const key of bodyKeys) {
+      shape[key] = z.unknown();
+    }
+    schema = z.object(shape);
+  }
+  return {
+    ...operation,
+    request: {
+      ...operation.request,
+      body: {
+        ...operation.request.body,
+        schema: undefined,
+      },
+      schema,
+    },
+  };
 }
 
 /**

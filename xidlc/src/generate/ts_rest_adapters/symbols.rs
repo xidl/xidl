@@ -6,14 +6,15 @@ use std::collections::BTreeSet;
 
 impl FileContext {
     pub(super) fn validate_symbols(&self) -> IdlcResult<()> {
-        let mut names = self
-            .decisions
-            .iter()
-            .map(|value| value.name.clone())
-            .chain(self.conversions.iter().map(|value| value.name.clone()))
-            .chain(self.wire_definitions.iter().map(|value| value.name.clone()))
-            .chain(self.type_dispatchers.iter().map(|value| value.name.clone()))
-            .collect::<Vec<_>>();
+        let mut names = vec!["VERSIONS".to_string(), "VersionId".to_string()];
+        names.extend(
+            self.decisions
+                .iter()
+                .map(|value| value.name.clone())
+                .chain(self.conversions.iter().map(|value| value.name.clone()))
+                .chain(self.wire_definitions.iter().map(|value| value.name.clone()))
+                .chain(self.type_dispatchers.iter().map(|value| value.name.clone())),
+        );
         for operation in &self.operations {
             for suffix in ["ResultTo", "ErrorTo"] {
                 let prefix = "downcastStep";
