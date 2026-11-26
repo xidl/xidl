@@ -1,0 +1,17 @@
+{%- if has_handshake %}		req := &{{ request_struct }}{}
+{%- for line in binding_lines %}
+	{{ line }}
+{%- endfor %}
+{% endif -%}
+		var subprotocols []string
+		if {{ subproto }} != "" { subprotocols = []string{{ "{" }}{{ subproto }}{{ "}" }} }
+		conn, err := xidlgohttp.UpgradeWebSocket(c, subprotocols)
+		if err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusBadRequest, http.StatusBadRequest, err.Error())
+			return
+		}
+		stream := xidlgohttp.NewWSBidiServer[{{ stream_in_ty }}, {{ stream_out_ty }}](conn)
+		if err := svc.{{ method_name }}({{ args }}); err != nil {
+			xidlgohttp.GinWriteJSONError(c, http.StatusInternalServerError, http.StatusInternalServerError, err.Error())
+		}
+		_ = stream.Close()

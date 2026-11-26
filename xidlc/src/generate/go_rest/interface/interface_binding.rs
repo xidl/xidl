@@ -1,6 +1,5 @@
 use crate::error::IdlcResult;
 use crate::generate::go_rest::{MethodMeta, ParamMeta, definition};
-use std::fmt::Write;
 
 use super::GoRestRenderer;
 use super::interface_templates::{
@@ -54,17 +53,6 @@ pub(super) fn render_client_build_request(
     out.push_str(&renderer.render_template("client_build_request.go.j2", &ctx)?);
     out.push('\n');
     Ok(())
-}
-
-pub(super) fn render_client_decode_response(out: &mut String, method: &MethodMeta) {
-    writeln!(
-        out,
-        "\tdecoded, err := decode{}Response(resp)",
-        method.struct_prefix
-    )
-    .unwrap();
-    writeln!(out, "\tif err != nil {{ return nil, err }}").unwrap();
-    writeln!(out, "\treturn &decoded, nil").unwrap();
 }
 
 pub(super) fn render_decode_response_fn(

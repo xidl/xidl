@@ -1,0 +1,8 @@
+func (c *{{ interface_name }}Client) {{ method_name }}(ctx context.Context, req *{{ request_struct }}) (*{{ response_struct }}, error) {
+{{ build_request }}	resp, err := c.httpClient.Do(httpReq)
+	if err != nil { return nil, err }
+	defer resp.Body.Close()
+{{ http_error }}	decoded, err := decode{{ struct_prefix }}Response(resp)
+	if err != nil { return nil, err }
+	return &decoded, nil
+}

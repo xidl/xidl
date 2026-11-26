@@ -1,0 +1,15 @@
+{%- if version_value %}const {{ interface_name }}APIVersion = {{ version_value | tojson }}
+
+{% endif -%}
+type {{ interface_name }}Client struct {
+	baseURL string
+	httpClient *http.Client
+	auth xidlgohttp.ClientAuth
+}
+
+func New{{ interface_name }}Client(baseURL string, httpClient *http.Client, auth xidlgohttp.ClientAuth) *{{ interface_name }}Client {
+	if httpClient == nil {
+		httpClient = http.DefaultClient
+	}
+	return &{{ interface_name }}Client{baseURL: strings.TrimRight(baseURL, "/"), httpClient: httpClient, auth: auth}
+}

@@ -1,0 +1,4 @@
+		{
+		{{ binding }}, err := svc.{{ method_name }}(c.Request.Context(), req)
+{{ server_error }}{% if has_response %}{{ response_write }}{% else %}		c.Status(http.StatusNoContent)
+{% endif %}		}

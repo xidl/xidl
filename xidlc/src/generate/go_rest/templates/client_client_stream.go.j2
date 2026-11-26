@@ -1,0 +1,21 @@
+func (c *{{ interface_name }}Client) {{ method_name }}(ctx context.Context) (*xidlgohttp.ClientStreamWriter[{{ request_struct }}, {{ response_struct }}], error) {
+	requestURL := c.baseURL + "{{ path }}"
+{%- if version_query %}
+	versionQuery := url.Values{}
+	versionQuery.Set({{ version_query.name | tojson }}, {{ version_query.value | tojson }}); requestURL += "?" + versionQuery.Encode()
+{%- endif %}
+	httpReq, err := http.NewRequestWithContext(ctx, "{{ http_method }}", requestURL, nil)
+	if err != nil { return nil, err }
+{%- if version_header %}
+	httpReq.Header.Set({{ version_header.name | tojson }}, {{ version_header.value | tojson }})
+{%- elif version_cookie %}
+	httpReq.AddCookie(&http.Cookie{Name: {{ version_cookie.name | tojson }}, Value: xidlgohttp.EncodeCookieValue({{ version_cookie.value | tojson }})})
+{%- endif %}
+	httpReq.Header.Set("Accept", "{{ response_content_type }}")
+	xidlgohttp.ApplyClientAuth(httpReq, c.auth, {{ struct_prefix }}SecurityRequirements())
+	stream := xidlgohttp.NewClientStreamWriter[{{ request_struct }}, {{ response_struct }}](ctx, c.httpClient, httpReq, func(resp *http.Response) ({{ response_struct }}, error) {
+{{ http_error }}		decoded, err := decode{{ struct_prefix }}Response(resp)
+		return decoded, err
+	})
+	return stream, nil
+}

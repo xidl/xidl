@@ -1,0 +1,5 @@
+type {{ interface_name }}Service interface {
+{%- for method in methods %}
+	{{ method.signature }}
+{%- endfor %}
+}

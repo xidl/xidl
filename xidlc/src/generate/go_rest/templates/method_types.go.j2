@@ -1,0 +1,36 @@
+{%- for s in structs %}
+type {{ s.name }} struct {
+{%- for field in s.fields %}
+	{{ field.name }} {{ field.ty }} `{{ field.tag }}`
+{%- endfor %}
+}
+
+{% endfor -%}
+func {{ struct_prefix }}SecurityRequirements() []xidlgohttp.SecurityRequirement {
+	return []xidlgohttp.SecurityRequirement{
+{%- for req in security %}
+{%- if req.kind == "basic" %}
+		{Kind: xidlgohttp.SecurityBasic, Realm: {{ req.realm | tojson }}},
+{%- elif req.kind == "bearer" %}
+		{Kind: xidlgohttp.SecurityBearer},
+{%- elif req.kind == "api_key" %}
+		{Kind: xidlgohttp.SecurityAPIKey, Location: xidlgohttp.{{ req.location }}, Name: {{ req.name | tojson }}},
+{%- endif %}
+{%- endfor %}
+	}
+}
+
+func {{ struct_prefix }}Deprecated() xidlgohttp.DeprecatedInfo {
+	return xidlgohttp.DeprecatedInfo{
+		Deprecated: {% if deprecated %}true{% else %}false{% endif %},
+{%- if deprecated_since is not none %}
+		Since: {{ deprecated_since | tojson }},
+{%- endif %}
+{%- if deprecated_after is not none %}
+		After: {{ deprecated_after | tojson }},
+{%- endif %}
+{%- if deprecated_note is not none %}
+		Note: {{ deprecated_note | tojson }},
+{%- endif %}
+	}
+}

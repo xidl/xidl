@@ -1,0 +1,33 @@
+func (c *{{ interface_name }}Client) {{ method_name }}({{ params }}) (*xidlgohttp.WSBidiStream[{{ stream_out_ty }}, {{ stream_in_ty }}], error) {
+	req := &{{ request_struct }}{{ "{" }}{{ req_fields }}{{ "}" }}
+	path := format{{ struct_prefix }}Path(req)
+	base := strings.TrimRight(c.baseURL, "/")
+	base = strings.Replace(base, "http://", "ws://", 1)
+	base = strings.Replace(base, "https://", "wss://", 1)
+	endpoint := base + path
+{%- if has_query %}
+	query := url.Values{}
+{%- for line in query_lines %}
+	{{ line }}
+{%- endfor %}
+{%- if version_query %}
+	query.Set({{ version_query.name | tojson }}, {{ version_query.value | tojson }})
+{%- endif %}
+	if encoded := query.Encode(); encoded != "" { endpoint += "?" + encoded }
+{%- endif %}
+	var subprotocols []string
+	if {{ subproto }} != "" { subprotocols = []string{{ "{" }}{{ subproto }}{{ "}" }} }
+{%- if ws_version_header %}
+	wsHeaders := http.Header{}
+{%- if ws_version_header.is_cookie %}
+	wsHeaders.Add("Cookie", {{ ws_version_header.name | tojson }} + "=" + xidlgohttp.EncodeCookieValue({{ ws_version_header.value | tojson }}))
+{%- else %}
+	wsHeaders.Set({{ ws_version_header.name | tojson }}, {{ ws_version_header.value | tojson }})
+{%- endif %}
+	conn, err := xidlgohttp.DialWebSocketWithHeaders(ctx, endpoint, subprotocols, wsHeaders)
+{%- else %}
+	conn, err := xidlgohttp.DialWebSocket(ctx, endpoint, subprotocols)
+{%- endif %}
+	if err != nil { return nil, err }
+	return xidlgohttp.NewWSBidiClient[{{ stream_in_ty }}, {{ stream_out_ty }}](conn), nil
+}
