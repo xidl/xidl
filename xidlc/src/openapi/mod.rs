@@ -1,6 +1,8 @@
 //! Rust implementation of Openapi Spec V3.1.
 
 mod document;
+#[cfg(any(feature = "gen-openapi", feature = "cli"))]
+mod filename;
 mod macros;
 mod shared;
 #[cfg(test)]
@@ -41,5 +43,8 @@ pub mod security;
 pub mod server;
 pub mod tag;
 pub mod xml;
+
+#[cfg(any(feature = "gen-openapi", feature = "cli"))]
+pub(crate) use filename::OpenApiFilename;
 
 pub(crate) use macros::{build_fn, builder, from, new, set_value};

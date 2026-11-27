@@ -1,4 +1,8 @@
 mod cli;
+#[cfg(feature = "gen-openapi")]
+mod openapi;
+#[cfg(feature = "gen-openapi")]
+mod openapi_lock;
 mod subset;
 
 use super::*;
@@ -256,12 +260,17 @@ fn invalid_lock_files_and_missing_paths_return_typed_errors() {
     std::fs::write(&bad_json, "not json").unwrap();
     let bad_json_err = lock.check(&bad_json).unwrap_err().to_string();
     assert!(bad_json_err.contains("invalid JSON"), "{bad_json_err}");
-    let write_bad_err = lock.write_lock(&bad_json, false).unwrap_err().to_string();
-    assert!(write_bad_err.contains("invalid JSON"), "{write_bad_err}");
+    for force in [false, true] {
+        let write_bad_err = lock.write_lock(&bad_json, force).unwrap_err().to_string();
+        assert!(write_bad_err.contains("invalid JSON"), "{write_bad_err}");
+        assert_eq!(std::fs::read_to_string(&bad_json).unwrap(), "not json");
+    }
 
     let bad_schema = dir.path().join("future.lock.json");
     std::fs::write(&bad_schema, r#"{"schema_version": 99, "versions": {}}"#).unwrap();
     let err = lock.check(&bad_schema).unwrap_err().to_string();
+    assert!(err.contains("schema_version 99"), "{err}");
+    let err = lock.write_lock(&bad_schema, true).unwrap_err().to_string();
     assert!(err.contains("schema_version 99"), "{err}");
 
     assert_eq!(

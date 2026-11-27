@@ -3,7 +3,13 @@
 #[cfg(test)]
 mod tests;
 
+mod openapi;
+mod report;
+mod wire;
+
 use crate::error::{IdlcError, IdlcResult};
+use crate::library::ResolvedInputs;
+use crate::units::UnitGraph;
 use crate::version_diff::VersionDiff;
 use crown::hash::sha256::sum256;
 use serde::{Deserialize, Serialize};
@@ -13,14 +19,51 @@ use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
+use openapi::OpenApiFingerprints;
+#[cfg(test)]
+use report::LockDrift;
+use report::{Evidence, LockCheckReport, LockWriteReport};
+
 const LOCK_SCHEMA_VERSION: u32 = 1;
+const LOCK_ALGORITHM_VERSION: u32 = 1;
 static TEMP_FILE_COUNTER: AtomicU64 = AtomicU64::new(0);
+
+/// Optional generated artifact to fingerprint alongside the IDL projection.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum VersionArtifact {
+    /// The OpenAPI document and the schemas reachable from its operations.
+    OpenApi,
+}
 
 /// Serialized version lock file containing one stable fingerprint per version.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct LockDocument {
     pub(crate) schema_version: u32,
+    pub(crate) algorithm_version: Option<u32>,
     pub(crate) versions: BTreeMap<String, LockedVersion>,
+}
+
+impl LockDocument {
+    fn requires_relock(&self, path: &Path, force: bool) -> IdlcResult<bool> {
+        match self.algorithm_version {
+            Some(version) if version == LOCK_ALGORITHM_VERSION => Ok(false),
+            Some(version) if version > LOCK_ALGORITHM_VERSION => Err(IdlcError::fmt(format!(
+                "version lock: algorithm_version {version} in '{}' requires a newer compiler",
+                path.display()
+            ))),
+            _ if force => Ok(true),
+            _ => Err(IdlcError::fmt(format!(
+                "version lock: '{}' uses an older or missing algorithm version; regenerate it with version lock --force",
+                path.display()
+            ))),
+        }
+    }
+
+    fn has_openapi(&self, value: &str) -> bool {
+        self.versions
+            .get(value)
+            .is_some_and(|entry| entry.openapi_fingerprint.is_some())
+    }
 }
 
 /// Fingerprint metadata recorded for one version in a lock file.
@@ -28,117 +71,41 @@ pub(crate) struct LockDocument {
 pub(crate) struct LockedVersion {
     pub(crate) id: String,
     pub(crate) fingerprint: String,
-}
-
-/// One detected discrepancy between a lock file and the current IDL contract.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) enum LockDrift {
-    /// A locked version's canonical projection changed.
-    Changed {
-        version: String,
-        id: String,
-        expected: String,
-        actual: String,
-    },
-    /// A locked version was removed from the contract.
-    Removed { version: String, id: String },
-    /// The selected version is absent from the lock file.
-    Unlocked { version: String, id: String },
-}
-
-impl LockDrift {
-    /// Renders a human-readable diagnostic line for this drift entry.
-    pub(crate) fn format_line(&self) -> String {
-        match self {
-            Self::Changed {
-                version,
-                id,
-                expected,
-                actual,
-            } => format!("version '{version}' ({id}) changed: locked {expected}, current {actual}"),
-            Self::Removed { version, id } => {
-                format!("version '{version}' ({id}) was removed from the contract")
-            }
-            Self::Unlocked { version, id } => {
-                format!("version '{version}' ({id}) is not present in the lock file")
-            }
-        }
-    }
-}
-
-/// Outcome of validating a contract against its version lock file.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct LockCheckReport {
-    pub(crate) drifts: Vec<LockDrift>,
-}
-
-impl LockCheckReport {
-    /// Returns true when no frozen version drifted.
-    pub(crate) fn is_clean(&self) -> bool {
-        self.drifts.is_empty()
-    }
-
-    /// Formats all detected drifts as a newline-terminated message.
-    pub(crate) fn render(&self, contract: &Path, lock_path: &Path) -> String {
-        let mut out = format!(
-            "version lock mismatch for '{}' against '{}':\n",
-            contract.display(),
-            lock_path.display()
-        );
-        for drift in &self.drifts {
-            out.push_str("  - ");
-            out.push_str(&drift.format_line());
-            out.push('\n');
-        }
-        out
-    }
-}
-
-/// Outcome of writing or updating a version lock file.
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub(crate) struct LockWriteReport {
-    pub(crate) lock_path: PathBuf,
-    pub(crate) document: LockDocument,
-    pub(crate) drifts: Vec<LockDrift>,
-}
-
-impl LockWriteReport {
-    /// Returns true when the lock file was written with no unforced drifts.
-    pub(crate) fn is_written(&self) -> bool {
-        self.drifts.is_empty()
-    }
-
-    /// Formats unforced drift errors that blocked overwriting the lock file.
-    pub(crate) fn render_drifts(&self, contract: &Path) -> String {
-        let report = LockCheckReport {
-            drifts: self.drifts.clone(),
-        };
-        format!(
-            "{}re-run with --force to update locked fingerprints intentionally.\n",
-            report.render(contract, &self.lock_path)
-        )
-    }
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub(crate) openapi_fingerprint: Option<String>,
 }
 
 /// Computes and verifies stable per-version fingerprints for a versioned IDL file.
 pub(crate) struct VersionLock {
     diff: VersionDiff,
     versions: Option<BTreeSet<String>>,
+    graph: UnitGraph,
+    resolved: ResolvedInputs,
+    artifact: Option<VersionArtifact>,
 }
 
 impl VersionLock {
     /// Resolves a versioned IDL contract using the same pipeline as `version diff`.
     pub(crate) fn from_file(path: &Path) -> IdlcResult<Self> {
-        let diff = VersionDiff::from_file(path)?;
+        let (diff, graph, resolved) = VersionDiff::load(path)?;
         Ok(Self {
             diff,
             versions: None,
+            graph,
+            resolved,
+            artifact: None,
         })
     }
 
     /// Limits lock and check to the given version values when supplied.
     pub(crate) fn with_versions(mut self, versions: Option<BTreeSet<String>>) -> Self {
         self.versions = versions;
+        self
+    }
+
+    /// Selects explicit evidence from the generated artifact.
+    pub(crate) fn with_artifact(mut self, artifact: Option<VersionArtifact>) -> Self {
+        self.artifact = artifact;
         self
     }
 
@@ -192,47 +159,69 @@ impl VersionLock {
     }
 
     /// Builds a deterministic lock document for the selected versions.
-    fn document(&self) -> IdlcResult<LockDocument> {
+    fn document(&self, needs_openapi: impl Fn(&str) -> bool) -> IdlcResult<LockDocument> {
         let record = self.diff.record();
         let parameter_line = match record.parameter() {
             Some(param) => format!("{}:{}", param.location.as_str(), param.name),
             None => "none".to_string(),
         };
         let mut versions = BTreeMap::new();
+        let mut openapi = None;
         for (version_id, definition) in record.timeline().iter() {
             if !self.selects(&definition.value) {
                 continue;
             }
             let projection = self.diff.formatted_projection(version_id)?;
             let mut canonical = format!(
-                "xidl-version-lock-v1\nversion-value: {}\nversion-parameter: {}\n---\n{}",
+                "xidl-version-lock\nversion-value: {}\nversion-parameter: {}\n---\n{}",
                 definition.value, parameter_line, projection
             );
             for (unit_path, unit_source) in self.diff.imported_units() {
                 let _ = write!(canonical, "\n--- import {unit_path} ---\n{unit_source}");
             }
             let fingerprint = Self::fingerprint(canonical.as_bytes());
+            let openapi_fingerprint = if needs_openapi(&definition.value) {
+                let generator = match &mut openapi {
+                    Some(generator) => generator,
+                    slot => slot.insert(OpenApiFingerprints::new(&self.graph, &self.resolved)?),
+                };
+                Some(generator.fingerprint(&definition.value)?)
+            } else {
+                None
+            };
             versions.insert(
                 definition.value.clone(),
                 LockedVersion {
                     id: definition.ident.clone(),
                     fingerprint,
+                    openapi_fingerprint,
                 },
             );
         }
         Ok(LockDocument {
             schema_version: LOCK_SCHEMA_VERSION,
+            algorithm_version: Some(LOCK_ALGORITHM_VERSION),
             versions,
         })
     }
 
     /// Writes a lock file atomically, refusing to overwrite drifted existing entries unless `force` is set.
     pub(crate) fn write_lock(&self, lock_path: &Path, force: bool) -> IdlcResult<LockWriteReport> {
-        let current = self.document()?;
+        let existing = Self::read_document_if_exists(lock_path)?;
+        let upgrading = match &existing {
+            Some(document) => document.requires_relock(lock_path, force)?,
+            None => false,
+        };
+        let current = self.document(|value| {
+            self.artifact.is_some() || existing.as_ref().is_some_and(|doc| doc.has_openapi(value))
+        })?;
         self.validate_selection(&current, None)?;
-        if !force && let Some(mut existing) = Self::read_document_if_exists(lock_path)? {
+        if let Some(mut existing) = existing
+            && !upgrading
+            && !force
+        {
             existing.versions.retain(|value, _| self.selects(value));
-            let report = Self::compare(&existing, &current, false);
+            let report = LockCheckReport::compare(&existing, &current, Evidence::Recorded, false)?;
             if !report.is_clean() {
                 return Ok(LockWriteReport {
                     lock_path: lock_path.to_path_buf(),
@@ -262,10 +251,11 @@ impl VersionLock {
         })
     }
 
-    /// Verifies locked versions and requires each explicitly selected version to be locked.
+    /// Verifies that every version in `lock_path` still matches the contract.
     pub(crate) fn check(&self, lock_path: &Path) -> IdlcResult<LockCheckReport> {
         let mut existing = Self::read_document(lock_path)?;
-        let current = self.document()?;
+        existing.requires_relock(lock_path, false)?;
+        let current = self.document(|value| existing.has_openapi(value))?;
         self.validate_selection(&current, Some(&existing))?;
         if self.versions.is_some() {
             let declared: BTreeSet<&str> = self
@@ -280,7 +270,12 @@ impl VersionLock {
                 .versions
                 .retain(|value, _| self.selects(value) || !declared.contains(value.as_str()));
         }
-        Ok(Self::compare(&existing, &current, self.versions.is_some()))
+        let evidence = if self.artifact.is_some() {
+            Evidence::OpenApi
+        } else {
+            Evidence::Recorded
+        };
+        LockCheckReport::compare(&existing, &current, evidence, self.versions.is_some())
     }
 
     fn read_document_if_exists(lock_path: &Path) -> IdlcResult<Option<LockDocument>> {
@@ -350,41 +345,5 @@ impl VersionLock {
         })?;
         scopeguard::ScopeGuard::into_inner(cleanup);
         Ok(())
-    }
-
-    fn compare(
-        existing: &LockDocument,
-        current: &LockDocument,
-        require_selected: bool,
-    ) -> LockCheckReport {
-        let mut drifts = Vec::new();
-        for (version, locked) in &existing.versions {
-            match current.versions.get(version) {
-                None => drifts.push(LockDrift::Removed {
-                    version: version.clone(),
-                    id: locked.id.clone(),
-                }),
-                Some(actual) if actual.fingerprint != locked.fingerprint => {
-                    drifts.push(LockDrift::Changed {
-                        version: version.clone(),
-                        id: actual.id.clone(),
-                        expected: locked.fingerprint.clone(),
-                        actual: actual.fingerprint.clone(),
-                    });
-                }
-                Some(_) => {}
-            }
-        }
-        if require_selected {
-            for (version, actual) in &current.versions {
-                if !existing.versions.contains_key(version) {
-                    drifts.push(LockDrift::Unlocked {
-                        version: version.clone(),
-                        id: actual.id.clone(),
-                    });
-                }
-            }
-        }
-        LockCheckReport { drifts }
     }
 }

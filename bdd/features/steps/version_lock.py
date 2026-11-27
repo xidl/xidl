@@ -223,3 +223,72 @@ def check_empty_version_set(context):
         context, "version", "check", "--versions", "[]", context.version_lock_idl
     )
     assert result.returncode == 0, (result.stdout, result.stderr)
+
+
+@when("I lock the generated OpenAPI contract")
+def lock_openapi(context):
+    result = run_xidlc(
+        context, "version", "lock", "--artifact", "openapi", context.version_lock_idl
+    )
+    assert result.returncode == 0, (result.stdout, result.stderr)
+    lock_file = context.version_lock_dir / "workspace.versions.lock.json"
+    version = json.loads(lock_file.read_text())["versions"]["2026-12-01"]
+    assert version["openapi_fingerprint"].startswith("sha256:")
+
+
+@when("I document and deprecate a field in the contract")
+def document_and_deprecate_field(context):
+    source = context.version_lock_idl.read_text()
+    assert "    string name;" in source
+    context.version_lock_idl.write_text(
+        source.replace(
+            "    string name;", "    /// Display name.\n    @deprecated string name;"
+        )
+    )
+
+
+@then("the OpenAPI fingerprint still matches")
+def check_openapi(context):
+    result = run_xidlc(
+        context, "version", "check", "--artifact", "openapi", context.version_lock_idl
+    )
+    assert result.returncode == 0, (result.stdout, result.stderr)
+
+
+@then("checking the OpenAPI fingerprint reports drift")
+def check_openapi_drift(context):
+    result = run_xidlc(
+        context, "version", "check", "--artifact", "openapi", context.version_lock_idl
+    )
+    assert result.returncode == 1, (result.stdout, result.stderr)
+    assert "OpenAPI artifact changed" in result.stderr
+
+
+@when("I remove the algorithm version from the lock")
+def remove_lock_algorithm_version(context):
+    lock_file = context.version_lock_dir / "workspace.versions.lock.json"
+    document = json.loads(lock_file.read_text())
+    del document["algorithm_version"]
+    lock_file.write_text(json.dumps(document))
+
+
+@then("xidlc diagnoses the old lock before comparing fingerprints")
+def old_lock_needs_regeneration(context):
+    lock_file = context.version_lock_dir / "workspace.versions.lock.json"
+    before = lock_file.read_bytes()
+    for command in ["check", "lock"]:
+        result = run_xidlc(context, "version", command, context.version_lock_idl)
+        assert result.returncode == 2, (result.stdout, result.stderr)
+        assert result.stderr.count("version lock --force") == 1, result.stderr
+        assert "version lock mismatch" not in result.stderr, result.stderr
+        assert lock_file.read_bytes() == before
+
+
+@when("I explicitly regenerate the lock")
+def force_regenerate_old_lock(context):
+    result = run_xidlc(context, "version", "lock", "--force", context.version_lock_idl)
+    assert result.returncode == 0, (result.stdout, result.stderr)
+    lock_file = context.version_lock_dir / "workspace.versions.lock.json"
+    doc = json.loads(lock_file.read_text())
+    assert doc["algorithm_version"] > 0
+    assert doc["versions"]["2026-12-01"]["openapi_fingerprint"].startswith("sha256:")

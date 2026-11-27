@@ -7,10 +7,11 @@ use crate::jsonrpc::{
     Artifact, ArtifactFile, ArtifactHir, ArtifactJsonRpcHir, ArtifactRestHir, Codegen, CodegenInput,
 };
 use crate::macros::{hashmap, log_info};
-use crate::units::{Unit, UnitGraph};
+use crate::units::{IMPORT_PROPERTY, UNIT_PATH_PROPERTY, Unit, UnitGraph};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use xidl_parser::hir::ParserProperties;
+use xidl_parser::semantic::INTEGER_IMPORTS_PROPERTY;
 
 /// Coordinates the built-in HIR stage and target generator sessions.
 pub struct Generator {
@@ -39,6 +40,22 @@ impl Generator {
             lang,
             sessions: SessionPool::with_factory(factory),
         }
+    }
+
+    /// Generates one prepared unit with its resolved import properties.
+    pub(crate) fn generate_unit(
+        &mut self,
+        graph: &UnitGraph,
+        unit: &Unit,
+        mut props: HashMap<String, serde_json::Value>,
+    ) -> IdlcResult<Vec<File>> {
+        props.insert(IMPORT_PROPERTY.to_owned(), graph.import_property(unit));
+        props.insert(
+            INTEGER_IMPORTS_PROPERTY.to_owned(),
+            serde_json::to_value(graph.integer_imports(unit))?,
+        );
+        props.insert(UNIT_PATH_PROPERTY.to_owned(), unit.path().into());
+        self.generate_from_unit(unit, props)
     }
 
     /// Generates artifacts from IDL source, parsing the source once.

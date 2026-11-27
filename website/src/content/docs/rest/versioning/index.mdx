@@ -57,3 +57,32 @@ selected version to be locked and verifies its fingerprint. Every check reports
 locked versions removed from the contract. With no selection, lock writes
 every declared version and check verifies every locked version. List all
 declared values to require a lock for the whole contract.
+
+### Verify the generated HTTP contract
+
+Add an OpenAPI fingerprint with `version lock --artifact openapi`. A check
+without an artifact option verifies every fingerprint recorded for each checked
+version. Use `version check --artifact openapi` to require and verify its
+HTTP evidence specifically.
+
+```sh
+xidlc version lock --versions '["1.0"]' --artifact openapi -l pets.lock.json pets.idl
+xidlc version check --versions '["1.0"]' -l pets.lock.json pets.idl
+```
+
+The HTTP fingerprint covers routes, parameters, requirements, response
+statuses and headers, media types, and reachable payload schemas. Changes to
+operation identifiers, examples, or other documentation leave this fingerprint
+stable. A wire field whose name resembles documentation still counts.
+
+Each version may record both an IDL and an OpenAPI fingerprint. A lock write
+verifies all recorded evidence unless explicitly forced. A first OpenAPI
+fingerprint can be added when the recorded IDL fingerprint still matches.
+Forced writes recompute the IDL and every recorded OpenAPI fingerprint for
+the selected versions.
+
+Lock files record the fingerprint algorithm version. If an older file needs
+to be regenerated, review the released contracts and run `version lock --force`
+with the intended version set. This recomputes the evidence already recorded
+for those versions. A missing file may be created. Errors reading or parsing
+an existing file also apply to forced writes.

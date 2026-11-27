@@ -1,13 +1,14 @@
 use crate::error::{IdlcError, IdlcResult};
 use crate::fmt::format_idl_source;
-use crate::library::LibraryLoader;
-use crate::units::UnitGraph;
+use crate::library::{LibraryLoader, ResolvedInputs};
+use crate::units::{Unit, UnitGraph};
 use similar::TextDiff;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use xidl_parser::hir::printer::IdlPrinter;
-use xidl_parser::hir::{Definition, Pragma, Specification};
+use xidl_parser::hir::{Definition, ParserProperties, Pragma, Specification};
 use xidl_parser::pipeline::Pipeline;
+use xidl_parser::semantic::INTEGER_IMPORTS_PROPERTY;
 use xidl_parser::versioning::{VersionId, VersioningRecord};
 
 /// A resolved contract and its declared history for human-readable comparison.
@@ -22,21 +23,27 @@ pub(crate) struct VersionDiff {
 impl VersionDiff {
     /// Resolves imports and includes using the same preparation as generation.
     pub(crate) fn from_file(path: &Path) -> IdlcResult<Self> {
+        Self::load(path).map(|(contract, _, _)| contract)
+    }
+
+    /// Prepares a single contract with its resolved dependencies and mounts.
+    pub(crate) fn load(path: &Path) -> IdlcResult<(Self, UnitGraph, ResolvedInputs)> {
         let inputs = [path.to_path_buf()];
         let resolved = LibraryLoader::new().resolve(&inputs)?;
         resolved.check_compiler()?;
-        let graph = UnitGraph::build(&inputs, resolved.mounts())?;
+        let [input] = resolved.files() else {
+            return Err(IdlcError::fmt(format!(
+                "contract '{}' must resolve to one IDL input",
+                path.display()
+            )));
+        };
+        let graph = UnitGraph::build(resolved.files(), resolved.mounts())?;
         let unit = graph
             .units()
             .last()
             .ok_or_else(|| IdlcError::fmt(format!("contract '{}' has no unit", path.display())))?;
         let mut resolver = crate::library::include_resolver(resolved.mounts());
-        let spec = Pipeline::lower_spec(
-            unit.typed_ast().clone(),
-            &Default::default(),
-            path,
-            &mut *resolver,
-        )?;
+        let spec = Self::lower_unit(&graph, unit, &mut *resolver)?;
         let record = VersioningRecord::analyze(&spec)?.ok_or_else(|| {
             IdlcError::fmt(format!(
                 "contract '{}' requires a @version enum",
@@ -51,17 +58,18 @@ impl VersionDiff {
             ));
         }
         let imported_units = Self::collect_imported_units(&graph, &mut *resolver)?;
-        Ok(Self {
+        let diff = Self {
             spec,
             record,
             imports,
             imported_units,
-            contract: path
+            contract: input
                 .file_name()
-                .unwrap_or(path.as_os_str())
+                .unwrap_or(input.as_os_str())
                 .to_string_lossy()
                 .into_owned(),
-        })
+        };
+        Ok((diff, graph, resolved))
     }
 
     /// Compares canonical projections; equal contracts return no output.
@@ -110,6 +118,23 @@ impl VersionDiff {
         definitions
     }
 
+    fn lower_unit(
+        graph: &UnitGraph,
+        unit: &Unit,
+        resolver: &mut dyn xidl_parser::parser::IncludeResolver,
+    ) -> IdlcResult<Specification> {
+        let props = ParserProperties::from([(
+            INTEGER_IMPORTS_PROPERTY.to_owned(),
+            serde_json::to_value(graph.integer_imports(unit))?,
+        )]);
+        Ok(Pipeline::lower_spec(
+            unit.typed_ast().clone(),
+            &props,
+            unit.file(),
+            resolver,
+        )?)
+    }
+
     fn collect_imported_units(
         graph: &UnitGraph,
         resolver: &mut dyn xidl_parser::parser::IncludeResolver,
@@ -131,12 +156,7 @@ impl VersionDiff {
         }
         let mut canonical = BTreeMap::new();
         for dep in &units[..units.len() - 1] {
-            let spec = Pipeline::lower_spec(
-                dep.typed_ast().clone(),
-                &Default::default(),
-                dep.file(),
-                resolver,
-            )?;
+            let spec = Self::lower_unit(graph, dep, resolver)?;
             let rendered = match (
                 VersioningRecord::analyze(&spec)?,
                 bound_versions.get(dep.prefix()),
