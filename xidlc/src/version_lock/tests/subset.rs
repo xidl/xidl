@@ -17,7 +17,7 @@ fn a_subset_replaces_unselected_entries_and_preserves_selected_fingerprints() {
 
     let both = VersionLock::from_file(&idl)
         .unwrap()
-        .with_versions(vec![SECOND.into(), FIRST.into(), FIRST.into()])
+        .with_versions(Some([SECOND.into(), FIRST.into()].into()))
         .write_lock(&lock_path, false)
         .unwrap();
     assert!(both.is_written());
@@ -26,8 +26,8 @@ fn a_subset_replaces_unselected_entries_and_preserves_selected_fingerprints() {
 
     let selected = VersionLock::from_file(&idl)
         .unwrap()
-        .with_versions(vec![FIRST.into()]);
-    assert!(selected.check(&lock_path, true).unwrap().is_clean());
+        .with_versions(Some([FIRST.into()].into()));
+    assert!(selected.check(&lock_path).unwrap().is_clean());
     let first = selected.write_lock(&lock_path, false).unwrap();
     assert!(first.is_written());
     assert_eq!(first.document.versions.len(), 1);
@@ -57,11 +57,15 @@ fn a_subset_check_keeps_removals_and_rejects_unknown_values() {
     let without_second = without_second.replace(" @added(V::v2) string title;", "");
     std::fs::write(&idl, without_second).unwrap();
 
-    for version in [FIRST, SECOND] {
+    for versions in [
+        [FIRST.into()].into(),
+        [SECOND.into()].into(),
+        BTreeSet::new(),
+    ] {
         let report = VersionLock::from_file(&idl)
             .unwrap()
-            .with_versions(vec![version.into()])
-            .check(&lock_path, false)
+            .with_versions(Some(versions))
+            .check(&lock_path)
             .unwrap();
         assert_eq!(
             report.drifts,
@@ -73,8 +77,8 @@ fn a_subset_check_keeps_removals_and_rejects_unknown_values() {
     }
     let unknown = VersionLock::from_file(&idl)
         .unwrap()
-        .with_versions(vec!["unknown".into()]);
-    assert!(unknown.check(&lock_path, false).is_err());
+        .with_versions(Some(["unknown".into()].into()));
+    assert!(unknown.check(&lock_path).is_err());
     assert!(unknown.write_lock(&lock_path, true).is_err());
     assert_eq!(
         VersionLock::read_document(&lock_path).unwrap(),

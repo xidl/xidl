@@ -153,7 +153,12 @@ def version_lock_with_force_succeeds(context):
 @when('I lock only version "{version}"')
 def lock_one_version(context, version):
     result = run_xidlc(
-        context, "version", "lock", "--version", version, context.version_lock_idl
+        context,
+        "version",
+        "lock",
+        "--versions",
+        json.dumps([version]),
+        context.version_lock_idl,
     )
     assert result.returncode == 0, (result.stdout, result.stderr)
 
@@ -173,15 +178,14 @@ def rename_second_version_field(context):
     )
 
 
-@then('a strict check of only version "{version}" succeeds')
-def strictly_check_one_version(context, version):
+@then('checking only version "{version}" succeeds')
+def check_one_version(context, version):
     result = run_xidlc(
         context,
         "version",
         "check",
-        "--strict",
-        "--version",
-        version,
+        "--versions",
+        json.dumps([version]),
         context.version_lock_idl,
     )
     assert result.returncode == 0, (result.stdout, result.stderr)
@@ -190,9 +194,32 @@ def strictly_check_one_version(context, version):
 @then('checking only version "{version}" reports it is not locked')
 def check_unlocked_version(context, version):
     result = run_xidlc(
-        context, "version", "check", "--version", version, context.version_lock_idl
+        context,
+        "version",
+        "check",
+        "--versions",
+        json.dumps([version]),
+        context.version_lock_idl,
     )
     assert result.returncode == 1, (result.stdout, result.stderr)
     assert (
         version in result.stderr and "is not present in the lock file" in result.stderr
     )
+
+
+@when("I lock the explicit empty version set")
+def lock_empty_version_set(context):
+    result = run_xidlc(
+        context, "version", "lock", "--versions", "[]", context.version_lock_idl
+    )
+    assert result.returncode == 0, (result.stdout, result.stderr)
+
+
+@then("the lock contains no versions and the empty version check succeeds")
+def check_empty_version_set(context):
+    lock_file = context.version_lock_dir / "workspace.versions.lock.json"
+    assert json.loads(lock_file.read_text())["versions"] == {}
+    result = run_xidlc(
+        context, "version", "check", "--versions", "[]", context.version_lock_idl
+    )
+    assert result.returncode == 0, (result.stdout, result.stderr)

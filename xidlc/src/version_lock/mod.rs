@@ -42,7 +42,7 @@ pub(crate) enum LockDrift {
     },
     /// A locked version was removed from the contract.
     Removed { version: String, id: String },
-    /// The contract declares a version absent from the lock file (`--strict`).
+    /// The selected version is absent from the lock file.
     Unlocked { version: String, id: String },
 }
 
@@ -137,8 +137,8 @@ impl VersionLock {
     }
 
     /// Limits lock and check to the given version values when supplied.
-    pub(crate) fn with_versions(mut self, values: Vec<String>) -> Self {
-        self.versions = (!values.is_empty()).then(|| values.into_iter().collect());
+    pub(crate) fn with_versions(mut self, versions: Option<BTreeSet<String>>) -> Self {
+        self.versions = versions;
         self
     }
 
@@ -262,8 +262,8 @@ impl VersionLock {
         })
     }
 
-    /// Verifies that every version in `lock_path` still matches the contract.
-    pub(crate) fn check(&self, lock_path: &Path, strict: bool) -> IdlcResult<LockCheckReport> {
+    /// Verifies locked versions and requires each explicitly selected version to be locked.
+    pub(crate) fn check(&self, lock_path: &Path) -> IdlcResult<LockCheckReport> {
         let mut existing = Self::read_document(lock_path)?;
         let current = self.document()?;
         self.validate_selection(&current, Some(&existing))?;
@@ -280,11 +280,7 @@ impl VersionLock {
                 .versions
                 .retain(|value, _| self.selects(value) || !declared.contains(value.as_str()));
         }
-        Ok(Self::compare(
-            &existing,
-            &current,
-            strict || self.versions.is_some(),
-        ))
+        Ok(Self::compare(&existing, &current, self.versions.is_some()))
     }
 
     fn read_document_if_exists(lock_path: &Path) -> IdlcResult<Option<LockDocument>> {
@@ -356,7 +352,11 @@ impl VersionLock {
         Ok(())
     }
 
-    fn compare(existing: &LockDocument, current: &LockDocument, strict: bool) -> LockCheckReport {
+    fn compare(
+        existing: &LockDocument,
+        current: &LockDocument,
+        require_selected: bool,
+    ) -> LockCheckReport {
         let mut drifts = Vec::new();
         for (version, locked) in &existing.versions {
             match current.versions.get(version) {
@@ -375,7 +375,7 @@ impl VersionLock {
                 Some(_) => {}
             }
         }
-        if strict {
+        if require_selected {
             for (version, actual) in &current.versions {
                 if !existing.versions.contains_key(version) {
                     drifts.push(LockDrift::Unlocked {

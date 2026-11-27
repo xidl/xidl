@@ -58,15 +58,16 @@ fn version_lock_and_check_parse_idl_and_options() {
         panic!("expected version check command");
     };
     assert_eq!(args.lock_file, None);
-    assert!(!args.strict);
     assert_eq!(args.idl, PathBuf::from("api.idl"));
 
-    assert_eq!(
-        Cli::try_parse_from(["xidlc", "version", "lock", "--strict", "api.idl"])
-            .expect_err("lock must reject --strict")
-            .kind(),
-        clap::error::ErrorKind::UnknownArgument
-    );
+    for command in ["lock", "check"] {
+        assert_eq!(
+            Cli::try_parse_from(["xidlc", "version", command, "--strict", "api.idl"])
+                .expect_err("version selection replaces --strict")
+                .kind(),
+            clap::error::ErrorKind::UnknownArgument
+        );
+    }
     assert_eq!(
         Cli::try_parse_from(["xidlc", "version", "check", "--force", "api.idl"])
             .expect_err("check must reject --force")
@@ -100,7 +101,8 @@ fn version_lock_and_check_parse_idl_and_options() {
         "check",
         "-l",
         "custom.lock.json",
-        "--strict",
+        "--versions",
+        r#"["2026-12-01"]"#,
         "api.idl",
     ])
     .expect("parse version check");
@@ -111,27 +113,36 @@ fn version_lock_and_check_parse_idl_and_options() {
         panic!("expected version check command");
     };
     assert_eq!(args.lock_file, Some(PathBuf::from("custom.lock.json")));
-    assert!(args.strict);
     assert_eq!(args.idl, PathBuf::from("api.idl"));
 }
 
 #[test]
-fn version_selection_is_repeatable_and_requires_a_nonempty_value() {
+fn version_selection_accepts_a_json_array_of_version_values() {
     for command in ["lock", "check"] {
-        Cli::try_parse_from([
-            "xidlc",
-            "version",
-            command,
-            "--version",
-            "2026-12-01",
-            "--version",
-            "2027-06-01",
-            "api.idl",
-        ])
-        .expect("parse repeated version selection");
-        assert!(
-            Cli::try_parse_from(["xidlc", "version", command, "--version=", "api.idl"]).is_err()
-        );
+        for selection in ["[]", r#"["2026-12-01","2027-06-01"]"#] {
+            Cli::try_parse_from([
+                "xidlc",
+                "version",
+                command,
+                "--versions",
+                selection,
+                "api.idl",
+            ])
+            .expect("parse version array");
+        }
+        for invalid in ["", "{}", "[1]", "2026-12-01"] {
+            assert!(
+                Cli::try_parse_from([
+                    "xidlc",
+                    "version",
+                    command,
+                    "--versions",
+                    invalid,
+                    "api.idl",
+                ])
+                .is_err()
+            );
+        }
     }
 }
 

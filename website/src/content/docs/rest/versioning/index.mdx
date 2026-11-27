@@ -43,19 +43,17 @@ interface Pets {
 ## Lock released versions
 
 Use a version lock file to detect changes to the IDL projection of a released
-version. Pass the version's declared value with `--version`. Repeat the option
-to provide the complete set you want to lock.
+version. Pass the complete set of declared version values as a JSON array with
+`--versions`.
 
 ```sh
-xidlc version lock --version 1.0 --lock-file pets.lock.json pets.idl
-xidlc version check --version 1.0 --lock-file pets.lock.json pets.idl
+xidlc version lock --versions '["1.0"]' --lock-file pets.lock.json pets.idl
+xidlc version check --versions '["1.0"]' --lock-file pets.lock.json pets.idl
 ```
 
-An explicit lock writes only the supplied versions. An explicit check requires
-each supplied version to be locked and verifies its fingerprint. Check also
-reports any locked version removed from the contract. Without selection, lock
-writes every declared version, and check verifies the lock file. Add `--strict`
-to an unfiltered check to require a lock for every declared version.
-
-Your application chooses which versions to freeze and can skip lock and check
-when its frozen set is empty.
+An explicit lock replaces the entire stored set with the supplied versions.
+Use `--versions '[]'` to write an empty lock. An explicit check requires each
+selected version to be locked and verifies its fingerprint. Every check reports
+locked versions removed from the contract. With no selection, lock writes
+every declared version and check verifies every locked version. List all
+declared values to require a lock for the whole contract.
