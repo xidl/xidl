@@ -4,7 +4,9 @@ use super::error::ImportError;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use xidl_parser::hir;
+use xidl_parser::pipeline::Pipeline;
 use xidl_parser::semantic::IntegerExports;
+use xidl_parser::typed_ast;
 use xidl_parser::versioning::VersioningRecord;
 
 /// What one compilation unit exposes to its importers.
@@ -28,18 +30,18 @@ impl UnitInterface {
         import.insert("versions".into(), self.versions().into_iter().collect());
     }
 
-    /// Reads the interface `source` exposes.
+    /// Reads the interface parsed into `typed_ast`.
     ///
     /// # Errors
     ///
     /// Returns [`ImportError::Parse`] when the unit cannot be read as IDL, so a
     /// broken dependency is reported against the file that holds it.
     pub(super) fn of(
-        source: &str,
+        typed_ast: typed_ast::Specification,
         path: &Path,
         mounts: &BTreeMap<String, PathBuf>,
     ) -> Result<Self, ImportError> {
-        let spec = Self::lower(source, path, mounts)?;
+        let spec = Self::lower(typed_ast, path, mounts)?;
         let record = VersioningRecord::analyze(&spec).map_err(|err| Self::error(path, err))?;
         let mut integer_exports = IntegerExports::default();
         let mut members = BTreeSet::new();
@@ -191,17 +193,14 @@ impl UnitInterface {
 
     /// Lowers one unit into the HIR its interface is read from.
     fn lower(
-        source: &str,
+        typed_ast: typed_ast::Specification,
         path: &Path,
         mounts: &BTreeMap<String, PathBuf>,
     ) -> Result<hir::Specification, ImportError> {
         let mut resolver = crate::library::include_resolver(mounts);
-        let typed =
-            xidl_parser::parser::parser_text_with_resolver(source, path.to_str(), &mut *resolver)
-                .map_err(|err| Self::error(path, err))?;
         // An export index needs source declarations, before selected constants
         // or array dimensions are evaluated during compilation.
-        hir::Specification::source_from_typed_ast_with_resolver(typed, path, &mut *resolver)
+        Pipeline::lower_source_spec(typed_ast, path, &mut *resolver)
             .map_err(|err| Self::error(path, err))
     }
 

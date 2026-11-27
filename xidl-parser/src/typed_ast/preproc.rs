@@ -2,32 +2,32 @@ use super::*;
 use serde::Serialize;
 use xidl_parser_derive::Parser;
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct PreprocDefine {
     #[ts(id = "args", text)]
     pub args: String,
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct PreprocCall {
     pub directive: PreprocDirective,
     pub argument: Option<PreprocArg>,
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 #[ts(transparent)]
 pub struct PreprocDirective(pub String);
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 #[ts(transparent)]
 pub struct PreprocArg(pub String);
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct PreprocInclude {
     pub path: PreprocIncludePath,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub enum PreprocIncludePath {
     StringLiteral(String),
     SystemLibString(String),

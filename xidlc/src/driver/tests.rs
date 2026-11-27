@@ -1,6 +1,6 @@
-use super::Generator;
 use super::generate_session::CodegenSession;
 use super::session_pool::SessionPool;
+use super::{ArgsGenerate, Driver, Generator};
 use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Artifact, ArtifactFile, Codegen, CodegenInput, RpcError};
 use crate::units::UnitGraph;
@@ -129,7 +129,7 @@ fn multi_unit_generation_spawns_once_per_language() {
     assert_eq!(count(&counts.spawns, "test-plugin"), 1);
     assert_eq!(count(&counts.property_queries, "test-plugin"), 1);
     assert_eq!(count(&counts.generates, "test-plugin"), 2);
-    assert_eq!(count(&counts.spawns, "hir"), 1);
+    assert_eq!(count(&counts.spawns, "hir"), 0);
 }
 
 #[test]
@@ -185,4 +185,55 @@ fn session_pool_reuses_sessions_for_aliased_language_names() {
     let counts = counts.lock().expect("session counts");
     assert_eq!(count(&counts.spawns, "go"), 1);
     assert_eq!(count(&counts.property_queries, "go"), 1);
+}
+const BROKEN: &str = "struct Broken {";
+
+fn assert_syntax_diagnostics(error: IdlcError, filename: &str) {
+    let IdlcError::Diagnostics(diagnostics) = error else {
+        panic!("expected rich syntax diagnostics, got {error}");
+    };
+    assert!(!diagnostics.diagnostics.is_empty());
+    assert!(
+        diagnostics
+            .diagnostics
+            .iter()
+            .all(|diagnostic| diagnostic.filename.ends_with(filename))
+    );
+}
+
+#[test]
+fn driver_returns_structured_syntax_diagnostics_from_the_unit_parse() {
+    let dir = tempfile::tempdir().expect("driver fixture");
+    let input = dir.path().join("api.idl");
+    std::fs::write(&input, BROKEN).expect("write invalid source");
+
+    let Err(error) = Driver::run(ArgsGenerate {
+        lang: "rust".into(),
+        out_dir: "unused".into(),
+        client: false,
+        server: false,
+        dry_run: true,
+        mock: false,
+        api_version: None,
+        api_versions: None,
+        openapi_version: None,
+        files: vec![input],
+    }) else {
+        panic!("invalid syntax must fail");
+    };
+
+    assert_syntax_diagnostics(error, "api.idl");
+}
+
+#[test]
+fn generator_returns_structured_syntax_diagnostics_from_its_single_parse() {
+    let Err(error) = Generator::new("rust".into()).generate_from_idl(
+        BROKEN,
+        Path::new("broken.idl"),
+        HashMap::new(),
+    ) else {
+        panic!("invalid syntax must fail");
+    };
+
+    assert_syntax_diagnostics(error, "broken.idl");
 }

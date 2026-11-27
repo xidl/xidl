@@ -1,5 +1,6 @@
 use super::refs::{PreparedSource, UnitRef};
 use std::path::{Path, PathBuf};
+use xidl_parser::typed_ast;
 
 /// One resolved import of a unit.
 #[derive(Debug, Clone)]
@@ -82,24 +83,36 @@ pub struct Unit {
     prefix: String,
     imports: Vec<ImportSpec>,
     prepared: PreparedSource,
+    typed_ast: typed_ast::Specification,
     path: String,
 }
 
+/// Values needed to register one fully parsed compilation unit.
+pub(super) struct UnitParts {
+    /// File the unit is read from.
+    pub(super) file: PathBuf,
+    /// Reference prefix of the unit.
+    pub(super) prefix: String,
+    /// Imports the unit declares.
+    pub(super) imports: Vec<ImportSpec>,
+    /// Source prepared for generation.
+    pub(super) prepared: PreparedSource,
+    /// Parsed specification matching the prepared source.
+    pub(super) typed_ast: typed_ast::Specification,
+    /// Path the unit has inside the mount tree.
+    pub(super) path: String,
+}
+
 impl Unit {
-    /// Creates a unit from its file, prefix, imports, source and references.
-    pub(super) fn new(
-        file: PathBuf,
-        prefix: String,
-        imports: Vec<ImportSpec>,
-        prepared: PreparedSource,
-        path: String,
-    ) -> Self {
+    /// Creates a unit from its parsed parts.
+    pub(super) fn new(parts: UnitParts) -> Self {
         Self {
-            file,
-            prefix,
-            imports,
-            prepared,
-            path,
+            file: parts.file,
+            prefix: parts.prefix,
+            imports: parts.imports,
+            prepared: parts.prepared,
+            typed_ast: parts.typed_ast,
+            path: parts.path,
         }
     }
 
@@ -135,6 +148,11 @@ impl Unit {
     /// Source handed to generation, with bound versions spelled out.
     pub fn source(&self) -> &str {
         self.prepared.source()
+    }
+
+    /// Parsed specification matching [`Self::source`].
+    pub fn typed_ast(&self) -> &typed_ast::Specification {
+        &self.typed_ast
     }
 
     /// References this unit makes into other units.

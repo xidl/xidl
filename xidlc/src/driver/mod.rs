@@ -152,8 +152,7 @@ impl Driver {
                 UNIT_PATH_PROPERTY.to_string(),
                 serde_json::Value::String(unit.path().to_string()),
             );
-            let files =
-                generator.generate_from_idl(unit.source(), &unit.generation_input(), unit_props)?;
+            let files = generator.generate_from_unit(unit, unit_props)?;
             output.write_files(files)?;
         }
 

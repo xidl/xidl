@@ -36,7 +36,7 @@
 use super::*;
 use serde::Serialize;
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct BitsetDcl {
     pub ident: Identifier,
     pub parent: Option<ScopedName>,
@@ -44,34 +44,34 @@ pub struct BitsetDcl {
     pub field: Vec<BitField>,
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 #[ts(id = "bitfield")]
 pub struct BitField {
     pub spec: BitfieldSpec,
     pub ident: Vec<Identifier>,
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct BitfieldSpec {
     pub pos: PositiveIntConst,
     pub dst_ty: Option<DestinationType>,
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub enum DestinationType {
     BooleanType(BooleanType),
     OctetType(OctetType),
     IntegerType(IntegerType),
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct BitmaskDcl {
     pub ident: Identifier,
 
     pub value: Vec<BitValue>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct BitValue {
     pub annotations: Vec<AnnotationAppl>,
     pub ident: Identifier,

@@ -104,7 +104,18 @@ impl From<crate::library::LibraryError> for IdlcError {
 
 impl From<crate::units::ImportError> for IdlcError {
     fn from(err: crate::units::ImportError) -> Self {
-        Self::Import(err)
+        match err {
+            crate::units::ImportError::Diagnostics {
+                path,
+                source,
+                diagnostics,
+            } => crate::diagnostic::DiagnosticRunner::new_idl().from_diagnostics(
+                &source,
+                path.to_string_lossy().as_ref(),
+                diagnostics,
+            ),
+            err => Self::Import(err),
+        }
     }
 }
 

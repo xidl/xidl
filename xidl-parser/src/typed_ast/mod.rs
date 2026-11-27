@@ -39,10 +39,10 @@ pub use exception_dcl::*;
 mod template_module;
 pub use template_module::*;
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct Specification(pub Vec<Definition>);
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub enum Definition {
     ModuleDcl(ModuleDcl),
     TypeDcl(TypeDcl),
@@ -57,13 +57,13 @@ pub enum Definition {
     PreprocDefine(PreprocDefine),
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct TypeDcl {
     pub annotations: Vec<AnnotationAppl>,
     pub decl: TypeDclInner,
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 #[ts(transparent)]
 #[allow(clippy::large_enum_variant)]
 pub enum TypeDclInner {
@@ -109,12 +109,12 @@ impl<'a> crate::parser::FromTreeSitter<'a> for TypeDcl {
     }
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct NativeDcl {
     pub decl: SimpleDeclarator,
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub enum ConstrTypeDcl {
     StructDcl(StructDcl),
     UnionDcl(UnionDcl),
@@ -123,25 +123,25 @@ pub enum ConstrTypeDcl {
     BitmaskDcl(BitmaskDcl),
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub enum StructDcl {
     StructForwardDcl(StructForwardDcl),
     StructDef(StructDef),
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct StructForwardDcl {
     pub ident: Identifier,
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct StructDef {
     pub ident: Identifier,
     pub parent: Vec<ScopedName>,
     pub member: Vec<Member>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Member {
     pub annotations: Vec<AnnotationAppl>,
     pub ty: TypeSpec,
@@ -199,10 +199,10 @@ impl<'a> crate::parser::FromTreeSitter<'a> for Member {
     }
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct Default(pub ConstExpr);
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct ConstDcl {
     pub annotations: Vec<AnnotationAppl>,
     pub ty: ConstType,
@@ -265,7 +265,7 @@ impl<'a> crate::parser::FromTreeSitter<'a> for ConstDcl {
     }
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub enum ConstType {
     IntegerType(IntegerType),
     FloatingPtType(FloatingPtType),

@@ -1,7 +1,7 @@
 use super::*;
 use serde::Serialize;
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct ExceptDcl {
     pub annotations: Vec<AnnotationAppl>,
     pub ident: Identifier,

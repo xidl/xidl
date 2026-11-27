@@ -25,52 +25,52 @@ use super::*;
 use serde::Serialize;
 use xidl_parser_derive::Parser;
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct TypedefDcl {
     pub decl: TypeDeclarator,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct TypeDeclarator {
     pub ty: TypeDeclaratorInner,
     pub decl: AnyDeclarators,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub enum TypeDeclaratorInner {
     SimpleTypeSpec(SimpleTypeSpec),
     TemplateTypeSpec(TemplateTypeSpec),
     ConstrTypeDcl(ConstrTypeDcl),
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct AnyDeclarators(pub Vec<AnyDeclarator>);
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub enum AnyDeclarator {
     SimpleDeclarator(SimpleDeclarator),
     ArrayDeclarator(ArrayDeclarator),
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct SimpleDeclarator(pub Identifier);
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub enum Declarator {
     SimpleDeclarator(SimpleDeclarator),
     ArrayDeclarator(ArrayDeclarator),
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct Declarators(pub Vec<Declarator>);
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct ArrayDeclarator {
     pub ident: Identifier,
     pub len: Vec<FixedArraySize>,
 }
 
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct FixedArraySize(pub PositiveIntConst);
 
 impl<'a> crate::parser::FromTreeSitter<'a> for TypeDeclarator {

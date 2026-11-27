@@ -1,6 +1,7 @@
 use std::error::Error;
 use std::fmt;
 use std::path::PathBuf;
+use xidl_parser::diagnostic::Diagnostic;
 
 /// Errors raised while resolving imported compilation units.
 #[derive(Debug)]
@@ -18,6 +19,15 @@ pub enum ImportError {
         path: PathBuf,
         /// Parser failure.
         reason: String,
+    },
+    /// A unit failed syntax validation with structured diagnostics.
+    Diagnostics {
+        /// File being parsed.
+        path: PathBuf,
+        /// Source the diagnostics point into.
+        source: String,
+        /// Parser diagnostics in source order.
+        diagnostics: Vec<Diagnostic>,
     },
     /// An `import` named a scope instead of a quoted path.
     Unquoted {
@@ -124,6 +134,14 @@ impl fmt::Display for ImportError {
             Self::Parse { path, reason } => {
                 write!(f, "failed to scan imports of {}: {reason}", path.display())
             }
+            Self::Diagnostics {
+                path, diagnostics, ..
+            } => write!(
+                f,
+                "failed to parse {}: {} diagnostics found",
+                path.display(),
+                diagnostics.len()
+            ),
             Self::Unquoted { importer, scope } => write!(
                 f,
                 "xidl import: {} imports `{scope}`; an import names a quoted path such as \
@@ -243,6 +261,7 @@ impl Error for ImportError {
         match self {
             Self::Io { source, .. } => Some(source),
             Self::Parse { .. }
+            | Self::Diagnostics { .. }
             | Self::Unquoted { .. }
             | Self::InvalidPath { .. }
             | Self::Unresolved { .. }
@@ -253,6 +272,27 @@ impl Error for ImportError {
             | Self::UnknownVersion { .. }
             | Self::MissingVersion { .. }
             | Self::UnexpectedVersion { .. } => None,
+        }
+    }
+}
+
+impl ImportError {
+    /// Converts a parser failure into the import error that best preserves it.
+    pub(super) fn from_parse_error(
+        path: &std::path::Path,
+        source: &str,
+        error: xidl_parser::error::ParseError,
+    ) -> Self {
+        match error {
+            xidl_parser::error::ParseError::Diagnostics(diagnostics) => Self::Diagnostics {
+                path: path.to_path_buf(),
+                source: source.to_string(),
+                diagnostics,
+            },
+            error => Self::Parse {
+                path: path.to_path_buf(),
+                reason: error.to_string(),
+            },
         }
     }
 }
