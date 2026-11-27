@@ -167,10 +167,17 @@ fn parse_builtin_annotation_with_multiple_positional_literals_as_param_nodes() {
 #[test]
 fn parse_hyphenated_builtin_annotations_with_bracketed_raw_arguments() {
     let normalized = normalize_source_for_tree_sitter("@client-stream interface Clock {};");
-    assert!(normalized.contains("@client_stream"), "{normalized}");
+    assert_eq!(normalized, "@client_stream interface Clock {};");
     assert_eq!(
         AnnotationDefinition::lookup("client-stream").map(|definition| definition.name),
         Some("client_stream")
+    );
+    assert!(AnnotationDefinition::lookup("unknown-annotation").is_none());
+
+    let literal_and_comment = r#"const string S = "@client-stream"; // @client-stream"#;
+    assert_eq!(
+        normalize_source_for_tree_sitter(literal_and_comment),
+        literal_and_comment
     );
 
     let typed = parser_text(
@@ -187,7 +194,26 @@ fn parse_hyphenated_builtin_annotations_with_bracketed_raw_arguments() {
     let Definition::InterfaceDcl(interface) = &typed.0[0] else {
         panic!("expected interface declaration");
     };
-    assert!(!interface.annotations.is_empty());
+    assert_eq!(interface.annotations.len(), 1);
+    assert!(matches!(
+        (&interface.annotations[0].name, &interface.annotations[0].params),
+        (AnnotationName::Builtin(name), None) if name == "client-stream"
+    ));
+
+    let crate::typed_ast::InterfaceDclInner::InterfaceDef(def) = &interface.decl else {
+        panic!("expected interface definition");
+    };
+    let exports = &def.interface_body.as_ref().expect("interface body").0;
+    let [crate::typed_ast::Export::OpDcl(op)] = exports.as_slice() else {
+        panic!("expected single operation export");
+    };
+    assert_eq!(op.ident.0, "now");
+    assert_eq!(op.annotations.len(), 1);
+    assert!(matches!(
+        (&op.annotations[0].name, &op.annotations[0].params),
+        (AnnotationName::Builtin(name), Some(AnnotationParams::Raw(raw)))
+            if name == "oauth2" && raw == r#"scopes = ["read"]"#
+    ));
 }
 
 fn assert_has_doc(annotations: &[AnnotationAppl], expected: &str) {

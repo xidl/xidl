@@ -7,6 +7,7 @@
 //! suffix binds the default API version of that unit, and a cycle between units
 //! is an error.
 
+mod builder;
 mod error;
 mod graph;
 mod interface;

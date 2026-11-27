@@ -14,6 +14,7 @@ struct SessionCounts {
     spawns: HashMap<String, usize>,
     property_queries: HashMap<String, usize>,
     generates: HashMap<String, usize>,
+    compilation_unit_counts: Vec<usize>,
 }
 
 struct FakeCodegen {
@@ -42,7 +43,7 @@ impl Codegen for FakeCodegen {
 
     fn generate(
         &self,
-        _input: CodegenInput,
+        input: CodegenInput,
         path: String,
         _props: ParserProperties,
     ) -> Result<Vec<Artifact>, RpcError> {
@@ -51,6 +52,9 @@ impl Codegen for FakeCodegen {
             .lock()
             .map_err(|err| RpcError::new(format!("test session counter poisoned: {err}")))?;
         increment(&mut counts.generates, &self.lang);
+        if let CodegenInput::Compilation(compilation) = input {
+            counts.compilation_unit_counts.push(compilation.units.len());
+        }
         let path = if path.is_empty() {
             "generated.txt".to_owned()
         } else {
@@ -123,7 +127,8 @@ fn multi_unit_generation_spawns_once_per_language() {
         let files = generator
             .generate_from_idl(source, Path::new(name), HashMap::new())
             .expect("generate a unit");
-        assert!(!files.is_empty());
+        assert_eq!(files.len(), 1);
+        assert_eq!(files[0].path(), name);
     }
     let counts = counts.lock().expect("session counts");
     assert_eq!(count(&counts.spawns, "test-plugin"), 1);
@@ -156,12 +161,14 @@ fn compilation_scope_reuses_the_property_probe_session() {
     let files = generator
         .generate_compilation(&graph, props, &roots)
         .expect("generate compilation");
-    assert!(!files.is_empty());
+    assert_eq!(files.len(), 1);
+    assert_eq!(files[0].path(), "generated.txt");
 
     let counts = counts.lock().expect("session counts");
     assert_eq!(count(&counts.spawns, "docs"), 1);
     assert_eq!(count(&counts.property_queries, "docs"), 1);
     assert_eq!(count(&counts.generates, "docs"), 1);
+    assert_eq!(counts.compilation_unit_counts, vec![2]);
 }
 
 #[test]
@@ -175,17 +182,55 @@ fn session_pool_reuses_sessions_for_aliased_language_names() {
                 .map_err(|err| IdlcError::rpc(format!("test session counter poisoned: {err}")))?;
             increment(&mut state.spawns, lang);
         }
-        Ok(fake_session(lang, None, Arc::clone(&pool_counts)))
+        Ok(fake_session(lang, Some("unit"), Arc::clone(&pool_counts)))
     });
 
     let first = pool.properties("go").expect("query canonical properties");
     let second = pool.properties("golang").expect("query aliased properties");
+    assert_eq!(
+        first.get("generation_scope").and_then(|v| v.as_str()),
+        Some("unit")
+    );
     assert_eq!(first, second);
+
+    let lease = pool.checkout("golang").expect("checkout aliased session");
+    pool.reclaim(lease);
 
     let counts = counts.lock().expect("session counts");
     assert_eq!(count(&counts.spawns, "go"), 1);
+    assert_eq!(count(&counts.spawns, "golang"), 0);
     assert_eq!(count(&counts.property_queries, "go"), 1);
 }
+
+#[test]
+fn session_pool_respawns_after_unreclaimed_drop_and_handles_reentrancy() {
+    let counts = Arc::new(Mutex::new(SessionCounts::default()));
+    let pool_counts = Arc::clone(&counts);
+    let mut pool = SessionPool::with_factory(move |lang: &str| {
+        {
+            let mut state = pool_counts
+                .lock()
+                .map_err(|err| IdlcError::rpc(format!("test session counter poisoned: {err}")))?;
+            increment(&mut state.spawns, lang);
+        }
+        Ok(fake_session(lang, None, Arc::clone(&pool_counts)))
+    });
+
+    let dropped = pool.checkout("go").expect("first checkout");
+    drop(dropped);
+
+    let outer = pool.checkout("go").expect("respawn after dropped lease");
+    let inner = pool.checkout("go").expect("re-entrant checkout");
+    pool.reclaim(outer);
+    pool.reclaim(inner);
+
+    let reused = pool.checkout("go").expect("reuse cached session");
+    pool.reclaim(reused);
+
+    let counts = counts.lock().expect("session counts");
+    assert_eq!(count(&counts.spawns, "go"), 3);
+}
+
 const BROKEN: &str = "struct Broken {";
 
 fn assert_syntax_diagnostics(error: IdlcError, filename: &str) {
@@ -193,12 +238,16 @@ fn assert_syntax_diagnostics(error: IdlcError, filename: &str) {
         panic!("expected rich syntax diagnostics, got {error}");
     };
     assert!(!diagnostics.diagnostics.is_empty());
-    assert!(
-        diagnostics
-            .diagnostics
-            .iter()
-            .all(|diagnostic| diagnostic.filename.ends_with(filename))
-    );
+    for diagnostic in &diagnostics.diagnostics {
+        assert!(diagnostic.filename.ends_with(filename), "{diagnostic:?}");
+        assert_eq!(diagnostic.src, BROKEN);
+        assert!(!diagnostic.label.is_empty(), "{diagnostic:?}");
+        assert!(diagnostic.offset <= BROKEN.len(), "{diagnostic:?}");
+        assert!(
+            diagnostic.offset + diagnostic.len <= BROKEN.len(),
+            "{diagnostic:?}"
+        );
+    }
 }
 
 #[test]
