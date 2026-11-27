@@ -7,7 +7,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use xidl_parser::hir::printer::IdlPrinter;
 use xidl_parser::hir::{Definition, Pragma, Specification};
-use xidl_parser::parser::parser_text_with_resolver;
+use xidl_parser::pipeline::Pipeline;
 use xidl_parser::versioning::{VersionId, VersioningRecord};
 
 /// A resolved contract and its declared history for human-readable comparison.
@@ -31,10 +31,9 @@ impl VersionDiff {
             .last()
             .ok_or_else(|| IdlcError::fmt(format!("contract '{}' has no unit", path.display())))?;
         let mut resolver = crate::library::include_resolver(resolved.mounts());
-        let typed = parser_text_with_resolver(unit.source(), path.to_str(), &mut *resolver)?;
-        let spec = Specification::from_typed_ast_with_resolver(
-            typed,
-            Default::default(),
+        let spec = Pipeline::lower_spec(
+            unit.typed_ast().clone(),
+            &Default::default(),
             path,
             &mut *resolver,
         )?;
@@ -132,10 +131,9 @@ impl VersionDiff {
         }
         let mut canonical = BTreeMap::new();
         for dep in &units[..units.len() - 1] {
-            let typed = parser_text_with_resolver(dep.source(), dep.file().to_str(), resolver)?;
-            let spec = Specification::from_typed_ast_with_resolver(
-                typed,
-                Default::default(),
+            let spec = Pipeline::lower_spec(
+                dep.typed_ast().clone(),
+                &Default::default(),
                 dep.file(),
                 resolver,
             )?;

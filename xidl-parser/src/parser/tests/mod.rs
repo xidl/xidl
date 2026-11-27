@@ -1,4 +1,5 @@
-use crate::parser::parser_text;
+use crate::lint::AnnotationDefinition;
+use crate::parser::{normalize_source_for_tree_sitter, parser_text};
 use crate::typed_ast::{
     AnnotationAppl, AnnotationApplParam, AnnotationName, AnnotationParams, BuiltinAnnotation,
     DataRepresentationKind, Definition, TemplateTypeSpec, TopicPlatform, TypeDclInner,
@@ -161,6 +162,32 @@ fn parse_builtin_annotation_with_multiple_positional_literals_as_param_nodes() {
             AnnotationApplParam::Positional(_)
         ]
     ));
+}
+
+#[test]
+fn parse_hyphenated_builtin_annotations_with_bracketed_raw_arguments() {
+    let normalized = normalize_source_for_tree_sitter("@client-stream interface Clock {};");
+    assert!(normalized.contains("@client_stream"), "{normalized}");
+    assert_eq!(
+        AnnotationDefinition::lookup("client-stream").map(|definition| definition.name),
+        Some("client_stream")
+    );
+
+    let typed = parser_text(
+        r#"
+        @client-stream
+        interface Clock {
+            @oauth2(scopes = ["read"])
+            void now();
+        };
+        "#,
+    )
+    .expect("normalized annotations should parse");
+
+    let Definition::InterfaceDcl(interface) = &typed.0[0] else {
+        panic!("expected interface declaration");
+    };
+    assert!(!interface.annotations.is_empty());
 }
 
 fn assert_has_doc(annotations: &[AnnotationAppl], expected: &str) {

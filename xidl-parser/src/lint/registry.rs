@@ -93,6 +93,16 @@ pub struct AnnotationDefinition {
 impl AnnotationDefinition {
     /// Looks up a built-in name using the shared ASCII case rule.
     pub fn lookup(name: &str) -> Option<&'static Self> {
+        Self::find(name).or_else(|| {
+            if name.contains('-') {
+                Self::find(&name.replace('-', "_"))
+            } else {
+                None
+            }
+        })
+    }
+
+    fn find(name: &str) -> Option<&'static Self> {
         BUILTIN_ANNOTATIONS
             .iter()
             .find(|entry| entry.name.eq_ignore_ascii_case(name))

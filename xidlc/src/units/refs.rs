@@ -1,6 +1,8 @@
 //! Cross-unit type references written in a unit's source.
 
 use super::error::ImportError;
+use similar::TextDiff;
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use tree_sitter::{Node, Parser};
 
@@ -65,6 +67,13 @@ impl PreparedSource {
         source: &str,
         bindings: &BTreeMap<String, Option<String>>,
     ) -> Result<Self, ImportError> {
+        if bindings.is_empty() {
+            return Ok(Self {
+                source: source.to_string(),
+                refs: Vec::new(),
+            });
+        }
+        let mut normalized = NormalizedSource::new(source);
         let mut parser = Parser::new();
         parser
             .set_language(&tree_sitter_idl::language())
@@ -73,21 +82,21 @@ impl PreparedSource {
                 reason: format!("failed to load the IDL grammar: {err}"),
             })?;
         let tree = parser
-            .parse(source, None)
+            .parse(normalized.as_str(), None)
             .ok_or_else(|| ImportError::Parse {
                 path: std::path::PathBuf::new(),
                 reason: "failed to parse the unit source".to_string(),
             })?;
+        if tree.root_node().has_error() {
+            return Err(ImportError::Parse {
+                path: std::path::PathBuf::new(),
+                reason: "failed to parse normalized unit references".to_string(),
+            });
+        }
 
-        let mut refs = Vec::new();
-        let mut inserts = Vec::new();
-        Self::walk(
-            tree.root_node(),
-            source.as_bytes(),
-            bindings,
-            &mut refs,
-            &mut inserts,
-        )?;
+        let mut rewrite = RefRewrite::new(bindings, &mut normalized);
+        rewrite.walk(tree.root_node())?;
+        let (refs, mut inserts) = rewrite.into_parts();
 
         let mut qualified = source.to_string();
         inserts.sort_by_key(|(offset, _)| std::cmp::Reverse(*offset));
@@ -109,41 +118,139 @@ impl PreparedSource {
     pub(super) fn refs(&self) -> &[UnitRef] {
         &self.refs
     }
+}
+
+/// A source string normalized for tree-sitter plus a map back to raw offsets.
+struct NormalizedSource<'a> {
+    original: &'a str,
+    normalized: Cow<'a, str>,
+    offsets: Option<Vec<usize>>,
+}
+
+impl<'a> NormalizedSource<'a> {
+    fn new(original: &'a str) -> Self {
+        let normalized = xidl_parser::parser::normalize_source_for_tree_sitter(original);
+        Self {
+            original,
+            normalized,
+            offsets: None,
+        }
+    }
+
+    fn as_str(&self) -> &str {
+        self.normalized.as_ref()
+    }
+
+    fn original_offset(&mut self, offset: usize) -> Result<usize, ImportError> {
+        if self.normalized.len() == self.original.len() {
+            return Ok(offset);
+        }
+        if self.offsets.is_none() {
+            self.offsets = Some(Self::diff_offsets(self.original, self.normalized.as_ref()));
+        }
+        let offsets = self.offsets.as_ref().ok_or_else(|| ImportError::Parse {
+            path: std::path::PathBuf::new(),
+            reason: "failed to build the normalized-reference offset map".to_string(),
+        })?;
+        let original = offsets
+            .get(offset)
+            .copied()
+            .ok_or_else(|| ImportError::Parse {
+                path: std::path::PathBuf::new(),
+                reason: format!(
+                    "normalized reference offset {offset} exceeds {} bytes",
+                    self.normalized.len()
+                ),
+            })?;
+        if !self.original.is_char_boundary(original) {
+            return Err(ImportError::Parse {
+                path: std::path::PathBuf::new(),
+                reason: format!(
+                    "normalized reference offset {offset} maps inside a UTF-8 character"
+                ),
+            });
+        }
+        Ok(original)
+    }
+
+    fn diff_offsets(original: &str, normalized: &str) -> Vec<usize> {
+        let mut offsets = vec![0; normalized.len() + 1];
+        let mut original_byte = 0;
+        let mut normalized_byte = 0;
+        for change in TextDiff::from_chars(original, normalized).iter_all_changes() {
+            let len = change.value().len();
+            match change.tag() {
+                similar::ChangeTag::Equal => {
+                    for index in 0..len {
+                        offsets[normalized_byte + index] = original_byte + index;
+                    }
+                    original_byte += len;
+                    normalized_byte += len;
+                }
+                similar::ChangeTag::Delete => original_byte += len,
+                similar::ChangeTag::Insert => {
+                    for index in 0..len {
+                        offsets[normalized_byte + index] = original_byte;
+                    }
+                    normalized_byte += len;
+                }
+            }
+        }
+        offsets[normalized.len()] = original.len();
+        offsets
+    }
+}
+
+/// Walk state for cross-unit references and qualified-version insertions.
+struct RefRewrite<'a, 'b> {
+    bindings: &'b BTreeMap<String, Option<String>>,
+    normalized: &'b mut NormalizedSource<'a>,
+    refs: Vec<UnitRef>,
+    inserts: Vec<(usize, String)>,
+}
+
+impl<'a, 'b> RefRewrite<'a, 'b> {
+    fn new(
+        bindings: &'b BTreeMap<String, Option<String>>,
+        normalized: &'b mut NormalizedSource<'a>,
+    ) -> Self {
+        Self {
+            bindings,
+            normalized,
+            refs: Vec::new(),
+            inserts: Vec::new(),
+        }
+    }
+
+    fn into_parts(self) -> (Vec<UnitRef>, Vec<(usize, String)>) {
+        (self.refs, self.inserts)
+    }
 
     /// Walks `node`, recording references and version insertions.
-    fn walk(
-        node: Node<'_>,
-        source: &[u8],
-        bindings: &BTreeMap<String, Option<String>>,
-        refs: &mut Vec<UnitRef>,
-        inserts: &mut Vec<(usize, String)>,
-    ) -> Result<(), ImportError> {
+    fn walk(&mut self, node: Node<'_>) -> Result<(), ImportError> {
         if node.kind() == "scoped_name" {
-            Self::visit(node, source, bindings, refs, inserts)?;
+            self.visit(node)?;
             return Ok(());
         }
         let mut cursor = node.walk();
         for child in node.children(&mut cursor) {
-            Self::walk(child, source, bindings, refs, inserts)?;
+            self.walk(child)?;
         }
         Ok(())
     }
 
     /// Records one outermost `scoped_name` when an import names its prefix.
-    fn visit(
-        node: Node<'_>,
-        source: &[u8],
-        bindings: &BTreeMap<String, Option<String>>,
-        refs: &mut Vec<UnitRef>,
-        inserts: &mut Vec<(usize, String)>,
-    ) -> Result<(), ImportError> {
+    fn visit(&mut self, node: Node<'_>) -> Result<(), ImportError> {
         if node.parent().map(|parent| parent.kind()) == Some("scoped_name") {
             return Ok(());
         }
-        let text = node.utf8_text(source).map_err(|err| ImportError::Parse {
-            path: std::path::PathBuf::new(),
-            reason: format!("reference is not valid utf-8: {err}"),
-        })?;
+        let text = node
+            .utf8_text(self.normalized.as_str().as_bytes())
+            .map_err(|err| ImportError::Parse {
+                path: std::path::PathBuf::new(),
+                reason: format!("reference is not valid utf-8: {err}"),
+            })?
+            .to_string();
         if text.trim_start().starts_with("::") {
             return Ok(());
         }
@@ -154,7 +261,7 @@ impl PreparedSource {
         if prefix.is_empty() {
             return Ok(());
         }
-        let Some(bound) = bindings.get(prefix) else {
+        let Some(bound) = self.bindings.get(prefix) else {
             return Ok(());
         };
         let rest = text[separator + 2..].trim();
@@ -169,18 +276,21 @@ impl PreparedSource {
             .chain(parts.map(str::to_string))
             .collect();
         if tail.len() == 1 {
-            refs.push(UnitRef {
+            self.refs.push(UnitRef {
                 prefix: prefix.to_string(),
                 version: bound.clone(),
                 name: tail,
             });
             if let Some(bound) = bound {
-                inserts.push((node.start_byte() + separator, format!("::{bound}")));
+                let offset = self
+                    .normalized
+                    .original_offset(node.start_byte() + separator)?;
+                self.inserts.push((offset, format!("::{bound}")));
             }
             return Ok(());
         }
         let version = tail[0].clone();
-        refs.push(UnitRef {
+        self.refs.push(UnitRef {
             prefix: prefix.to_string(),
             version: Some(version),
             name: tail[1..].to_vec(),

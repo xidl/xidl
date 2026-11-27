@@ -1,9 +1,12 @@
 use xidl_parser::hir::ParserProperties;
-use xidl_parser::parser::IncludeResolver;
+use xidl_parser::parser::{IncludeResolver, parser_text_with_resolver};
 use xidl_parser::pipeline::{CompileOptions, Pipeline, ProjectedHir};
+use xidl_parser::typed_ast;
 use xidl_parser::versioning::{self, VersionedProjection};
 
+use crate::diagnostic::DiagnosticRunner;
 use crate::driver::lang::Plugin;
+use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Artifact, ArtifactFile, ArtifactHir, ArtifactJsonRpcHir, RpcError};
 use crate::library::MOUNT_PROPERTY;
 use std::collections::BTreeMap;
@@ -27,25 +30,45 @@ impl crate::jsonrpc::Codegen for HirGen {
         &self,
         _input_hir: crate::jsonrpc::CodegenInput,
         input: String,
-        mut props: ParserProperties,
+        props: ParserProperties,
     ) -> Result<Vec<Artifact>, RpcError> {
         let source = Self::required_string_prop(&props, "idl")?;
-        let target_lang = Self::required_string_prop(&props, "target_lang")?;
+        let typed = self
+            .parse_source(&source, &input, &props)
+            .map_err(|err| RpcError::new(err.to_string()))?;
+        self.generate_typed_ast(typed, &source, input, props)
+            .map_err(|err| RpcError::new(err.to_string()))
+    }
+}
+
+impl HirGen {
+    /// Compiles an already-parsed typed AST into target artifacts.
+    pub(crate) fn generate_typed_ast(
+        &self,
+        typed: typed_ast::Specification,
+        source: &str,
+        input: String,
+        mut props: ParserProperties,
+    ) -> IdlcResult<Vec<Artifact>> {
+        let target_lang = Self::required_string_prop(&props, "target_lang")
+            .map_err(|err| IdlcError::rpc(err.to_string()))?;
         let mut resolver = include_resolver(&props);
+        let diagnostics =
+            |error| DiagnosticRunner::new_idl().from_parse_error(source, &input, error);
 
         if Self::is_version_map_target(&target_lang) {
             let options = CompileOptions::new(&input, props).with_version_map(true);
-            let version_map = Pipeline::build_version_map(&source, options, &mut *resolver)
-                .map_err(|err| RpcError::new(err.to_string()))?;
+            let version_map = Pipeline::build_version_map_typed_ast(typed, options, &mut *resolver)
+                .map_err(diagnostics)?;
             let Some(version_map) = version_map.as_ref() else {
-                return Err(RpcError::new("xidlc version-map requires a @version enum"));
+                return Err(IdlcError::rpc("xidlc version-map requires a @version enum"));
             };
             let file_name = std::path::Path::new(&input)
                 .file_stem()
                 .and_then(|name| name.to_str())
                 .unwrap_or("api");
             let content = xidl_parser::versioning::map::to_json(version_map)
-                .map_err(|err| RpcError::new(err.to_string()))?;
+                .map_err(|err| IdlcError::rpc(err.to_string()))?;
             return Ok(vec![Artifact::new_file(ArtifactFile {
                 path: format!("{file_name}.version-map.json"),
                 content,
@@ -58,30 +81,37 @@ impl crate::jsonrpc::Codegen for HirGen {
         );
         let options =
             CompileOptions::new(&input, props.clone()).with_version_map(include_http_operations);
-        let compiled = Pipeline::compile_source(&source, options, &mut *resolver)
-            .map_err(|err| RpcError::new(err.to_string()))?;
+        let compiled =
+            Pipeline::compile_typed_ast(typed, options, &mut *resolver).map_err(diagnostics)?;
 
         if let Some(version_map) = compiled.version_map {
             props.insert(
                 "version_map".to_string(),
-                serde_json::to_value(version_map).map_err(|err| RpcError::new(err.to_string()))?,
+                serde_json::to_value(version_map)?,
             );
         }
         let mut artifacts = Vec::new();
         for projection in compiled.projections {
             let props = projection_properties(props.clone(), &projection);
-            artifacts.push(projection_artifact(
-                projection,
-                &target_lang,
-                &input,
-                props,
-            )?);
+            artifacts.push(
+                projection_artifact(projection, &target_lang, &input, props)
+                    .map_err(|err| IdlcError::rpc(err.to_string()))?,
+            );
         }
         Ok(artifacts)
     }
-}
 
-impl HirGen {
+    /// Parses IDL source with the include resolver selected by `props`.
+    pub(crate) fn parse_source(
+        &self,
+        source: &str,
+        input: &str,
+        props: &ParserProperties,
+    ) -> xidl_parser::error::ParserResult<typed_ast::Specification> {
+        let mut resolver = include_resolver(props);
+        parser_text_with_resolver(source, Some(input), &mut *resolver)
+    }
+
     fn required_string_prop(props: &ParserProperties, key: &str) -> Result<String, RpcError> {
         let value = props.get(key).ok_or_else(|| {
             RpcError::invalid_params(format!("hir: missing required property '{key}'"))

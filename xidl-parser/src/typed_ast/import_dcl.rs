@@ -6,13 +6,13 @@ use xidl_parser_derive::Parser;
 ///
 /// The node mirrors `import_dcl` in the `tree-sitter-idl` grammar, whose
 /// single child is the `imported_scope` choice.
-#[derive(Debug, Parser, Serialize)]
+#[derive(Clone, Debug, Parser, Serialize)]
 pub struct ImportDcl {
     pub scope: ImportedScope,
 }
 
 /// The scope named by an [`ImportDcl`], mirroring `imported_scope`.
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub enum ImportedScope {
     ScopedName(ScopedName),
     StringLiteral(String),

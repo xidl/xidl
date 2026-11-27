@@ -1,6 +1,6 @@
 use super::*;
 use serde::Serialize;
-#[derive(Debug, Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct ModuleDcl {
     pub annotations: Vec<AnnotationAppl>,
     pub ident: Identifier,

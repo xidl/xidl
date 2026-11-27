@@ -2,17 +2,16 @@
 
 use super::File;
 use super::session_pool::SessionPool;
-use crate::diagnostic::DiagnosticRunner;
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::hir_gen::HirGen;
 use crate::jsonrpc::{
-    Artifact, COMPILATION_FORMAT, Codegen, CodegenInput, CompilationInput, CompilationUnit,
-    UnitImport, VersionInput,
+    Artifact, COMPILATION_FORMAT, CodegenInput, CompilationInput, CompilationUnit, UnitImport,
+    VersionInput,
 };
 use crate::units::{IMPORT_PROPERTY, UNIT_PATH_PROPERTY, Unit, UnitGraph};
 use std::collections::BTreeSet;
 use std::path::PathBuf;
-use xidl_parser::hir::{ParserProperties, Specification};
+use xidl_parser::hir::ParserProperties;
 
 pub(super) struct CompilationGeneration<'a> {
     lang: &'a str,
@@ -44,13 +43,15 @@ impl<'a> CompilationGeneration<'a> {
             units,
         };
         let mut lease = sessions.checkout(self.lang)?;
-        let generated = lease.session_mut()?.generate(
-            CodegenInput::Compilation(Box::new(compilation)),
-            String::new(),
-            props,
-        );
+        let artifacts = lease
+            .session_mut()?
+            .generate(
+                CodegenInput::Compilation(Box::new(compilation)),
+                String::new(),
+                props,
+            )
+            .map_err(|err| IdlcError::rpc(err.to_string()))?;
         sessions.reclaim(lease);
-        let artifacts = generated.map_err(|err| IdlcError::rpc(err.to_string()))?;
         artifacts
             .into_iter()
             .map(|artifact| match artifact {
@@ -77,7 +78,6 @@ impl<'a> CompilationGeneration<'a> {
             props.remove(xidl_parser::versioning::API_VERSION_PROPERTY);
             props.remove(xidl_parser::versioning::API_VERSIONS_PROPERTY);
         }
-        DiagnosticRunner::new_idl().run(unit.source(), &path)?;
         props.insert("idl".into(), unit.source().into());
         props.insert("target_lang".into(), self.lang.into());
         props.insert(IMPORT_PROPERTY.into(), graph.import_property(unit));
@@ -86,9 +86,8 @@ impl<'a> CompilationGeneration<'a> {
             xidl_parser::semantic::INTEGER_IMPORTS_PROPERTY.into(),
             serde_json::to_value(graph.integer_imports(unit))?,
         );
-        let artifacts = HirGen
-            .generate(CodegenInput::RpcHir(Specification(vec![])), path, props)
-            .map_err(|err| IdlcError::rpc(err.to_string()))?;
+        let artifacts =
+            HirGen.generate_typed_ast(unit.typed_ast().clone(), unit.source(), path, props)?;
         let mut version_map = None;
         let mut inputs = Vec::new();
         for artifact in artifacts {

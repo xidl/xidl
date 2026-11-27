@@ -3,7 +3,7 @@ use super::interface::UnitInterface;
 use super::path::ImportPath;
 use super::refs::PreparedSource;
 use super::scan::{DeclaredImports, ImportDecl};
-use super::spec::{ImportSpec, Unit};
+use super::spec::{ImportSpec, Unit, UnitParts};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -115,7 +115,8 @@ impl UnitGraph {
             .collect();
         for target in &self.units {
             if imported.contains(target.prefix()) {
-                let interface = UnitInterface::of(target.source(), target.file(), &self.mounts)?;
+                let interface =
+                    UnitInterface::of(target.typed_ast().clone(), target.file(), &self.mounts)?;
                 self.interfaces
                     .insert(target.prefix().to_owned(), interface);
             }
@@ -220,8 +221,14 @@ impl<'a> UnitBuilder<'a> {
         }
 
         let source = Self::read(&file)?;
-        let imports = self.resolve_imports(&file, &source)?;
+        let typed = Self::parse(&file, &source, self.mounts)?;
+        let imports = self.resolve_imports(&file, &typed)?;
         let prepared = PreparedSource::of(&source, &Self::bindings(&imports))?;
+        let typed = if prepared.source() == source {
+            typed
+        } else {
+            Self::parse(&file, prepared.source(), self.mounts)?
+        };
 
         self.stack.push(identity.clone());
         for import in &imports {
@@ -235,8 +242,14 @@ impl<'a> UnitBuilder<'a> {
 
         self.register_prefix(&prefix, &file)?;
         self.by_file.insert(identity, self.units.len());
-        self.units
-            .push(Unit::new(file, prefix, imports, prepared, path));
+        self.units.push(Unit::new(UnitParts {
+            file,
+            prefix,
+            imports,
+            prepared,
+            typed_ast: typed,
+            path,
+        }));
         Ok(())
     }
 
@@ -259,8 +272,12 @@ impl<'a> UnitBuilder<'a> {
     }
 
     /// Resolves every import declaration of one file.
-    fn resolve_imports(&self, file: &Path, source: &str) -> Result<Vec<ImportSpec>, ImportError> {
-        let declared = DeclaredImports::of(source, file, self.mounts)?;
+    fn resolve_imports(
+        &self,
+        file: &Path,
+        typed_ast: &xidl_parser::typed_ast::Specification,
+    ) -> Result<Vec<ImportSpec>, ImportError> {
+        let declared = DeclaredImports::of(typed_ast);
         let mut imports: Vec<ImportSpec> = Vec::new();
         for declaration in declared.into_decls() {
             let raw = match declaration {
@@ -281,6 +298,17 @@ impl<'a> UnitBuilder<'a> {
             }
         }
         Ok(imports)
+    }
+
+    /// Parses one unit with the resolver that expands its includes.
+    fn parse(
+        file: &Path,
+        source: &str,
+        mounts: &BTreeMap<String, PathBuf>,
+    ) -> Result<xidl_parser::typed_ast::Specification, ImportError> {
+        let mut resolver = crate::library::include_resolver(mounts);
+        xidl_parser::parser::parser_text_with_resolver(source, file.to_str(), &mut *resolver)
+            .map_err(|error| ImportError::from_parse_error(file, source, error))
     }
 
     /// Resolves one import path relative to its importer or a mount.

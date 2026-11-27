@@ -194,6 +194,19 @@ impl Pipeline {
     ) -> ParserResult<Option<VersionMap>> {
         let current = Self::current_path(&options.path);
         let typed = parser_text_with_resolver(source, current.as_deref(), resolver)?;
+        Self::build_version_map_typed_ast(typed, options, resolver)
+    }
+
+    /// Builds only the [`VersionMap`] for an already-parsed specification.
+    ///
+    /// Parsing, source validation, and HIR lowering happen once before this
+    /// call, so callers that already hold a typed AST do not parse the source
+    /// again.
+    pub fn build_version_map_typed_ast(
+        typed: typed_ast::Specification,
+        options: CompileOptions,
+        resolver: &mut dyn IncludeResolver,
+    ) -> ParserResult<Option<VersionMap>> {
         let mut bag = DiagnosticBag::new();
         let source_spec = Self::lower_source_with_bag(typed, &options.path, resolver, &mut bag)?;
         let Some(record) = VersioningRecord::analyze(&source_spec)? else {

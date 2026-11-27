@@ -10,6 +10,7 @@ pub use highlight::TreeSitterMietteHighlighter;
 
 use crate::error::{DiagnosticError, IdlcError, IdlcResult};
 use xidl_parser::diagnostic::{Diagnostic, Severity, SyntaxPass};
+use xidl_parser::error::ParseError;
 
 /// Runner for IDL syntax diagnostics backed by [`SyntaxPass`].
 pub struct DiagnosticRunner;
@@ -26,6 +27,26 @@ impl DiagnosticRunner {
         if diagnostics.is_empty() {
             return Ok(());
         }
+        Err(self.from_diagnostics(source, filename, diagnostics))
+    }
+
+    /// Converts a parser failure, preserving structured diagnostics.
+    pub fn from_parse_error(&self, source: &str, filename: &str, error: ParseError) -> IdlcError {
+        match error {
+            ParseError::Diagnostics(diagnostics) => {
+                self.from_diagnostics(source, filename, diagnostics)
+            }
+            error => IdlcError::Parse(error),
+        }
+    }
+
+    /// Converts parser diagnostics into the compiler's miette-ready error.
+    pub fn from_diagnostics(
+        &self,
+        source: &str,
+        filename: &str,
+        diagnostics: Vec<Diagnostic>,
+    ) -> IdlcError {
         let errors = diagnostics
             .into_iter()
             .map(|diagnostic| {
@@ -34,7 +55,7 @@ impl DiagnosticRunner {
                 DiagnosticError::from_span(filename, source, offset, len, diagnostic.message)
             })
             .collect();
-        Err(IdlcError::diagnostics(errors))
+        IdlcError::diagnostics(errors)
     }
 }
 

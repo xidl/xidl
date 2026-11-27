@@ -2,21 +2,24 @@ use super::File;
 use super::session_pool::SessionPool;
 use crate::diagnostic::DiagnosticRunner;
 use crate::error::{IdlcError, IdlcResult};
+use crate::generate::hir_gen::HirGen;
 use crate::jsonrpc::{
-    Artifact, ArtifactFile, ArtifactHir, ArtifactJsonRpcHir, ArtifactRestHir, CodegenInput,
+    Artifact, ArtifactFile, ArtifactHir, ArtifactJsonRpcHir, ArtifactRestHir, Codegen, CodegenInput,
 };
 use crate::macros::{hashmap, log_info};
-use crate::units::UnitGraph;
+use crate::units::{Unit, UnitGraph};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use xidl_parser::hir::ParserProperties;
 
+/// Coordinates the built-in HIR stage and target generator sessions.
 pub struct Generator {
     lang: String,
     sessions: SessionPool,
 }
 
 impl Generator {
+    /// Creates a generator for `lang`.
     pub fn new(lang: String) -> Self {
         Self {
             lang,
@@ -38,6 +41,7 @@ impl Generator {
         }
     }
 
+    /// Generates artifacts from IDL source, parsing the source once.
     pub fn generate_from_idl(
         &mut self,
         source: &str,
@@ -45,13 +49,54 @@ impl Generator {
         props: HashMap<String, serde_json::Value>,
     ) -> IdlcResult<Vec<File>> {
         log_info!("generate for idl");
-        DiagnosticRunner::new_idl().run(source, path.to_string_lossy().as_ref())?;
+        let input = path.to_string_lossy();
+        let typed_ast = HirGen
+            .parse_source(source, input.as_ref(), &props)
+            .map_err(|error| {
+                DiagnosticRunner::new_idl().from_parse_error(source, input.as_ref(), error)
+            })?;
+        self.generate_from_typed_ast(source, typed_ast, path, props)
+    }
 
+    /// Generates artifacts from a typed AST that already matches `source`.
+    pub fn generate_from_typed_ast(
+        &mut self,
+        source: &str,
+        typed_ast: xidl_parser::typed_ast::Specification,
+        path: &Path,
+        props: HashMap<String, serde_json::Value>,
+    ) -> IdlcResult<Vec<File>> {
         let mut target_props = self.get_properties_for_lang()?;
         target_props.extend(self.metadata(source, props));
+        let mut hir_props = HirGen
+            .get_properties()
+            .map_err(|err| IdlcError::rpc(err.to_string()))?;
+        hir_props.extend(target_props);
+        let artifacts = HirGen.generate_typed_ast(
+            typed_ast,
+            source,
+            path.to_string_lossy().into_owned(),
+            hir_props.clone(),
+        )?;
+        let mut files = Vec::new();
+        for artifact in artifacts {
+            files.extend(self.expand_artifact(artifact, path, &hir_props)?);
+        }
+        Ok(files)
+    }
 
-        let empty = xidl_parser::hir::Specification(vec![]);
-        self.generate_for_lang("hir", CodegenInput::new_rpc_hir(empty), path, target_props)
+    /// Generates artifacts from a resolved compilation unit.
+    pub fn generate_from_unit(
+        &mut self,
+        unit: &Unit,
+        props: HashMap<String, serde_json::Value>,
+    ) -> IdlcResult<Vec<File>> {
+        self.generate_from_typed_ast(
+            unit.source(),
+            unit.typed_ast().clone(),
+            &unit.generation_input(),
+            props,
+        )
     }
 
     fn metadata(
@@ -82,12 +127,11 @@ impl Generator {
         let properties = self.merge_properties(session_properties, base);
 
         let mut lease = self.sessions.checkout(lang)?;
-        let generated =
-            lease
-                .session_mut()?
-                .generate(input_hir, input_str.to_string(), properties.clone());
+        let artifacts: Vec<Artifact> = lease
+            .session_mut()?
+            .generate(input_hir, input_str.to_string(), properties.clone())
+            .map_err(|err| IdlcError::rpc(err.to_string()))?;
         self.sessions.reclaim(lease);
-        let artifacts: Vec<Artifact> = generated.map_err(|err| IdlcError::rpc(err.to_string()))?;
 
         let mut ret = Vec::new();
         for artifact in artifacts {
