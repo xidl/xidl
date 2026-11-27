@@ -37,3 +37,19 @@ Feature: version lock and check
     When I lock the contract versions with xidlc version lock
     And I lock the explicit empty version set
     Then the lock contains no versions and the empty version check succeeds
+
+  Scenario: OpenAPI fingerprints ignore documentation and reject changes to the wire
+    Given a temporary workspace with a single-version IDL contract
+    When I lock the generated OpenAPI contract
+    And I document and deprecate a field in the contract
+    Then the OpenAPI fingerprint still matches
+    When I rename a field in the locked version without lifecycle annotations
+    Then checking the OpenAPI fingerprint reports drift
+
+  Scenario: an older lock requires an explicit re-lock
+    Given a temporary workspace with a single-version IDL contract
+    When I lock the generated OpenAPI contract
+    And I remove the algorithm version from the lock
+    Then xidlc diagnoses the old lock before comparing fingerprints
+    When I explicitly regenerate the lock
+    Then xidlc version check succeeds with exit code 0

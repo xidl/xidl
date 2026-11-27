@@ -16,6 +16,7 @@ mod tests;
 
 use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{Artifact, ArtifactFile};
+use crate::openapi::OpenApiFilename;
 use crate::openapi::{InfoBuilder, OpenApi, OpenApiBuilder, Tag};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -61,10 +62,7 @@ impl crate::jsonrpc::Codegen for OpenApiCodegen {
             .file_stem()
             .and_then(|value| value.to_str())
             .unwrap_or("openapi");
-        let path = match api_version(&props) {
-            Some(version) => format!("openapi_{stem}.{version}.json"),
-            None => format!("openapi_{stem}.json"),
-        };
+        let path = OpenApiFilename::render(stem, api_version(&props));
 
         Ok(vec![Artifact::new_file(ArtifactFile { path, content })])
     }

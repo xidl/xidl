@@ -1,5 +1,6 @@
 //! Documents an OpenAPI document reaches through an import.
 
+use crate::openapi::OpenApiFilename;
 use std::collections::{BTreeMap, BTreeSet};
 
 use xidl_parser::hir;
@@ -55,11 +56,8 @@ impl DocumentUnits {
             return None;
         }
         let versions = self.prefixes.get(prefix)?;
-        let document = if versions.contains(&rest[0]) {
-            format!("openapi_{prefix}.{}.json", rest[0])
-        } else {
-            format!("openapi_{prefix}.json")
-        };
+        let version = versions.contains(&rest[0]).then_some(rest[0].as_str());
+        let document = OpenApiFilename::render(prefix, version);
         let path = rest.join(".");
         Some(format!("{document}#/components/schemas/{path}"))
     }

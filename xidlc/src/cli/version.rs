@@ -1,5 +1,6 @@
 use crate::error::{IdlcError, IdlcResult};
-use clap::{Args, Subcommand};
+use crate::version_lock::VersionArtifact;
+use clap::{Args, Subcommand, ValueEnum};
 use std::collections::BTreeSet;
 use std::io::Write;
 use std::path::PathBuf;
@@ -34,6 +35,23 @@ struct ArgsSelectedVersions {
     /// Select version values as a JSON array. Lock replaces the stored set, including with [].
     #[arg(long = "versions", value_name = "JSON_ARRAY", value_parser = ArgsSelectedVersions::parse)]
     values: Option<BTreeSet<String>>,
+    /// Request evidence from the generated artifact.
+    #[arg(long, value_enum)]
+    artifact: Option<ArgsVersionArtifact>,
+}
+
+#[derive(Clone, Copy, Debug, ValueEnum)]
+enum ArgsVersionArtifact {
+    #[value(name = "openapi")]
+    OpenApi,
+}
+
+impl From<ArgsVersionArtifact> for VersionArtifact {
+    fn from(artifact: ArgsVersionArtifact) -> Self {
+        match artifact {
+            ArgsVersionArtifact::OpenApi => Self::OpenApi,
+        }
+    }
 }
 
 impl ArgsSelectedVersions {
@@ -115,6 +133,7 @@ impl ArgsVersion {
             .unwrap_or_else(|| crate::version_lock::VersionLock::default_lock_path(&args.idl));
         match crate::version_lock::VersionLock::from_file(&args.idl).and_then(|lock| {
             lock.with_versions(args.versions.values)
+                .with_artifact(args.versions.artifact.map(Into::into))
                 .write_lock(&lock_path, args.force)
         }) {
             Ok(report) if report.is_written() => Ok(()),
@@ -136,9 +155,11 @@ impl ArgsVersion {
         let lock_path = args
             .lock_file
             .unwrap_or_else(|| crate::version_lock::VersionLock::default_lock_path(&args.idl));
-        match crate::version_lock::VersionLock::from_file(&args.idl)
-            .and_then(|lock| lock.with_versions(args.versions.values).check(&lock_path))
-        {
+        match crate::version_lock::VersionLock::from_file(&args.idl).and_then(|lock| {
+            lock.with_versions(args.versions.values)
+                .with_artifact(args.versions.artifact.map(Into::into))
+                .check(&lock_path)
+        }) {
             Ok(report) if report.is_clean() => Ok(()),
             Ok(report) => Err(IdlcError::CliExit {
                 code: 1,
