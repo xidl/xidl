@@ -20,9 +20,9 @@ fn package_cache_path_follows_host_and_version() {
 fn package_cache_path_sanitizes_commit_hashes() {
     let root = temp_dir("cache-rev");
     let store = PackageStore::with_root(root.clone(), Box::new(FakeFetcher::default()));
-    let dependency = xidl_parser::manifest::Dependency::new(
+    let dependency = Dependency::new(
         "github.com/x/timestamp",
-        xidl_parser::manifest::Revision::Rev("9f0d/abc".to_string()),
+        Revision::Rev("9f0d/abc".to_string()),
     );
 
     let path = store.cache_dir("timestamp", &dependency).unwrap();
@@ -34,7 +34,7 @@ fn package_cache_path_sanitizes_commit_hashes() {
 fn package_cache_rejects_path_dependencies() {
     let root = temp_dir("cache-path-dependency");
     let store = PackageStore::with_root(root.clone(), Box::new(FakeFetcher::default()));
-    let dependency = xidl_parser::manifest::Dependency::from_path("../timestamp");
+    let dependency = Dependency::from_path("../timestamp");
 
     let err = store.cache_dir("timestamp", &dependency).unwrap_err();
 

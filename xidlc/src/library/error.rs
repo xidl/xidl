@@ -1,3 +1,4 @@
+use super::manifest::ManifestError;
 use std::error::Error;
 use std::fmt;
 use std::path::PathBuf;
@@ -6,7 +7,7 @@ use std::path::PathBuf;
 #[derive(Debug)]
 pub enum LibraryError {
     /// A manifest could not be read or validated.
-    Manifest(xidl_parser::manifest::ManifestError),
+    Manifest(ManifestError),
     /// A file or directory could not be read or written.
     Io {
         /// Path the operation targeted.
@@ -133,8 +134,8 @@ impl Error for LibraryError {
     }
 }
 
-impl From<xidl_parser::manifest::ManifestError> for LibraryError {
-    fn from(err: xidl_parser::manifest::ManifestError) -> Self {
+impl From<ManifestError> for LibraryError {
+    fn from(err: ManifestError) -> Self {
         Self::Manifest(err)
     }
 }
