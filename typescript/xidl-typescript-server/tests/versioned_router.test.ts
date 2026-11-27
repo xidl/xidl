@@ -63,7 +63,7 @@ const v2Op = defineOperation<V2Service, 'getItem'>({
   security: [],
 });
 
-test('createVersionedRouter routes by header, enforces lifecycles, echoes version and sets Vary', async () => {
+test('createVersionedRouter routes by header, reports retired wire values, echoes version and sets Vary', async () => {
   const v1Handler = createRouter([v1Op], {
     getItem: id => ({ id, label: `v1:${id}` }),
   });
@@ -73,12 +73,11 @@ test('createVersionedRouter routes by header, enforces lifecycles, echoes versio
 
   const router = createVersionedRouter({
     parameter: { in: 'header', name: 'X-Version' },
+    retired: ['2025-01-01'],
     versions: [
-      { id: 'v0', status: 'retired', value: '2025-01-01' },
       {
         handler: v1Handler,
         id: 'v1',
-        status: 'active',
         value: '2026-01-01',
       },
       { handler: v2Handler, id: 'v2', value: '2026-06-01' },
@@ -259,7 +258,9 @@ test('createVersionedRouter supports query, cookie, defaultVersion, Vary semanti
 
   const headerRouter = createVersionedRouter({
     parameter: { in: 'header', name: 'X-Version' },
-    resolveVersion: raw => (raw === 'latest' ? 'v2' : undefined),
+    resolveVersion: raw =>
+      raw === 'latest' || raw === '2025-01-01' ? 'v2' : undefined,
+    retired: ['2025-01-01'],
     versions: [{ handler: taggedHandler('v2'), id: 'v2', value: '2026-06-01' }],
   });
   const res = await headerRouter(
@@ -271,27 +272,43 @@ test('createVersionedRouter supports query, cookie, defaultVersion, Vary semanti
   assert.deepEqual(await res.json(), { version: 'v2' });
   assert.equal(res.headers.get('X-Version'), '2026-06-01');
   assert.equal(res.headers.get('Vary'), 'Accept, X-Version');
+
+  const retired = await headerRouter(
+    new Request('http://localhost/items', {
+      headers: { 'X-Version': '2025-01-01' },
+    }),
+  );
+  assert.equal(retired.status, 410);
+  assert.deepEqual(await retired.json(), {
+    code: 410,
+    kind: 'retired',
+    msg: "version '2025-01-01' is retired",
+    retiredVersion: '2025-01-01',
+    supportedVersions: ['2026-06-01'],
+  });
 });
 
-test('createVersionedRouter rejects unsupported statuses from JavaScript callers', () => {
-  for (const status of ['preview', 'latest', 'maintained']) {
-    assert.throws(
-      () =>
-        createVersionedRouter({
-          parameter: { in: 'header', name: 'X-Version' },
-          versions: [
-            {
-              handler: async () => new Response(),
-              id: 'v1',
-              // A JavaScript caller can supply any string at runtime.
-              status: status as 'active',
-              value: '2028-06-01',
-            },
-          ],
-        }),
-      new RegExp(`version '2028-06-01' has invalid status '${status}'`),
-    );
-  }
+test('createVersionedRouter rejects duplicated retired wire values and mounted overlaps', () => {
+  const handler = async () => new Response('ok');
+  const parameter = { in: 'header', name: 'X-Version' } as const;
+  assert.throws(
+    () =>
+      createVersionedRouter({
+        parameter,
+        retired: ['1'],
+        versions: [{ handler, id: 'v1', value: '1' }],
+      }),
+    /duplicate version value '1'/,
+  );
+  assert.throws(
+    () =>
+      createVersionedRouter({
+        parameter,
+        retired: ['old', 'old'],
+        versions: [{ handler, id: 'v1', value: '1' }],
+      }),
+    /duplicate version value 'old'/,
+  );
 });
 
 test('createVersionedRouter validates duplicate versions and invalid defaultVersion eagerly', () => {
@@ -320,7 +337,7 @@ test('createVersionedRouter validates duplicate versions and invalid defaultVers
   );
   assert.throws(
     () =>
-      createVersionedRouter({
+      createVersionedRouter<string>({
         defaultVersion: 'v9',
         parameter: { in: 'header', name: 'X-Version' },
         versions: [{ handler: noop, id: 'v1', value: '1' }],

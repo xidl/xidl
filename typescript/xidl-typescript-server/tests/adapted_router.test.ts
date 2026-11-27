@@ -171,11 +171,11 @@ test('createVersionedAdapterRouter connects OperationTables to adapter dispatche
       getItem: { dispatch: dispatchGetItem },
     },
     parameter: { in: 'header', name: 'X-Version' },
+    retired: ['2025-01-01'],
     versions: [
       {
         id: 'v1',
         operations: v1Operations,
-        status: 'active',
         value: '2026-01-01',
       },
       {
@@ -212,6 +212,21 @@ test('createVersionedAdapterRouter connects OperationTables to adapter dispatche
     code: 400,
     kind: 'unknown',
     msg: "unsupported version '2028-06-01'",
+    supportedVersions: ['2026-01-01', '2026-06-01'],
+  });
+
+  const retired = await router(
+    new Request('http://localhost/items/7', {
+      headers: { 'X-Version': '2025-01-01' },
+    }),
+  );
+  assert.equal(retired.status, 410);
+  assert.equal(retired.headers.get('Vary'), 'X-Version');
+  assert.deepEqual(await retired.json(), {
+    code: 410,
+    kind: 'retired',
+    msg: "version '2025-01-01' is retired",
+    retiredVersion: '2025-01-01',
     supportedVersions: ['2026-01-01', '2026-06-01'],
   });
 
