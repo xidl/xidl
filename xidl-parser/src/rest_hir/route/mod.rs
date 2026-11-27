@@ -224,7 +224,7 @@ pub(super) fn normalize_path(path: &str) -> String {
 
 fn method_from_annotation(annotation: &hir::Annotation) -> Option<HttpMethod> {
     let name = annotation_name(annotation)?;
-    use crate::lint::AnnotationKind;
+    use crate::annotations::AnnotationKind;
     match AnnotationKind::from_name(name)? {
         AnnotationKind::Get => Some(HttpMethod::Get),
         AnnotationKind::Post => Some(HttpMethod::Post),

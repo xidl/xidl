@@ -3,9 +3,9 @@
 use super::super::timeline::{VersionId, VersionTimeline};
 use super::super::{VersioningDiagnostic, VersioningError};
 pub(crate) use super::site::{Availability, Site, SiteKind, VersionVisitor};
+use crate::annotations::AnnotationKind;
 use crate::error::ParserResult;
 use crate::hir::{Annotation, ScopedName};
-use crate::lint::AnnotationKind;
 
 /// Rejected versioning annotations, rather than promises of future syntax.
 pub(super) const UNSUPPORTED_ANNOTATIONS: [&str; 8] = [

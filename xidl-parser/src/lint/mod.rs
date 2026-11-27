@@ -1,19 +1,18 @@
-//! Pure annotation diagnostics and the built-in annotation vocabulary.
+//! Pure annotation diagnostics over the shared built-in vocabulary.
 //!
 //! Generation can validate selected contracts without enabling the lint pass. Editors use
 //! `BUILTIN_ANNOTATIONS` for completion and `lint` for source diagnostics.
 
 mod arguments;
 mod check;
-mod registry;
 mod walk;
 
 use crate::diagnostic::{AstDiagnosticPass, DiagnosticBag};
 
-pub use crate::diagnostic::{Diagnostic, DiagnosticCode, Severity};
-pub use registry::{
+pub use crate::annotations::{
     AnnotationDefinition, AnnotationKind, ArgumentShape, BUILTIN_ANNOTATIONS, Site,
 };
+pub use crate::diagnostic::{Diagnostic, DiagnosticCode, Severity};
 
 /// AST diagnostic pass validating built-in annotation names, placement, and arguments.
 #[derive(Debug, Default, Clone, Copy)]

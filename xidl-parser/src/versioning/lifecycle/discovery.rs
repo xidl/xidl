@@ -80,8 +80,8 @@ impl VersionVisitor for DiscoverVisitor {
                     // A malformed `@version(...)` stays a raw application; treat
                     // it as the marker so its arguments are reported.
                     if raw_versioning_name(other).is_some_and(|name| {
-                        crate::lint::AnnotationKind::from_name(&name)
-                            == Some(crate::lint::AnnotationKind::Version)
+                        crate::annotations::AnnotationKind::from_name(&name)
+                            == Some(crate::annotations::AnnotationKind::Version)
                     }) {
                         if marker {
                             self.push(

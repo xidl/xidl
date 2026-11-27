@@ -1,7 +1,7 @@
 //! Explicit HTTP sources and their effective wire names.
 
+use crate::annotations::AnnotationKind;
 use crate::hir;
-use crate::lint::AnnotationKind;
 use crate::rest_hir::{HttpParamKind, RestHirResult};
 
 /// One explicit HTTP binding shared by operation parameters and exceptions.

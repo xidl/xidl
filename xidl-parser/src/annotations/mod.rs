@@ -1,3 +1,8 @@
+//! Pure built-in annotation vocabulary shared by parsing, lint, and semantics.
+//!
+//! This module owns annotation metadata only. It MUST NOT depend on `lint`,
+//! `diagnostic`, `typed_ast`, `hir`, or `parser`.
+
 /// Declaration category used by annotation completion and placement checks.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Site {
@@ -254,3 +259,6 @@ impl AnnotationKind {
         matches!(self, Self::Version | Self::Added | Self::Removed)
     }
 }
+
+#[cfg(test)]
+mod tests;
