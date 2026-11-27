@@ -168,7 +168,9 @@ def lock_has_only_version(context, version):
 def rename_second_version_field(context):
     source = context.version_lock_idl.read_text()
     assert "string actor;" in source
-    context.version_lock_idl.write_text(source.replace("string actor;", "string author;"))
+    context.version_lock_idl.write_text(
+        source.replace("string actor;", "string author;")
+    )
 
 
 @then('a strict check of only version "{version}" succeeds')
@@ -191,4 +193,6 @@ def check_unlocked_version(context, version):
         context, "version", "check", "--version", version, context.version_lock_idl
     )
     assert result.returncode == 1, (result.stdout, result.stderr)
-    assert version in result.stderr and "is not present in the lock file" in result.stderr
+    assert (
+        version in result.stderr and "is not present in the lock file" in result.stderr
+    )
