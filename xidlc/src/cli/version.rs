@@ -1,4 +1,5 @@
 use crate::error::{IdlcError, IdlcResult};
+use clap::builder::NonEmptyStringValueParser;
 use clap::{Args, Subcommand};
 use std::io::Write;
 use std::path::PathBuf;
@@ -29,6 +30,13 @@ pub(super) struct ArgsVersionDiff {
 }
 
 #[derive(Debug, Args)]
+struct ArgsSelectedVersions {
+    /// Limit the command to these version values. Repeat to select several.
+    #[arg(long = "version", value_name = "VALUE", value_parser = NonEmptyStringValueParser::new())]
+    values: Vec<String>,
+}
+
+#[derive(Debug, Args)]
 pub(super) struct ArgsVersionLock {
     /// Lock file path (defaults to `<idl_stem>.versions.lock.json` next to the IDL file).
     #[arg(long = "lock-file", short = 'l', value_name = "PATH")]
@@ -36,6 +44,8 @@ pub(super) struct ArgsVersionLock {
     /// Overwrite existing locked fingerprints when a frozen version changed.
     #[arg(long = "force", default_value_t = false)]
     pub(super) force: bool,
+    #[command(flatten)]
+    versions: ArgsSelectedVersions,
     /// Versioned IDL contract.
     pub(super) idl: PathBuf,
 }
@@ -48,6 +58,8 @@ pub(super) struct ArgsVersionCheck {
     /// Also fail when the contract declares versions missing from the lock file.
     #[arg(long = "strict", default_value_t = false)]
     pub(super) strict: bool,
+    #[command(flatten)]
+    versions: ArgsSelectedVersions,
     /// Versioned IDL contract.
     pub(super) idl: PathBuf,
 }
@@ -98,9 +110,10 @@ impl ArgsVersion {
         let lock_path = args
             .lock_file
             .unwrap_or_else(|| crate::version_lock::VersionLock::default_lock_path(&args.idl));
-        match crate::version_lock::VersionLock::from_file(&args.idl)
-            .and_then(|lock| lock.write_lock(&lock_path, args.force))
-        {
+        match crate::version_lock::VersionLock::from_file(&args.idl).and_then(|lock| {
+            lock.with_versions(args.versions.values)
+                .write_lock(&lock_path, args.force)
+        }) {
             Ok(report) if report.is_written() => Ok(()),
             Ok(report) => Err(IdlcError::CliExit {
                 code: 1,
@@ -120,9 +133,10 @@ impl ArgsVersion {
         let lock_path = args
             .lock_file
             .unwrap_or_else(|| crate::version_lock::VersionLock::default_lock_path(&args.idl));
-        match crate::version_lock::VersionLock::from_file(&args.idl)
-            .and_then(|lock| lock.check(&lock_path, args.strict))
-        {
+        match crate::version_lock::VersionLock::from_file(&args.idl).and_then(|lock| {
+            lock.with_versions(args.versions.values)
+                .check(&lock_path, args.strict)
+        }) {
             Ok(report) if report.is_clean() => Ok(()),
             Ok(report) => Err(IdlcError::CliExit {
                 code: 1,

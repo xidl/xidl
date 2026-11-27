@@ -116,6 +116,26 @@ fn version_lock_and_check_parse_idl_and_options() {
 }
 
 #[test]
+fn version_selection_is_repeatable_and_requires_a_nonempty_value() {
+    for command in ["lock", "check"] {
+        Cli::try_parse_from([
+            "xidlc",
+            "version",
+            command,
+            "--version",
+            "2026-12-01",
+            "--version",
+            "2027-06-01",
+            "api.idl",
+        ])
+        .expect("parse repeated version selection");
+        assert!(
+            Cli::try_parse_from(["xidlc", "version", command, "--version=", "api.idl"]).is_err()
+        );
+    }
+}
+
+#[test]
 fn parses_gen_subcommand_with_lang_enum_and_files() {
     let cli = Cli::try_parse_from(["xidlc", "gen", "rust", "demo.idl"]).expect("parse cli");
     match cli.command {

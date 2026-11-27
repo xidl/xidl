@@ -1,4 +1,5 @@
 mod cli;
+mod subset;
 
 use super::*;
 
