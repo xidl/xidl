@@ -142,7 +142,7 @@ impl<'a> NormalizedSource<'a> {
     }
 
     fn original_offset(&mut self, offset: usize) -> Result<usize, ImportError> {
-        if self.normalized.len() == self.original.len() {
+        if matches!(self.normalized, Cow::Borrowed(_)) {
             return Ok(offset);
         }
         if self.offsets.is_none() {

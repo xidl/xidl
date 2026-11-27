@@ -13,10 +13,11 @@ fn normalized_annotations_do_not_hide_version_bound_references() {
         "app.idl",
         r#"import "timestamp@v1";
 
+// 中文注释验证多字节 UTF-8 偏移映射
 interface Clock {
     @client-stream
     @oauth2(scopes = ["read"])
-    timestamp::Instant now();
+    timestamp::Instant now(in timestamp::Instant since);
 };
 "#,
     );
@@ -29,11 +30,26 @@ interface Clock {
         .expect("app unit");
 
     assert!(
-        app.source().contains("timestamp::v1::Instant"),
-        "source: {}",
+        app.source().contains("@client-stream"),
+        "original hyphenated annotation must be preserved: {}",
         app.source()
     );
-    assert_eq!(app.refs().len(), 1);
-    assert_eq!(app.refs()[0].version(), Some("v1"));
-    assert_eq!(app.refs()[0].qualified(), "timestamp::v1::Instant");
+    assert!(
+        app.source().contains(r#"@oauth2(scopes = ["read"])"#),
+        "original bracketed annotation arguments must be preserved: {}",
+        app.source()
+    );
+    assert!(
+        app.source()
+            .contains("timestamp::v1::Instant now(in timestamp::v1::Instant since);"),
+        "all version-bound references must be rewritten in place: {}",
+        app.source()
+    );
+    assert_eq!(app.refs().len(), 2);
+    assert!(app.refs().iter().all(|r| r.version() == Some("v1")));
+    assert!(
+        app.refs()
+            .iter()
+            .all(|r| r.qualified() == "timestamp::v1::Instant")
+    );
 }
