@@ -397,7 +397,6 @@ This code map focuses on ownership boundaries rather than every file.
   - owns `hir` and `semantic` analysis
   - owns `rest_hir` and `jsonrpc_hir` protocol projections
   - owns `versioning` timeline, lifecycle validation, and version-map collection
-  - owns `xidl.toml` manifest parsing and validation
   - owns `pipeline` single-pass compilation orchestration
   - owns parser-focused tests and snapshots
 
@@ -413,8 +412,6 @@ Important subtrees:
 - `xidl-parser/src/jsonrpc_hir/`: shared JSON-RPC semantic projection
 - `xidl-parser/src/versioning/`: `@version` timeline, lifecycle validation,
   per-version projection, and version-map facts
-- `xidl-parser/src/manifest/`: `xidl.toml` package identity, input patterns,
-  compiler range, and dependency parsing
 - `xidl-parser/src/pipeline/`: unidirectional compilation orchestration
 - `xidl-parser/tests/`: parser and lowering tests
 
@@ -450,15 +447,15 @@ Important subtrees:
 
 ### Library Manifests
 
-`xidl.toml` parsing belongs to `xidl-parser/src/manifest/`, which validates the
-package identity, input patterns, compiler range, and dependency declarations.
-`xidlc/src/library/` owns discovery and loading of those manifests, expands
-library arguments into IDL inputs, fetches or mounts dependencies, and enforces
-compiler ranges.
+`xidl.toml` parsing, validation, discovery, input expansion, dependency
+fetching/mounting, and compiler-range enforcement all live in
+`xidlc/src/library/` (with manifest parsing in `xidlc/src/library/manifest/`).
 
-`UnitGraph` is the per-run boundary for unit identity and resolved reference
-data. It does not cache a shared `typed_ast`; phases that need syntax parse the
-unit source they inspect.
+`UnitGraph` is the per-run boundary for unit identity, resolved references, and
+parsed syntax. Each `Unit` caches the `typed_ast::Specification` matching its
+prepared source so interface indexing, code generation, compilation-scoped
+generation, and version diffs reuse that AST through `Pipeline` without
+reparsing.
 
 ### Runtime and Support Crates
 
@@ -647,9 +644,12 @@ invocation.
 - `finish()` releases the session, closing an external plugin's stdio and
   waiting for the child process
 
-The session is scoped to the stage invocation rather than to the whole compiler
-run. This gives the driver one orchestration model regardless of whether a stage
-is compiled into `xidlc` or shipped separately.
+Sessions are pooled inside `xidlc/src/driver/session_pool.rs` (owned by
+`Generator`) keyed by canonical language name, caching `get_properties()`
+results and reusing live sessions across units and compilation stages within a
+compiler run. When `Generator` drops, the pool closes every cached external
+plugin cleanly via `finish()`. This gives the driver one orchestration model
+regardless of whether a stage is compiled into `xidlc` or shipped separately.
 
 ### How plugins call each other
 
