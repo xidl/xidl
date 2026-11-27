@@ -38,7 +38,7 @@ impl DeclarationNames {
     }
 
     /// Resolves a known reference without rebinding it in a consumer's scope.
-    pub(crate) fn resolve(&self, scope: &[String], name: &ScopedName) -> Option<ScopedName> {
+    pub fn resolve(&self, scope: &[String], name: &ScopedName) -> Option<ScopedName> {
         let depth = if name.is_root { 0 } else { scope.len() };
         for depth in (0..=depth).rev() {
             let mut candidate = scope[..depth].to_vec();

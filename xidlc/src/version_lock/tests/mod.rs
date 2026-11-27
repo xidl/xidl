@@ -1,4 +1,5 @@
 mod cli;
+mod imports;
 #[cfg(feature = "gen-openapi")]
 mod openapi;
 #[cfg(feature = "gen-openapi")]

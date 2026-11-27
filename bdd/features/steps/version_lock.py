@@ -292,3 +292,52 @@ def force_regenerate_old_lock(context):
     doc = json.loads(lock_file.read_text())
     assert doc["algorithm_version"] > 0
     assert doc["versions"]["2026-12-01"]["openapi_fingerprint"].startswith("sha256:")
+
+
+@given("a two-version contract using a shared import in its second version")
+def setup_shared_import(context):
+    setup_version_lock_workspace(context)
+    context.version_lock_idl.write_text(
+        """\
+import "common";
+
+@version(in = "header", name = "X-Version")
+enum V {
+    @rename("2026-12-01") v1,
+    @rename("2027-06-01") v2
+};
+
+struct Item {
+    string id;
+    @added(V::v2) @optional common::Money price;
+};
+
+interface Api {
+    @get(path = "/items")
+    Item get();
+};
+"""
+    )
+    context.shared_idl = context.version_lock_dir / "common" / "index.idl"
+    context.shared_idl.parent.mkdir()
+    context.shared_idl.write_text("struct Money { long amount; string currency; };\n")
+
+
+@when("I add an unreferenced declaration to the shared import")
+def add_unreferenced_declaration(context):
+    with context.shared_idl.open("a") as shared:
+        shared.write("struct Unused { string note; };\n")
+
+
+@when("I change the type of a referenced field in the shared import")
+def change_referenced_type(context):
+    source = context.shared_idl.read_text()
+    context.shared_idl.write_text(source.replace("long amount", "string amount"))
+
+
+@then("xidlc version check reports drift only in the second version")
+def check_shared_drift(context):
+    result = run_xidlc(context, "version", "check", context.version_lock_idl)
+    assert result.returncode == 1, (result.stdout, result.stderr)
+    assert "version '2027-06-01' (v2) changed" in result.stderr, result.stderr
+    assert "version '2026-12-01'" not in result.stderr, result.stderr

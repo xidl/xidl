@@ -53,3 +53,11 @@ Feature: version lock and check
     Then xidlc diagnoses the old lock before comparing fingerprints
     When I explicitly regenerate the lock
     Then xidlc version check succeeds with exit code 0
+
+  Scenario: unreferenced declarations in a shared import leave frozen versions unchanged
+    Given a two-version contract using a shared import in its second version
+    When I lock the contract versions with xidlc version lock
+    And I add an unreferenced declaration to the shared import
+    Then xidlc version check succeeds with exit code 0
+    When I change the type of a referenced field in the shared import
+    Then xidlc version check reports drift only in the second version
