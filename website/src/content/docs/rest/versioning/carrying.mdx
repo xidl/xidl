@@ -56,6 +56,30 @@ contains the mounted wire values, and `defaultVersion` names a mounted ID.
 The caller decides which previews to expose and which versions to freeze
 before constructing the router.
 
+The routers set `Vary` on success and failure when the version comes from a
+header or cookie. A version header contributes its name and a version cookie
+contributes `Cookie`. Generated handlers still supply their declared response
+headers. To echo a version for a custom handler, compose that handler when
+mounting it:
+
+```typescript
+function withVersionHeader(handler: WebHandler, value: string): WebHandler {
+    return async request => {
+        const response = await handler(request);
+        const headers = new Headers(response.headers);
+        headers.set("X-Version", value);
+        return new Response(response.body, {
+            headers, status: response.status, statusText: response.statusText,
+        });
+    };
+}
+```
+
+Translate application-specific version aliases before passing a request to
+the router. To replace a version rejection response, use `onVersionError`.
+The error's `kind` identifies its status, and a retired rejection includes
+its wire value in `rawValue`.
+
 | Location | HTTP clients | WebSocket handshake |
 | --- | --- | --- |
 | header | Rust, TypeScript, and Go REST send the pinned header | Rust and Node send it; browsers use the server default |

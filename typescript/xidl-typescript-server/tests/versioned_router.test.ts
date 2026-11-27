@@ -63,7 +63,7 @@ const v2Op = defineOperation<V2Service, 'getItem'>({
   security: [],
 });
 
-test('createVersionedRouter routes by header, reports retired wire values, echoes version and sets Vary', async () => {
+test('createVersionedRouter routes by header, reports retired wire values and sets Vary', async () => {
   const v1Handler = createRouter([v1Op], {
     getItem: id => ({ id, label: `v1:${id}` }),
   });
@@ -90,7 +90,7 @@ test('createVersionedRouter routes by header, reports retired wire values, echoe
     }),
   );
   assert.equal(okV1.status, 200);
-  assert.equal(okV1.headers.get('X-Version'), '2026-01-01');
+  assert.equal(okV1.headers.get('X-Version'), null);
   assert.equal(okV1.headers.get('Vary'), 'X-Version');
   assert.deepEqual(await okV1.json(), { id: '42', label: 'v1:42' });
 
@@ -100,7 +100,7 @@ test('createVersionedRouter routes by header, reports retired wire values, echoe
     }),
   );
   assert.equal(okV2.status, 200);
-  assert.equal(okV2.headers.get('X-Version'), '2026-06-01');
+  assert.equal(okV2.headers.get('X-Version'), null);
   assert.deepEqual(await okV2.json(), { id: '42', title: 'v2:42' });
 
   const missing = await router(new Request('http://localhost/items/42'));
@@ -165,11 +165,17 @@ test('createVersionedRouter routes by header, reports retired wire values, echoe
   });
 });
 
-test('createVersionedRouter supports query, cookie, defaultVersion, Vary semantics, and custom resolver', async () => {
+test('createVersionedRouter supports query, cookie, defaultVersion and composed handlers', async () => {
   const taggedHandler = (version: string) => async () =>
     new Response(JSON.stringify({ version }), {
       headers: { 'Content-Type': 'application/json', Vary: 'Accept' },
     });
+  const withVersion =
+    (version: string, name: string, wire: string) => async () => {
+      const response = await taggedHandler(version)();
+      response.headers.set(name, wire);
+      return response;
+    };
 
   const queryRouter = createVersionedRouter({
     defaultVersion: 'v2',
@@ -195,12 +201,14 @@ test('createVersionedRouter supports query, cookie, defaultVersion, Vary semanti
     new Request('http://localhost/items?api_version=1&api_version=2'),
   );
   assert.equal(repeatedQuery.status, 400);
+  assert.equal(repeatedQuery.headers.get('Vary'), null);
   assert.equal((await repeatedQuery.json()).kind, 'repeated');
 
   const queryEchoRouter = createVersionedRouter({
-    echoHeader: true,
     parameter: { in: 'query', name: 'api_version' },
-    versions: [{ handler: taggedHandler('v1'), id: 'v1', value: '1' }],
+    versions: [
+      { handler: withVersion('v1', 'api_version', '1'), id: 'v1', value: '1' },
+    ],
   });
   const queryEchoRes = await queryEchoRouter(
     new Request('http://localhost/items?api_version=1'),
@@ -210,7 +218,6 @@ test('createVersionedRouter supports query, cookie, defaultVersion, Vary semanti
   assert.equal(queryEchoRes.headers.get('Vary'), 'Accept');
 
   const cookieRouter = createVersionedRouter({
-    echoHeader: false,
     parameter: { in: 'cookie', name: 'api_version' },
     versions: [{ handler: taggedHandler('v1'), id: 'v1', value: '2026-01-01' }],
   });
@@ -222,7 +229,7 @@ test('createVersionedRouter supports query, cookie, defaultVersion, Vary semanti
   assert.equal(cookieOk.status, 200);
   assert.deepEqual(await cookieOk.json(), { version: 'v1' });
   assert.equal(cookieOk.headers.get('api_version'), null);
-  assert.equal(cookieOk.headers.get('Vary'), 'Accept');
+  assert.equal(cookieOk.headers.get('Vary'), 'Accept, Cookie');
 
   const cookieRepeated = await cookieRouter(
     new Request('http://localhost/items', {
@@ -232,6 +239,7 @@ test('createVersionedRouter supports query, cookie, defaultVersion, Vary semanti
     }),
   );
   assert.equal(cookieRepeated.status, 400);
+  assert.equal(cookieRepeated.headers.get('Vary'), 'Cookie');
   assert.equal((await cookieRepeated.json()).kind, 'repeated');
 
   const cookieMalformed = await cookieRouter(
@@ -240,12 +248,18 @@ test('createVersionedRouter supports query, cookie, defaultVersion, Vary semanti
     }),
   );
   assert.equal(cookieMalformed.status, 400);
+  assert.equal(cookieMalformed.headers.get('Vary'), 'Cookie');
   assert.equal((await cookieMalformed.json()).kind, 'malformed');
 
   const cookieEchoRouter = createVersionedRouter({
-    echoHeader: true,
     parameter: { in: 'cookie', name: 'api_version' },
-    versions: [{ handler: taggedHandler('v1'), id: 'v1', value: '2026-01-01' }],
+    versions: [
+      {
+        handler: withVersion('v1', 'api_version', '2026-01-01'),
+        id: 'v1',
+        value: '2026-01-01',
+      },
+    ],
   });
   const cookieEchoRes = await cookieEchoRouter(
     new Request('http://localhost/items', {
@@ -256,13 +270,25 @@ test('createVersionedRouter supports query, cookie, defaultVersion, Vary semanti
   assert.equal(cookieEchoRes.headers.get('api_version'), '2026-01-01');
   assert.equal(cookieEchoRes.headers.get('Vary'), 'Accept, Cookie');
 
-  const headerRouter = createVersionedRouter({
+  const exactHeaderRouter = createVersionedRouter({
     parameter: { in: 'header', name: 'X-Version' },
-    resolveVersion: raw =>
-      raw === 'latest' || raw === '2025-01-01' ? 'v2' : undefined,
     retired: ['2025-01-01'],
-    versions: [{ handler: taggedHandler('v2'), id: 'v2', value: '2026-06-01' }],
+    versions: [
+      {
+        handler: withVersion('v2', 'X-Version', '2026-06-01'),
+        id: 'v2',
+        value: '2026-06-01',
+      },
+    ],
   });
+  const headerRouter = (request: Request) => {
+    if (request.headers.get('X-Version') !== 'latest') {
+      return exactHeaderRouter(request);
+    }
+    const headers = new Headers(request.headers);
+    headers.set('X-Version', '2026-06-01');
+    return exactHeaderRouter(new Request(request, { headers }));
+  };
   const res = await headerRouter(
     new Request('http://localhost/items', {
       headers: { 'X-Version': 'latest' },
@@ -279,6 +305,7 @@ test('createVersionedRouter supports query, cookie, defaultVersion, Vary semanti
     }),
   );
   assert.equal(retired.status, 410);
+  assert.equal(retired.headers.get('Vary'), 'X-Version');
   assert.deepEqual(await retired.json(), {
     code: 410,
     kind: 'retired',

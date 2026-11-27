@@ -160,10 +160,8 @@ export function createVersionedAdapterRouter<TVersionId extends string>(
   }));
   return createVersionedRouter({
     defaultVersion: options.defaultVersion,
-    echoHeader: options.echoHeader,
     onVersionError: options.onVersionError,
     parameter: options.parameter,
-    resolveVersion: options.resolveVersion,
     retired: options.retired,
     versions,
   });
