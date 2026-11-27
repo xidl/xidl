@@ -1,4 +1,4 @@
-use crate::lint::AnnotationDefinition;
+use crate::annotations::AnnotationDefinition;
 use crate::parser::{normalize_source_for_tree_sitter, parser_text};
 use crate::typed_ast::{
     AnnotationAppl, AnnotationApplParam, AnnotationName, AnnotationParams, BuiltinAnnotation,

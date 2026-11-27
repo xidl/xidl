@@ -1,3 +1,4 @@
+pub mod annotations;
 pub mod diagnostic;
 pub mod error;
 pub mod parser;

@@ -197,9 +197,17 @@ passes unrecognized names through as external `xidl-<lang>` plugins.
 `xidl-parser` separates syntax, AST, HIR, and protocol validation into layered
 passes coordinated by `xidl-parser/src/pipeline/`:
 
+- `xidl-parser/src/annotations/` owns the pure built-in annotation vocabulary:
+  `Site`, `ArgumentShape`, `AnnotationDefinition`, `AnnotationKind`, and
+  `BUILTIN_ANNOTATIONS`. It has no dependency on parsing, AST, diagnostics, HIR,
+  or lint code, so low-level parser modules and semantic projections share one
+  vocabulary without importing the lint layer.
 - `xidl-parser/src/diagnostic/` defines `Diagnostic`, `DiagnosticCode`,
   `Severity`, `DiagnosticBag`, `SyntaxPass`, `AstDiagnosticPass`, and
   `HirDiagnosticPass`.
+- `xidl-parser/src/lint/` consumes the shared vocabulary to diagnose annotation
+  names, placement, and arguments. Its existing public paths, including
+  `xidl_parser::lint::BUILTIN_ANNOTATIONS`, remain available through re-exports.
 - `xidl-parser/src/parser/` runs `SyntaxPass` on the parsed tree-sitter tree so
   syntax diagnostics are collected without a redundant parse pass.
 - `xidl-parser/src/pipeline/` orchestrates single-pass compilation from IDL
@@ -392,7 +400,8 @@ This code map focuses on ownership boundaries rather than every file.
 
 - `xidl-parser/`
   - owns parsing from `tree-sitter-idl`
-  - owns `diagnostic` passes and `lint` vocabulary
+  - owns the shared annotation vocabulary, `diagnostic` passes, and `lint`
+    validation
   - owns `typed_ast`
   - owns `hir` and `semantic` analysis
   - owns `rest_hir` and `jsonrpc_hir` protocol projections
@@ -402,6 +411,8 @@ This code map focuses on ownership boundaries rather than every file.
 
 Important subtrees:
 
+- `xidl-parser/src/annotations/`: pure built-in annotation vocabulary shared by
+  parsing, lint, semantic analysis, and protocol projections
 - `xidl-parser/src/diagnostic/`: unified diagnostics and syntax/AST/HIR pass
   traits
 - `xidl-parser/src/typed_ast/`: syntax-shaped typed AST

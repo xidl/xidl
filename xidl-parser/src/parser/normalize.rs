@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::ops::Range;
 
-use crate::lint::AnnotationDefinition;
+use crate::annotations::AnnotationDefinition;
 
 pub fn source(text: &str) -> Cow<'_, str> {
     SourceNormalization {

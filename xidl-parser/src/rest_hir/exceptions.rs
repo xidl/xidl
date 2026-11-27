@@ -107,8 +107,9 @@ impl HttpException {
 
     fn http_params(annotations: &[hir::Annotation]) -> Option<&hir::AnnotationParams> {
         annotations.iter().find_map(|annotation| {
-            (hir::annotation_name(annotation).and_then(crate::lint::AnnotationKind::from_name)
-                == Some(crate::lint::AnnotationKind::Http))
+            (hir::annotation_name(annotation)
+                .and_then(crate::annotations::AnnotationKind::from_name)
+                == Some(crate::annotations::AnnotationKind::Http))
             .then(|| hir::annotation_params(annotation))
             .flatten()
         })

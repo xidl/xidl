@@ -1,9 +1,10 @@
 //! Diagnostic passes executed by the parser compilation pipeline.
 
+use crate::annotations::AnnotationKind;
 use crate::diagnostic::{AstDiagnosticPass, DiagnosticBag, HirDiagnosticPass};
 use crate::hir::Specification;
 use crate::jsonrpc_hir;
-use crate::lint::{AnnotationKind, AnnotationLintPass};
+use crate::lint::AnnotationLintPass;
 use crate::rest_hir::{self, HttpUnion, ProjectOptions};
 use crate::semantic::{CollectionBounds, IntegerImports, StructInheritance, UnionCaseLabels};
 use crate::typed_ast;

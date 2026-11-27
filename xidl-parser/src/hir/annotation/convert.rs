@@ -1,7 +1,7 @@
 use super::super::*;
 use super::params::{parse_raw_annotation_params, trim_annotation_quotes};
 use super::{Annotation, AnnotationParam, AnnotationParams, RenameRule};
-use crate::lint::{AnnotationDefinition, AnnotationKind};
+use crate::annotations::{AnnotationDefinition, AnnotationKind};
 use convert_case::{Case, Casing};
 use std::collections::HashMap;
 
