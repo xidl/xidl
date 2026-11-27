@@ -6,6 +6,10 @@ mod compilation;
 mod compilation_output;
 mod generate_session;
 mod out_file;
+mod session_pool;
+
+#[cfg(test)]
+mod tests;
 
 use crate::driver::out_file::OutputTargetTrait;
 use crate::error::IdlcResult;
@@ -128,8 +132,8 @@ impl Driver {
         {
             let mut compilation_props = properties;
             compilation_props.extend(props);
-            let files = compilation::CompilationGeneration::new(&self.args.lang, resolved.files())?
-                .generate(&graph, compilation_props)?;
+            let files =
+                generator.generate_compilation(&graph, compilation_props, resolved.files())?;
             return if self.args.dry_run {
                 Ok(())
             } else {

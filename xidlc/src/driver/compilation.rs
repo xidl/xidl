@@ -1,6 +1,7 @@
 //! Opt-in whole-compilation generation, reusing the ordinary semantic stage.
 
-use super::{File, generate_session::CodegenSession};
+use super::File;
+use super::session_pool::SessionPool;
 use crate::diagnostic::DiagnosticRunner;
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::hir_gen::HirGen;
@@ -31,6 +32,7 @@ impl<'a> CompilationGeneration<'a> {
         &self,
         graph: &UnitGraph,
         props: ParserProperties,
+        sessions: &mut SessionPool,
     ) -> IdlcResult<Vec<File>> {
         let units = graph
             .units()
@@ -41,15 +43,14 @@ impl<'a> CompilationGeneration<'a> {
             format: COMPILATION_FORMAT,
             units,
         };
-        let mut session = CodegenSession::spawn(self.lang)?;
-        let artifacts = session
-            .generate(
-                CodegenInput::Compilation(Box::new(compilation)),
-                String::new(),
-                props,
-            )
-            .map_err(|err| IdlcError::rpc(err.to_string()))?;
-        session.finish();
+        let mut lease = sessions.checkout(self.lang)?;
+        let generated = lease.session_mut()?.generate(
+            CodegenInput::Compilation(Box::new(compilation)),
+            String::new(),
+            props,
+        );
+        sessions.reclaim(lease);
+        let artifacts = generated.map_err(|err| IdlcError::rpc(err.to_string()))?;
         artifacts
             .into_iter()
             .map(|artifact| match artifact {

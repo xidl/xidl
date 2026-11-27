@@ -1,21 +1,41 @@
 use super::File;
+use super::session_pool::SessionPool;
 use crate::diagnostic::DiagnosticRunner;
-use crate::driver::generate_session::CodegenSession;
 use crate::error::{IdlcError, IdlcResult};
 use crate::jsonrpc::{
     Artifact, ArtifactFile, ArtifactHir, ArtifactJsonRpcHir, ArtifactRestHir, CodegenInput,
 };
 use crate::macros::{hashmap, log_info};
+use crate::units::UnitGraph;
 use std::collections::HashMap;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use xidl_parser::hir::ParserProperties;
 
 pub struct Generator {
     lang: String,
+    sessions: SessionPool,
 }
 
 impl Generator {
     pub fn new(lang: String) -> Self {
-        Self { lang }
+        Self {
+            lang,
+            sessions: SessionPool::new(),
+        }
+    }
+
+    #[cfg(test)]
+    pub(super) fn with_session_factory<F>(lang: String, factory: F) -> Self
+    where
+        F: FnMut(&str) -> IdlcResult<super::generate_session::CodegenSession>
+            + Send
+            + Sync
+            + 'static,
+    {
+        Self {
+            lang,
+            sessions: SessionPool::with_factory(factory),
+        }
     }
 
     pub fn generate_from_idl(
@@ -58,22 +78,21 @@ impl Generator {
     ) -> IdlcResult<Vec<File>> {
         log_info!("generate for lang: {lang}");
         let input_str = input.to_string_lossy();
-        let mut session = CodegenSession::spawn(lang)?;
-        let properties = session
-            .get_properties()
-            .map_err(|err| IdlcError::rpc(err.to_string()))?;
+        let session_properties = self.sessions.properties(lang)?;
+        let properties = self.merge_properties(session_properties, base);
 
-        let properties = self.merge_properties(properties, base);
-
-        let artifacts: Vec<Artifact> = session
-            .generate(input_hir, input_str.to_string(), properties.clone())
-            .map_err(|err| IdlcError::rpc(err.to_string()))?;
+        let mut lease = self.sessions.checkout(lang)?;
+        let generated =
+            lease
+                .session_mut()?
+                .generate(input_hir, input_str.to_string(), properties.clone());
+        self.sessions.reclaim(lease);
+        let artifacts: Vec<Artifact> = generated.map_err(|err| IdlcError::rpc(err.to_string()))?;
 
         let mut ret = Vec::new();
         for artifact in artifacts {
             ret.extend(self.expand_artifact(artifact, input, &properties)?);
         }
-        session.finish();
         Ok(ret)
     }
 
@@ -159,11 +178,19 @@ impl Generator {
         &mut self,
     ) -> IdlcResult<HashMap<String, serde_json::Value>> {
         log_info!("get properties for {}", self.lang);
-        let mut session = CodegenSession::spawn(&self.lang)?;
-        let props = session
-            .get_properties()
-            .map_err(|err| IdlcError::rpc(err.to_string()))?;
-        session.finish();
-        Ok(props)
+        self.sessions.properties(&self.lang)
+    }
+
+    pub(super) fn generate_compilation(
+        &mut self,
+        graph: &UnitGraph,
+        props: ParserProperties,
+        roots: &[PathBuf],
+    ) -> IdlcResult<Vec<File>> {
+        super::compilation::CompilationGeneration::new(&self.lang, roots)?.generate(
+            graph,
+            props,
+            &mut self.sessions,
+        )
     }
 }
