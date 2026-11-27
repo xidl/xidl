@@ -2,6 +2,8 @@ use crate::generate::rust_axum::RustAxumRenderer;
 use crate::generate::rust_axum::transport::TypeRegistry;
 use serde::Serialize;
 
+use super::interface_method_flags::MethodFlags;
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum HttpMethod {
     Get,
@@ -24,6 +26,9 @@ pub(crate) enum ParamSource {
 
 #[derive(Serialize)]
 pub(crate) struct MethodContext {
+    /// Precomputed branches shared by every interface template.
+    #[serde(flatten)]
+    pub(crate) flags: MethodFlags,
     pub(crate) name: String,
     pub(crate) raw_name: String,
     pub(crate) rust_attrs: Vec<String>,

@@ -1,0 +1,26 @@
+                                }
+                                Err(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+                            };
+                            {% if method.deprecated %}
+                                resp.headers_mut().insert(
+                                ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated"),
+                                ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+                                );
+                                {% if method.deprecated_since %}
+                                    let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_since }}")
+                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                    resp.headers_mut().insert(
+                                    ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-since"),
+                                    value,
+                                    );
+                                {% endif %}
+                                {% if method.deprecated_after %}
+                                    let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_after }}")
+                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                    resp.headers_mut().insert(
+                                    ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-from"),
+                                    value,
+                                    );
+                                {% endif %}
+                            {% endif %}
+                            Ok(resp)

@@ -1,0 +1,17 @@
+{%- macro client_return_ty(method) -%}
+{%- if method.client_return_kind == "byte_writer" -%}
+xidl_rust_axum::stream::Writer<xidl_rust_axum::axum::body::Bytes, {{ method.response_ty }}{% if method.has_raises %}, {{ method.error_ty }}{% endif %}>
+{%- elif method.client_return_kind == "writer" -%}
+xidl_rust_axum::stream::Writer<{{ method.request_item_ty }}, {{ method.response_ty }}{% if method.has_raises %}, {{ method.error_ty }}{% endif %}>
+{%- elif method.client_return_kind == "reader_writer" -%}
+xidl_rust_axum::stream::ReaderWriter<{{ method.request_item_ty }}, {{ method.response_ty }}>
+{%- elif method.client_return_kind == "byte_reader" -%}
+xidl_rust_axum::stream::ByteReader
+{%- elif method.client_return_kind == "reader" -%}
+xidl_rust_axum::stream::Reader<{{ method.response_ty }}{% if method.has_raises %}, {{ method.error_ty }}{% endif %}>
+{%- elif method.client_return_kind == "upgraded" -%}
+::xidl_rust_axum::reqwest::Upgraded
+{%- else -%}
+{{ method.response_ty }}
+{%- endif -%}
+{%- endmacro -%}

@@ -1,0 +1,18 @@
+pub struct {{ ident }}Server<T> {
+    inner: ::std::sync::Arc<T>,
+}
+
+#[allow(non_snake_case)]
+impl<T> {{ ident }}Server<T>
+where
+T: {{ ident }} + Send + Sync + 'static,
+{
+    pub fn new(inner: T) -> Self {
+        Self {
+            inner: ::std::sync::Arc::new(inner),
+        }
+    }
+
+    pub fn from_arc(inner: ::std::sync::Arc<T>) -> Self {
+        Self { inner }
+    }

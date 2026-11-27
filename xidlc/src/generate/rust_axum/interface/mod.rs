@@ -3,6 +3,7 @@ mod interface_attr;
 mod interface_exceptions;
 mod interface_http;
 mod interface_method;
+mod interface_method_flags;
 mod interface_method_params;
 mod interface_method_support;
 mod interface_model;

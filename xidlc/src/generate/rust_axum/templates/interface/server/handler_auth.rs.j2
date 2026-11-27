@@ -1,0 +1,52 @@
+            {% if method.auth_kind == "basic" %}
+                let xidl_auth = match xidl_rust_axum::auth::basic::extract_basic_auth(&headers) {
+                    Ok(auth) => auth,
+                    Err(_) => {
+                        let resp = xidl_rust_axum::auth::basic::unauthorized_response("{{ method.basic_auth_realm }}");
+                        return Ok(resp);
+                    }
+                };
+            {% elif method.auth_kind == "bearer" %}
+                let xidl_auth = match auth_header {
+                    Some(::xidl_rust_axum::axum_extra::extract::TypedHeader(auth_header)) => {
+                        xidl_rust_axum::auth::bearer::BearerAuth::from_header(auth_header)
+                    }
+                    None => return Err(xidl_rust_axum::Error::unauthorized()),
+                };
+            {% elif method.auth_kind == "api_key" %}
+                {% set api_key_req = method.api_key_requirements[0] %}
+                let xidl_auth = match ::xidl_rust_axum::auth::api_key::extract_api_key(
+                &headers,
+                &uri,
+                ::xidl_rust_axum::ApiKeyLocation::{{ api_key_req.location }},
+                "{{ api_key_req.name }}",
+                ) {
+                    Ok(auth) => auth,
+                    Err(_) => return Err(::xidl_rust_axum::Error::unauthorized()),
+                };
+            {% elif method.auth_kind == "client" %}
+                let basic = xidl_rust_axum::auth::basic::extract_basic_auth(&headers).ok();
+                let bearer = {% if method.has_bearer_auth %}
+                auth_header.as_ref().map(|::xidl_rust_axum::axum_extra::extract::TypedHeader(h)| {
+                    xidl_rust_axum::auth::bearer::BearerAuth::from_header(h.clone()).token
+                })
+            {% else %}
+                None
+                {% endif %};
+                let mut api_keys = ::std::vec![];
+                {% for api_key_req in method.api_key_requirements %}
+                    if let Ok(key) = ::xidl_rust_axum::auth::api_key::extract_api_key(
+                    &headers,
+                    &uri,
+                    ::xidl_rust_axum::ApiKeyLocation::{{ api_key_req.location }},
+                    "{{ api_key_req.name }}",
+                    ) {
+                        api_keys.push(key);
+                    }
+                {% endfor %}
+                let xidl_auth = ::xidl_rust_axum::ClientAuth {
+                    basic,
+                    bearer,
+                    api_keys,
+                };
+            {% endif %}

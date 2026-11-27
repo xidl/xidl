@@ -1,0 +1,86 @@
+    {% for method in methods %}
+        {% if method.has_raises %}
+            /// Typed error channel for `{{ method.name }}`: one variant per
+            /// declared `raises(...)` exception, plus the runtime fallback.
+            #[derive(Debug)]
+            pub enum {{ method.error_ty }} {
+                {% for ex in method.raises %}
+                    {% if ex.deprecated %}#[allow(deprecated)]
+                    {% endif %}{{ ex.variant }}({{ ex.ty }}),
+                {% endfor %}
+                Framework(xidl_rust_axum::Error),
+            }
+
+            impl ::std::fmt::Display for {{ method.error_ty }} {
+                fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+                match self {
+                    {% for ex in method.raises %}
+                        Self::{{ ex.variant }}(_) => f.write_str("HTTP {{ ex.status }}: {{ ex.variant }}"),
+                    {% endfor %}
+                    Self::Framework(err) => ::std::fmt::Display::fmt(err, f),
+                }
+            }
+            }
+
+            impl ::std::error::Error for {{ method.error_ty }} {
+                fn source(&self) -> Option<&(dyn ::std::error::Error + 'static)> {
+                match self {
+                    Self::Framework(err) => Some(err),
+                    _ => None,
+                }
+            }
+            }
+
+            impl From<xidl_rust_axum::Error> for {{ method.error_ty }} {
+                fn from(err: xidl_rust_axum::Error) -> Self {
+                    Self::Framework(err)
+                }
+            }
+            {% if method.is_streaming %}
+                {% include 'interface/stream_exceptions.rs.j2' %}
+            {% endif %}
+            {% if opt.enable_server %}
+                impl ::xidl_rust_axum::axum::response::IntoResponse for {{ method.error_ty }} {
+                    fn into_response(self) -> ::xidl_rust_axum::axum::response::Response {
+                        match self {
+                            Self::Framework(err) => ::xidl_rust_axum::axum::response::IntoResponse::into_response(err),
+                            {% for ex in method.raises %}
+                                Self::{{ ex.variant }}({% if ex.has_body or ex.headers | length > 0 or ex.cookies | length > 0 %}err{% else %}_{% endif %}) => {
+                                    {% if ex.has_body or ex.headers | length > 0 or ex.cookies | length > 0 %}
+                                        let err: {{ ex.wire_ty }} = err.into();
+                                    {% endif %}
+                                    {% if ex.headers | length > 0 or ex.cookies | length > 0 %}
+                                        {% include 'interface/exception_headers.rs.j2' %}
+                                    {% endif %}
+                                    {% if ex.has_body %}
+                                        let body = match xidl_rust_axum::serde_json::to_vec(&err) {
+                                            Ok(body) => body,
+                                            Err(err) => {
+                                                return ::xidl_rust_axum::axum::response::IntoResponse::into_response(
+                                                xidl_rust_axum::Error::new(500, format!("{err:?}")));
+                                            }
+                                        };
+                                        let body = ::xidl_rust_axum::axum::body::Body::from(body);
+                                    {% else %}
+                                        let body = ::xidl_rust_axum::axum::body::Body::empty();
+                                    {% endif %}
+                                    let mut response = ::xidl_rust_axum::axum::response::Response::new(body);
+                                    *response.status_mut() = ::xidl_rust_axum::axum::http::StatusCode::from_u16({{ ex.status }}u16).unwrap();
+                                    {% if ex.has_body %}
+                                        response.headers_mut().insert(
+                                        ::xidl_rust_axum::axum::http::header::CONTENT_TYPE,
+                                        ::xidl_rust_axum::axum::http::HeaderValue::from_static("application/json"),
+                                        );
+                                    {% endif %}
+                                    {% if ex.headers | length > 0 or ex.cookies | length > 0 %}
+                                        response.headers_mut().extend(headers);
+                                    {% endif %}
+                                    response
+                                }
+                            {% endfor %}
+                        }
+                    }
+                }
+            {% endif %}
+        {% endif %}
+    {% endfor %}

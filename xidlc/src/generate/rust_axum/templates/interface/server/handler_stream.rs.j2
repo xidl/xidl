@@ -1,0 +1,72 @@
+                {% if method.is_bidi_stream %}
+                    let req_headers = headers.clone();
+                    let svc = svc.clone();
+                    {% if method.has_basic_auth or method.has_bearer_auth %}
+                        let xidl_auth = xidl_auth.clone();
+                    {% endif %}
+                    {% for name in method.handshake_param_names %}
+                        let {{ name }} = {{ name }}.clone();
+                    {% endfor %}
+                    let mut resp = {% if method.websocket_subprotocol %}ws.protocols(["{{ method.websocket_subprotocol }}"]){% else %}ws{% endif %}.on_upgrade(move |socket| async move {
+                        let bidi = xidl_rust_axum::stream::open_bidi_server::<{{ method.request_item_ty }}, {{ method.response_ty }}>(socket);
+                        let error_sender = bidi.error_sender();
+                        let req = ::xidl_rust_axum::Request::new(
+                        req_headers,
+                        {% if method.auth_wrapper_struct %}
+                            {{ method.auth_wrapper_struct }} { xidl_auth, data: bidi }
+                        {% else %}
+                            bidi
+                        {% endif %}
+                        );
+                        if let Err(err) = svc.{{ method.name }}(req{% for name in method.handshake_param_names %}, {{ name }}{% endfor %}).await {
+                            if let Some(tx) = error_sender {
+                                let _ = tx.send(Err(err)).await;
+                            }
+                        }
+                    });
+                    {% if method.deprecated %}
+                        resp.headers_mut().insert(
+                        ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated"),
+                        ::xidl_rust_axum::axum::http::HeaderValue::from_static("true"),
+                        );
+                        {% if method.deprecated_since %}
+                            let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_since }}")
+                            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                            resp.headers_mut().insert(
+                            ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-since"),
+                            value,
+                            );
+                        {% endif %}
+                        {% if method.deprecated_after %}
+                            let value = ::xidl_rust_axum::axum::http::HeaderValue::from_str("{{ method.deprecated_after }}")
+                            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                            resp.headers_mut().insert(
+                            ::xidl_rust_axum::axum::http::HeaderName::from_static("x-api-deprecated-from"),
+                            value,
+                            );
+                        {% endif %}
+                    {% endif %}
+                    return Ok(resp);
+                {% elif method.is_client_stream %}
+                    {% if method.is_byte_stream %}
+                        let stream = xidl_rust_axum::stream::decode_bytes_body(body);
+                    {% else %}
+                        let stream = xidl_rust_axum::stream::decode_ndjson_body::<{{ method.request_item_ty }}>(body);
+                    {% endif %}
+                    {% if method.auth_wrapper_struct %}
+                        let data = {{ method.auth_wrapper_struct }} { xidl_auth, data: stream };
+                    {% else %}
+                        let data = stream;
+                    {% endif %}
+                {% elif method.is_streaming and method.request_struct is defined and method.request_struct %}
+                    let data = {{ method.request_struct }} {
+                        {% for param in method.request_params %}
+                            {{ param.name }},
+                        {% endfor %}
+                        {% if method.auth_in_request_struct %}
+                            xidl_auth,
+                        {% endif %}
+                    };
+                {% elif method.is_streaming %}
+                    let data = ();
+                {% endif %}

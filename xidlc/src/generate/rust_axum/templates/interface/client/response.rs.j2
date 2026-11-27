@@ -1,0 +1,143 @@
+            {% if method.client_response_kind == "server_stream" %}
+                {% if method.is_byte_stream %}
+                    xidl_rust_axum::stream::open_byte_stream(self.client.http(), req).await
+                {% else %}
+                    xidl_rust_axum::stream::open_sse::<{{ method.response_ty }}, {% if method.has_raises %}{{ method.error_ty }}{% else %}xidl_rust_axum::Error{% endif %}>(self.client.http(), req).await
+                {% endif %}
+            {% elif method.client_response_kind == "upgrade" %}
+                let resp = self
+                    .client
+                    .http()
+                    .execute(req)
+                    .await
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                if resp.status() == xidl_rust_axum::reqwest::StatusCode::SWITCHING_PROTOCOLS {
+                    resp.upgrade()
+                        .await
+                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))
+                } else {
+                    let status = resp.status();
+                    let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+                    Err(xidl_rust_axum::Error::from_http_response(status, body))
+                }
+            {% elif method.client_response_kind == "unary" %}
+                let resp = self
+                    .client
+                    .http()
+                    .execute(req)
+                    .await
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                if resp.status().is_success() {
+                    {% if method.has_representations %}
+                        let content_type = resp
+                            .headers()
+                            .get(::xidl_rust_axum::reqwest::header::CONTENT_TYPE)
+                            .and_then(|value| value.to_str().ok())
+                            .unwrap_or_default()
+                            .to_string();
+                        {{ response_header_decodes(method) }}
+                        {% for repr in method.representations %}
+                            if xidl_rust_axum::http::media_type_eq(&content_type, xidl_rust_axum::http::ContentType::{{ repr.variant }}.as_str()) {
+                                {% if repr.is_byte %}
+                                    let payload = resp
+                                        .bytes()
+                                        .await
+                                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?
+                                        .to_vec();
+                                    {% if repr.is_bounded_sequence %}
+                                        let payload: {{ repr.ty }} = payload.try_into()
+                                            .map_err(|error| xidl_rust_axum::Error::new(400, format!("{error}")))?;
+                                    {% endif %}
+                                {% else %}
+                                    let body = resp
+                                        .bytes()
+                                        .await
+                                        .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                    let payload: {{ repr.wire_ty }} = xidl_rust_axum::DeserializeFactory::new(xidl_rust_axum::http::ContentType::{{ repr.variant }}.as_str()).from_slice(&body)?;
+                                    let payload: {{ repr.ty }} = {{ repr.decode_expr }};
+                                {% endif %}
+                                {% if method.response_struct %}
+                                    return Ok({{ method.response_ty }} {
+                                        {% if method.response_include_return %}
+                                            r#return: {{ method.response_union }}::{{ repr.variant }}(payload),
+                                        {% endif %}
+                                        {% for param in method.response_params %}
+                                            {{ param.name }},
+                                        {% endfor %}
+                                    });
+                                {% else %}
+                                    return Ok({{ method.response_union }}::{{ repr.variant }}(payload));
+                                {% endif %}
+                            }
+                        {% endfor %}
+                        let status = resp.status();
+                        let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+                        {% if method.has_raises %}
+                            Err({{ method.error_ty }}::Framework(xidl_rust_axum::Error::from_http_response(status, body)))
+                        {% else %}
+                            Err(xidl_rust_axum::Error::from_http_response(status, body))
+                        {% endif %}
+                    {% elif method.response_is_empty %}
+                        {% if method.has_response_metadata %}
+                            {{- response_header_decodes(method) }}
+                            {% if method.response_struct %}
+                                Ok({{ method.response_ty }} {
+                                    {% for param in method.response_params %}
+                                        {{ param.name }},
+                                    {% endfor %}
+                                    {% if method.response_include_return %}
+                                        r#return: ::core::default::Default::default(),
+                                    {% endif %}
+                                })
+                            {% elif method.response_params | length == 1 and not method.response_include_return %}
+                                Ok({{ method.response_params[0].name }})
+                            {% else %}
+                                Ok(())
+                            {% endif %}
+                        {% else %}
+                            Ok(())
+                        {% endif %}
+                    {% else %}
+                        {% if method.response_struct and method.has_response_metadata %}
+                            {{- response_header_decodes(method) }}
+                        {% endif %}
+                        let body = resp
+                            .bytes()
+                            .await
+                            .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                        {% if method.response_has_body %}
+                            let body: {{ method.struct_prefix }}ResponseInBody = xidl_rust_axum::DeserializeFactory::new("{{ method.response_content_type }}").from_slice(&body)?;
+                            {% if method.has_response_metadata %}
+                                let mut response: {{ method.response_ty }} = body.into();
+                                {% for param in method.response_header_params + method.response_cookie_params %}
+                                    response.{{ param.name }} = {{ param.name }};
+                                {% endfor %}
+                                Ok(response)
+                            {% else %}
+                                Ok(body.into())
+                            {% endif %}
+                        {% elif method.response_include_return and method.response_params | length == 0 %}
+                            let body: {{ method.ret_in_ty }} = xidl_rust_axum::DeserializeFactory::new("{{ method.response_content_type }}").from_slice(&body)?;
+                            Ok({{ method.ret_in_expr }})
+                        {% elif not method.response_struct and method.return_is_unit and method.response_body_params | length == 1 and method.response_header_params | length == 0 and method.response_cookie_params | length == 0 %}
+                            let body: {{ method.response_body_params[0].in_ty }} = xidl_rust_axum::DeserializeFactory::new("{{ method.response_content_type }}").from_slice(&body)?;
+                            Ok({{ method.response_body_params[0].in_expr | replace(method.response_body_params[0].name, "body") }})
+                        {% else %}
+                            xidl_rust_axum::DeserializeFactory::new("{{ method.response_content_type }}").from_slice(&body)
+                        {% endif %}
+                    {% endif %}
+                } else {
+                    {% if method.has_raises %}
+                        let status = resp.status();
+                        {% for ex in method.raises %}
+                            {{- decode_exception(ex, method) }}
+                        {% endfor %}
+                        let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+                        Err({{ method.error_ty }}::Framework(xidl_rust_axum::Error::from_http_response(status, body)))
+                    {% else %}
+                        let status = resp.status();
+                        let body = resp.json::<xidl_rust_axum::ErrorBody>().await.ok();
+                        Err(xidl_rust_axum::Error::from_http_response(status, body))
+                    {% endif %}
+                }
+            {% endif %}
