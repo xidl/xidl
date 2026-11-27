@@ -28,6 +28,13 @@ impl CodegenSession {
         Ok(session)
     }
 
+    #[cfg(test)]
+    pub(super) fn from_codegen(generator: Box<dyn Codegen + Send + Sync>) -> Self {
+        Self {
+            inner: Inner::Builtin(generator),
+        }
+    }
+
     pub fn get_engine_version(&mut self) -> Result<String, RpcError> {
         match &mut self.inner {
             Inner::Builtin(generator) => generator.get_engine_version(),

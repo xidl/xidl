@@ -61,5 +61,31 @@ impl From<&str> for Plugin {
     }
 }
 
+impl Plugin {
+    /// Canonical language key used to share one session across aliases.
+    pub(crate) fn cache_key(&self) -> String {
+        match self {
+            Self::Hir => "hir",
+            Self::RestHir => "rest_hir",
+            Self::JsonRpcHir => "jsonrpc_hir",
+            Self::TypedAst => "typed_ast",
+            Self::Rust => "rust",
+            Self::RustJsonRpc => "rust-jsonrpc",
+            Self::Axum => "axum",
+            Self::RustAxumAdapters => "rust-axum-adapters",
+            Self::Typescript => "typescript",
+            Self::TypescriptRest => "typescript-rest",
+            Self::TypescriptRestAdapters => "typescript-rest-adapters",
+            Self::Go => "go",
+            Self::GoRest => "go-rest",
+            Self::Openapi => "openapi",
+            Self::Openrpc => "openrpc",
+            Self::VersionMap => "version_map",
+            Self::Custom(lang) => lang,
+        }
+        .to_owned()
+    }
+}
+
 #[cfg(test)]
 mod tests;
