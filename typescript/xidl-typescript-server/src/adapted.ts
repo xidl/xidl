@@ -11,7 +11,6 @@ import {
   createVersionedRouter,
   type VersionEntry,
   type VersionedRouterOptions,
-  type VersionLifecycle,
 } from './versioned.ts';
 
 /** Structural contract matching generated `DispatchOutcome` from `typescript-rest-adapters`. */
@@ -44,16 +43,17 @@ export type OperationTable<TService> =
 export interface VersionedAdapterEntry<TVersionId extends string = string> {
   id: TVersionId;
   value: string;
-  status?: VersionLifecycle;
   // biome-ignore lint/suspicious/noExplicitAny: each version has its own generated service shape
-  operations?: OperationTable<any>;
+  operations: OperationTable<any>;
 }
 
 export interface VersionedAdapterRouterOptions<
   TVersionId extends string = string,
 > extends Omit<VersionedRouterOptions<TVersionId>, 'versions'> {
   versions: readonly VersionedAdapterEntry<TVersionId>[];
-  bindings: Readonly<Record<string, AdapterOperationBinding<TVersionId>>>;
+  bindings: Readonly<
+    Record<string, AdapterOperationBinding<NoInfer<TVersionId>>>
+  >;
   routerOptions?: AdaptedRouterOptions;
 }
 
@@ -149,17 +149,13 @@ export function createVersionedAdapterRouter<TVersionId extends string>(
   options: VersionedAdapterRouterOptions<TVersionId>,
 ): WebHandler {
   const versions: VersionEntry<TVersionId>[] = options.versions.map(entry => ({
-    handler:
-      entry.status === 'retired' || !entry.operations
-        ? undefined
-        : createAdaptedRouter(
-            entry.id,
-            entry.operations,
-            options.bindings,
-            options.routerOptions,
-          ),
+    handler: createAdaptedRouter(
+      entry.id,
+      entry.operations,
+      options.bindings,
+      options.routerOptions,
+    ),
     id: entry.id,
-    status: entry.status,
     value: entry.value,
   }));
   return createVersionedRouter({
@@ -168,6 +164,7 @@ export function createVersionedAdapterRouter<TVersionId extends string>(
     onVersionError: options.onVersionError,
     parameter: options.parameter,
     resolveVersion: options.resolveVersion,
+    retired: options.retired,
     versions,
   });
 }

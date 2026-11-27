@@ -1,4 +1,4 @@
-import { errorResponse, XidlServerError } from './error.ts';
+import { errorResponse } from './error.ts';
 import type { Awaitable, WebHandler } from './types.ts';
 import {
   addVaryToken,
@@ -6,9 +6,6 @@ import {
   varyTokenForParameter,
   withVersionHeaders,
 } from './version_extract.ts';
-
-/** Whether a mounted version serves requests or responds with 410 Gone. */
-export type VersionLifecycle = 'active' | 'retired';
 
 export type VersionParameterLocation = 'header' | 'query' | 'cookie';
 
@@ -22,10 +19,8 @@ export interface VersionEntry<TVersionId extends string = string> {
   id: TVersionId;
   /** Wire value exchanged in HTTP requests and echoed in responses. */
   value: string;
-  /** Mounted status, defaulting to `'active'`. */
-  status?: VersionLifecycle;
-  /** Handler mounted for this version (required unless status is `'retired'`). */
-  handler?: WebHandler;
+  /** Handler mounted for this version. */
+  handler: WebHandler;
 }
 
 export type VersionErrorKind =
@@ -62,12 +57,14 @@ export type VersionResolver<TVersionId extends string = string> = (
 export interface VersionedRouterOptions<TVersionId extends string = string> {
   /** Version carrier declared by the contract. */
   parameter: VersionParameterSpec;
-  /** Served and retired versions for this contract. */
+  /** Versions mounted for this contract. */
   versions: readonly VersionEntry<TVersionId>[];
-  /** Optional fallback version ID used when the request omits the parameter. */
-  defaultVersion?: TVersionId;
+  /** Retired wire values, which respond with 410 Gone. */
+  retired?: readonly string[];
+  /** Mounted version ID used when the request omits the parameter. */
+  defaultVersion?: NoInfer<TVersionId>;
   /** Optional custom resolver; defaults to exact matching on wire `value`. */
-  resolveVersion?: VersionResolver<TVersionId>;
+  resolveVersion?: VersionResolver<NoInfer<TVersionId>>;
   /** Echo resolved version header and add `Vary`; defaults to `true` for headers. */
   echoHeader?: boolean;
   /** Optional custom response builder for version resolution failures. */
@@ -80,6 +77,7 @@ export interface VersionedRouterOptions<TVersionId extends string = string> {
 interface VersionRouterIndex<TVersionId extends string> {
   byId: Map<TVersionId, VersionEntry<TVersionId>>;
   byValue: Map<string, VersionEntry<TVersionId>>;
+  retired: ReadonlySet<string>;
   options: VersionedRouterOptions<TVersionId>;
   supportedVersions: readonly string[];
 }
@@ -92,17 +90,7 @@ export function createVersionedRouter<TVersionId extends string = string>(
 ): WebHandler {
   const byId = new Map<TVersionId, VersionEntry<TVersionId>>();
   const byValue = new Map<string, VersionEntry<TVersionId>>();
-  const supportedVersions: string[] = [];
   for (const entry of options.versions) {
-    if (
-      entry.status !== undefined &&
-      entry.status !== 'active' &&
-      entry.status !== 'retired'
-    ) {
-      throw new Error(
-        `version '${entry.value}' has invalid status '${entry.status}'`,
-      );
-    }
     if (byId.has(entry.id)) {
       throw new Error(`duplicate version id '${entry.id}'`);
     }
@@ -111,10 +99,15 @@ export function createVersionedRouter<TVersionId extends string = string>(
     }
     byId.set(entry.id, entry);
     byValue.set(entry.value, entry);
-    if (entry.status !== 'retired' && entry.handler) {
-      supportedVersions.push(entry.value);
-    }
   }
+  const retired = new Set<string>();
+  for (const value of options.retired ?? []) {
+    if (byValue.has(value) || retired.has(value)) {
+      throw new Error(`duplicate version value '${value}'`);
+    }
+    retired.add(value);
+  }
+  const supportedVersions = [...byValue.keys()];
   if (
     options.defaultVersion !== undefined &&
     !byId.has(options.defaultVersion)
@@ -127,6 +120,7 @@ export function createVersionedRouter<TVersionId extends string = string>(
     byId,
     byValue,
     options,
+    retired,
     supportedVersions,
   };
   const echoHeader = options.echoHeader ?? options.parameter.in === 'header';
@@ -164,32 +158,6 @@ export function createVersionedRouter<TVersionId extends string = string>(
       }
 
       const { entry } = resolved;
-      if (entry.status === 'retired') {
-        return await respondVersionError(
-          {
-            kind: 'retired',
-            message: `version '${entry.value}' is retired`,
-            parameter: options.parameter,
-            rawValue: extracted.value,
-            retiredVersion: entry.value,
-            status: 410,
-            supportedVersions,
-          },
-          request,
-          options,
-          varyToken,
-        );
-      }
-
-      if (!entry.handler) {
-        return errorResponse(
-          new XidlServerError(
-            500,
-            `version '${entry.value}' (${entry.id}) has no handler configured`,
-          ),
-        );
-      }
-
       const response = await entry.handler(request);
       if (!echoHeader) {
         return response;
@@ -211,7 +179,20 @@ function resolveEntry<TVersionId extends string>(
   request: Request,
   index: VersionRouterIndex<TVersionId>,
 ): { entry: VersionEntry<TVersionId> } | { error: VersionResolutionError } {
-  const { byId, byValue, options, supportedVersions } = index;
+  const { byId, byValue, retired, options, supportedVersions } = index;
+  if (raw !== undefined && retired.has(raw)) {
+    return {
+      error: {
+        kind: 'retired',
+        message: `version '${raw}' is retired`,
+        parameter: options.parameter,
+        rawValue: raw,
+        retiredVersion: raw,
+        status: 410,
+        supportedVersions,
+      },
+    };
+  }
   if (options.resolveVersion) {
     const outcome = options.resolveVersion(raw, {
       request,

@@ -38,7 +38,6 @@ export type {
   VersionEntry,
   VersionErrorKind,
   VersionedRouterOptions,
-  VersionLifecycle,
   VersionParameterLocation,
   VersionParameterSpec,
   VersionResolutionError,
