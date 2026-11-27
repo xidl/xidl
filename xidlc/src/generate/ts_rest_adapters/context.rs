@@ -1,5 +1,6 @@
 //! Data-only template contexts for TypeScript adapters.
 
+use super::bindings::InterfaceDispatcher;
 use crate::generate::typescript::definition::contexts::TsType;
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
@@ -29,20 +30,6 @@ pub(super) struct FileContext {
 pub(super) struct VersionMeta {
     pub id: String,
     pub value: String,
-}
-
-/// Typed operation dispatcher map matching `<Interface>Operations` handler keys.
-#[derive(Serialize)]
-pub(super) struct InterfaceDispatcher {
-    pub name: String,
-    pub entries: Vec<InterfaceDispatcherEntry>,
-}
-
-/// One method key -> `dispatch<Interface><Op>` binding.
-#[derive(Serialize)]
-pub(super) struct InterfaceDispatcherEntry {
-    pub handler: String,
-    pub dispatcher: String,
 }
 
 #[derive(Serialize)]
@@ -265,10 +252,11 @@ pub(super) struct Dispatcher {
     pub stored_type: Option<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Clone, Serialize)]
 pub(super) struct DispatcherVersion {
     pub id: String,
     pub pascal: String,
+    pub request_schema: String,
     pub current: bool,
     pub stored: bool,
 }

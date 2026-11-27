@@ -1,5 +1,6 @@
 //! Independent TypeScript REST adapter target.
 
+mod bindings;
 mod context;
 mod endpoints;
 mod error;

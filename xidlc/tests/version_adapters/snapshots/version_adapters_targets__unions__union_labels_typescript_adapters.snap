@@ -656,15 +656,25 @@ export type DispatchOutcome<T, Head> =
 
 
 
+
+
+
+
+
+
+
+
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastNotificationsReissueFromV1(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.NotificationsReissueRequest> {
-        const parsed = wireRequest0Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v1", operation: "Notifications.reissue", issues: parsed.error.issues } };
         
-            const step0 = upcastNotificationsReissueRequestFromV1(parsed.data, adapters);
+            const parsed = wireRequest0Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v1", operation: "Notifications.reissue", issues: parsed.error.issues } };
+            const data = parsed.data;
+            const step0 = upcastNotificationsReissueRequestFromV1(data, adapters);
             if (!step0.ok) return step0;
+            return step0;
         
-        return step0;
     }
     export function downcastNotificationsReissueResultToV1(head: types.v2.Notice, adapters: VersionAdapters): VersionedResult<types.v1.Notice> {
         
@@ -690,26 +700,31 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchNotificationsReissueFromV1(
-    raw: unknown,
-    handler: (request: ifaceTypes.v2.NotificationsReissueRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Notice, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.v2.NotificationsReissueRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Notice, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.Notice, FrameworkError>, OperationOutcome<types.v2.Notice, FrameworkError>>> {
-        const request = decodeAndUpcastNotificationsReissueFromV1(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "v1", originalVersionId: "v1" });
-        return { dispatched: true, ...downcastNotificationsReissueOutcomeToV1(head, adapters) };
+        
+            const request = decodeAndUpcastNotificationsReissueFromV1(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "v1", originalVersionId: "v1" });
+            return { dispatched: true, ...downcastNotificationsReissueOutcomeToV1(head, adapters) };
+        
     }
 
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastNotificationsSubmitFromV1(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.NotificationsSubmitRequest> {
-        const parsed = wireRequest2Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v1", operation: "Notifications.submit", issues: parsed.error.issues } };
         
-            const step0 = upcastNotificationsSubmitRequestFromV1(parsed.data, adapters);
+            const parsed = wireRequest2Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v1", operation: "Notifications.submit", issues: parsed.error.issues } };
+            const data = parsed.data;
+            const step0 = upcastNotificationsSubmitRequestFromV1(data, adapters);
             if (!step0.ok) return step0;
+            return step0;
         
-        return step0;
     }
     export function downcastNotificationsSubmitResultToV1(head: types.v2.Delivery, adapters: VersionAdapters): VersionedResult<types.v1.Delivery> {
         
@@ -735,23 +750,29 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchNotificationsSubmitFromV1(
-    raw: unknown,
-    handler: (request: ifaceTypes.v2.NotificationsSubmitRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Delivery, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.v2.NotificationsSubmitRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Delivery, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.Delivery, FrameworkError>, OperationOutcome<types.v2.Delivery, FrameworkError>>> {
-        const request = decodeAndUpcastNotificationsSubmitFromV1(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "v1", originalVersionId: "v1" });
-        return { dispatched: true, ...downcastNotificationsSubmitOutcomeToV1(head, adapters) };
+        
+            const request = decodeAndUpcastNotificationsSubmitFromV1(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "v1", originalVersionId: "v1" });
+            return { dispatched: true, ...downcastNotificationsSubmitOutcomeToV1(head, adapters) };
+        
     }
 
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastNotificationsReissueFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.NotificationsReissueRequest> {
-        const parsed = wireRequest4Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v2", operation: "Notifications.reissue", issues: parsed.error.issues } };
         
-        return ok(parsed.data);
+            const parsed = wireRequest4Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v2", operation: "Notifications.reissue", issues: parsed.error.issues } };
+            const data = parsed.data;
+            return ok(data);
+        
     }
     export function downcastNotificationsReissueResultToV2(head: types.v2.Notice, adapters: VersionAdapters): VersionedResult<types.v2.Notice> {
         
@@ -771,23 +792,29 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchNotificationsReissueFromV2(
-    raw: unknown,
-    handler: (request: ifaceTypes.v2.NotificationsReissueRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Notice, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.v2.NotificationsReissueRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Notice, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v2.Notice, FrameworkError>, OperationOutcome<types.v2.Notice, FrameworkError>>> {
-        const request = decodeAndUpcastNotificationsReissueFromV2(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "v2", originalVersionId: "v2" });
-        return { dispatched: true, ...downcastNotificationsReissueOutcomeToV2(head, adapters) };
+        
+            const request = decodeAndUpcastNotificationsReissueFromV2(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "v2", originalVersionId: "v2" });
+            return { dispatched: true, ...downcastNotificationsReissueOutcomeToV2(head, adapters) };
+        
     }
 
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastNotificationsSubmitFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.NotificationsSubmitRequest> {
-        const parsed = wireRequest6Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v2", operation: "Notifications.submit", issues: parsed.error.issues } };
         
-        return ok(parsed.data);
+            const parsed = wireRequest6Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v2", operation: "Notifications.submit", issues: parsed.error.issues } };
+            const data = parsed.data;
+            return ok(data);
+        
     }
     export function downcastNotificationsSubmitResultToV2(head: types.v2.Delivery, adapters: VersionAdapters): VersionedResult<types.v2.Delivery> {
         
@@ -807,15 +834,18 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchNotificationsSubmitFromV2(
-    raw: unknown,
-    handler: (request: ifaceTypes.v2.NotificationsSubmitRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Delivery, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.v2.NotificationsSubmitRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Delivery, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v2.Delivery, FrameworkError>, OperationOutcome<types.v2.Delivery, FrameworkError>>> {
-        const request = decodeAndUpcastNotificationsSubmitFromV2(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "v2", originalVersionId: "v2" });
-        return { dispatched: true, ...downcastNotificationsSubmitOutcomeToV2(head, adapters) };
+        
+            const request = decodeAndUpcastNotificationsSubmitFromV2(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "v2", originalVersionId: "v2" });
+            return { dispatched: true, ...downcastNotificationsSubmitOutcomeToV2(head, adapters) };
+        
     }
 
 
@@ -861,6 +891,111 @@ export type DispatchOutcome<T, Head> =
         
             submit: dispatchNotificationsSubmit,
         
+    } as const;
+
+
+
+    type $xidlOperationTable<Handler extends string> = {
+        readonly [Key in Handler]: import("xidl-typescript-server").OperationDescriptor<Record<Key, unknown>, Key>;
+    };
+
+    
+    type $xidlNotificationsSource =
+        
+            | {
+                id: "v1";
+                tables:
+                
+                    { readonly NotificationsOperations:
+                
+                $xidlOperationTable<"reissue" | "submit">
+                 };
+            }
+        
+            | {
+                id: "v2";
+                tables:
+                
+                    { readonly NotificationsOperations:
+                
+                $xidlOperationTable<"reissue" | "submit">
+                 };
+            }
+        ;
+    
+
+    /** Binds each interface's generated dispatchers to its Head service and adapter hooks. */
+    export const bindVersionedInterfaces = {
+    
+    "Notifications"<Source extends $xidlNotificationsSource>(
+    source: Source,
+    service: {
+        
+            reissue: (request: ifaceTypes.v2.NotificationsReissueRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Notice, FrameworkError>>;
+        
+            submit: (request: ifaceTypes.v2.NotificationsSubmitRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Delivery, FrameworkError>>;
+        
+    },
+    adapters: VersionAdapters,
+    
+    ): import("xidl-typescript-server").BoundInterface<Source["id"]> {
+        const version: Source["id"] = source.id;
+        const bindings = {
+            
+                reissue: {
+                    
+                        dispatch: (version: VersionId, raw: Record<string, unknown>) => NotificationsDispatchers.reissue(version, raw, service.reissue.bind(service), adapters),
+                    
+                },
+            
+                submit: {
+                    
+                        dispatch: (version: VersionId, raw: Record<string, unknown>) => NotificationsDispatchers.submit(version, raw, service.submit.bind(service), adapters),
+                    
+                },
+            
+        };
+        switch (source.id) {
+            
+                case "v1":
+                    return {
+                        version,
+                        operations: [
+                            
+                                {
+                                    operation: source.tables.NotificationsOperations.reissue,
+                                    binding: bindings.reissue,
+                                },
+                            
+                                {
+                                    operation: source.tables.NotificationsOperations.submit,
+                                    binding: bindings.submit,
+                                },
+                            
+                        ],
+                    };
+            
+                case "v2":
+                    return {
+                        version,
+                        operations: [
+                            
+                                {
+                                    operation: source.tables.NotificationsOperations.reissue,
+                                    binding: bindings.reissue,
+                                },
+                            
+                                {
+                                    operation: source.tables.NotificationsOperations.submit,
+                                    binding: bindings.submit,
+                                },
+                            
+                        ],
+                    };
+            
+        }
+    },
+    
     } as const;
 
 

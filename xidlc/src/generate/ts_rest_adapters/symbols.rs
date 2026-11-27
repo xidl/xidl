@@ -7,6 +7,12 @@ use std::collections::BTreeSet;
 impl FileContext {
     pub(super) fn validate_symbols(&self) -> IdlcResult<()> {
         let mut names = vec!["VERSIONS".to_string(), "VersionId".to_string()];
+        if !self.interface_dispatchers.is_empty() {
+            names.extend([
+                "bindVersionedInterfaces".to_string(),
+                "$xidlOperationTable".to_string(),
+            ]);
+        }
         names.extend(
             self.decisions
                 .iter()
@@ -31,6 +37,11 @@ impl FileContext {
             for prefix in ["decodeAndUpcast", "dispatch"] {
                 names.push(format!("{prefix}{}From{}", endpoint.prefix, endpoint.from));
             }
+            if endpoint.current {
+                for prefix in ["$xidlValidate", "$xidlUpcast", "$xidlDispatch"] {
+                    names.push(format!("{prefix}{}From{}", endpoint.prefix, endpoint.from));
+                }
+            }
             for suffix in ["ResultTo", "ErrorTo", "OutcomeTo"] {
                 let prefix = "downcast";
                 names.push(format!(
@@ -47,7 +58,7 @@ impl FileContext {
         names.extend(
             self.interface_dispatchers
                 .iter()
-                .map(|value| value.name.clone()),
+                .flat_map(|value| [value.name.clone(), value.source.clone()]),
         );
         let mut symbols = BTreeSet::new();
         for name in &names {

@@ -77,3 +77,28 @@ fn typescript_adapters_export_scoped_interface_dispatchers_and_reject_reserved_s
     let files = render(colliding, "ok.idl");
     assert_eq!(files.len(), 1);
 }
+
+#[test]
+fn distinct_scoped_interfaces_with_the_same_rendered_binding_name_are_rejected() {
+    let source = r#"
+        @version enum V { v1 };
+        module a {
+            interface b_c {
+                @get(path = "/one") long first();
+            };
+        };
+        module a_b {
+            interface c {
+                @get(path = "/two") long second();
+            };
+        };
+    "#;
+    let error = xidlc::generate_from_source("typescript-rest-adapters", source, Default::default())
+        .err()
+        .expect("colliding interface bindings must fail")
+        .to_string();
+    assert!(
+        error.contains("generated symbol a_b_cDispatchers is ambiguous"),
+        "{error}"
+    );
+}

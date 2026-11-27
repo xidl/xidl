@@ -1,0 +1,26 @@
+@version(in = "header", name = "X-Version")
+enum ApiVersion {
+    @rename("2026-12-01") v1,
+    @rename("2027-06-01") v2
+};
+
+struct Item {
+    string id;
+    @added(ApiVersion::v2) @optional string label;
+};
+
+struct Account { string id; };
+
+interface Items {
+    @get(path = "/items/{id}")
+    Item get(string id);
+};
+
+interface Accounts {
+    @get(path = "/accounts/{id}")
+    Account get(string id);
+
+    @added(ApiVersion::v2)
+    @get(path = "/account-summary")
+    string summary();
+};

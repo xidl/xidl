@@ -38,3 +38,8 @@ Feature: API versioning — independent adapter targets preserve frozen HTTP con
     Given a versioned REST IDL file "bdd/features/data/versioned_adapters_single.idl"
     When I generate Rust with the independent adapter target
     Then the single-version Rust application validates before dispatch
+
+  Scenario: generated versioned tables dispatch same-named methods on different interfaces
+    Given a versioned REST IDL file "bdd/features/data/versioned_adapter_tables.idl"
+    When I generate TypeScript with the independent adapter target
+    Then generated adapter bindings route both interfaces through one versioned handler

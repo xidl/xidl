@@ -327,15 +327,25 @@ export type DispatchOutcome<T, Head> =
 
 
 
+
+
+
+
+
+
+
+
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastStoreSaveFromV1(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.StoreSaveRequest> {
-        const parsed = wireRequest0Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v1", operation: "Store.save", issues: parsed.error.issues } };
         
-            const step0 = upcastStoreSaveRequestFromV1(parsed.data, adapters);
+            const parsed = wireRequest0Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v1", operation: "Store.save", issues: parsed.error.issues } };
+            const data = parsed.data;
+            const step0 = upcastStoreSaveRequestFromV1(data, adapters);
             if (!step0.ok) return step0;
+            return step0;
         
-        return step0;
     }
     export function downcastStoreSaveResultToV1(head: types.v2.Item, stored: StoredValues, adapters: VersionAdapters): VersionedResult<types.v1.Item> {
         
@@ -360,24 +370,30 @@ export type DispatchOutcome<T, Head> =
         const result = downcastStoreSaveErrorToV1(head.error, stored, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    
     /** The Head handler returns the stored values its outcome still needs for this version. */
     export async function dispatchStoreSaveFromV1(
-    raw: unknown,
-    handler: (request: ifaceTypes.v2.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Item, FrameworkError> & { stored: StoredValues }>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.v2.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Item, FrameworkError> & { stored: StoredValues }>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.Item, FrameworkError>, OperationOutcome<types.v2.Item, FrameworkError>>> {
-        const request = decodeAndUpcastStoreSaveFromV1(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "v1", originalVersionId: "v1" });
-        return { dispatched: true, ...downcastStoreSaveOutcomeToV1(head, head.stored, adapters) };
+        
+            const request = decodeAndUpcastStoreSaveFromV1(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "v1", originalVersionId: "v1" });
+            return { dispatched: true, ...downcastStoreSaveOutcomeToV1(head, head.stored, adapters) };
+        
     }
 
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastStoreSaveFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.StoreSaveRequest> {
-        const parsed = wireRequest2Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v2", operation: "Store.save", issues: parsed.error.issues } };
         
-        return ok(parsed.data);
+            const parsed = wireRequest2Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v2", operation: "Store.save", issues: parsed.error.issues } };
+            const data = parsed.data;
+            return ok(data);
+        
     }
     export function downcastStoreSaveResultToV2(head: types.v2.Item, adapters: VersionAdapters): VersionedResult<types.v2.Item> {
         
@@ -397,15 +413,18 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchStoreSaveFromV2(
-    raw: unknown,
-    handler: (request: ifaceTypes.v2.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Item, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.v2.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Item, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v2.Item, FrameworkError>, OperationOutcome<types.v2.Item, FrameworkError>>> {
-        const request = decodeAndUpcastStoreSaveFromV2(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "v2", originalVersionId: "v2" });
-        return { dispatched: true, ...downcastStoreSaveOutcomeToV2(head, adapters) };
+        
+            const request = decodeAndUpcastStoreSaveFromV2(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "v2", originalVersionId: "v2" });
+            return { dispatched: true, ...downcastStoreSaveOutcomeToV2(head, adapters) };
+        
     }
 
 
@@ -433,6 +452,93 @@ export type DispatchOutcome<T, Head> =
         
             save: dispatchStoreSave,
         
+    } as const;
+
+
+
+    type $xidlOperationTable<Handler extends string> = {
+        readonly [Key in Handler]: import("xidl-typescript-server").OperationDescriptor<Record<Key, unknown>, Key>;
+    };
+
+    
+    type $xidlStoreSource =
+        
+            | {
+                id: "v1";
+                tables:
+                
+                    { readonly StoreOperations:
+                
+                $xidlOperationTable<"save">
+                 };
+            }
+        
+            | {
+                id: "v2";
+                tables:
+                
+                    { readonly StoreOperations:
+                
+                $xidlOperationTable<"save">
+                 };
+            }
+        ;
+    
+
+    /** Binds each interface's generated dispatchers to its Head service and adapter hooks. */
+    export const bindVersionedInterfaces = {
+    
+    "Store"<Source extends $xidlStoreSource>(
+    source: Source,
+    service: {
+        
+            save: (request: ifaceTypes.v2.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Item, FrameworkError> & { stored: StoredValues }>;
+        
+    },
+    adapters: VersionAdapters,
+    
+    ): import("xidl-typescript-server").BoundInterface<Source["id"]> {
+        const version: Source["id"] = source.id;
+        const bindings = {
+            
+                save: {
+                    
+                        dispatch: (version: VersionId, raw: Record<string, unknown>) => StoreDispatchers.save(version, raw, service.save.bind(service), adapters),
+                    
+                },
+            
+        };
+        switch (source.id) {
+            
+                case "v1":
+                    return {
+                        version,
+                        operations: [
+                            
+                                {
+                                    operation: source.tables.StoreOperations.save,
+                                    binding: bindings.save,
+                                },
+                            
+                        ],
+                    };
+            
+                case "v2":
+                    return {
+                        version,
+                        operations: [
+                            
+                                {
+                                    operation: source.tables.StoreOperations.save,
+                                    binding: bindings.save,
+                                },
+                            
+                        ],
+                    };
+            
+        }
+    },
+    
     } as const;
 
 

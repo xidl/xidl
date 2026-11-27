@@ -18,25 +18,62 @@ export type DispatchOutcome<T, Head> =
     OperationOutcome<{{ m.render_type(result) }}, {{ errors_type(classes) }}>
 {%- endmacro %}
 
-{% for endpoint in endpoints %}
-    /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
-    export function decodeAndUpcast{{ endpoint.prefix }}From{{ endpoint.from }}(raw: unknown{% if endpoint.current %}, current: {{ m.render_type(endpoint.current_type) }}{% endif %}, adapters: VersionAdapters): {% if endpoint.stored_type %}{ ok: true; value: {{ m.render_type(endpoint.head_request) }}; stored: {{ endpoint.stored_type }} } | { ok: false; error: ValidationError | UnsupportedProjection }{% else %}DecodeResult<{{ m.render_type(endpoint.head_request) }}>{% endif %} {
-        const parsed = {{ endpoint.schema }}.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: {{ endpoint.version | tojson }}, operation: {{ endpoint.type_path | tojson }}, issues: parsed.error.issues } };
-        {% for step in endpoint.steps %}
-            {%- set prev_pair = endpoint.steps[loop.index0 - 1].request_call.pair if loop.index0 > 0 else false %}
-            const step{{ loop.index0 }} = {{ step.request_call.name }}({% if loop.first %}parsed.data{% else %}step{{ loop.index0 - 1 }}.value{% if prev_pair %}.value{% endif %}{% endif %}{% if step.request_call.current %}, current{% endif %}, adapters);
-            if (!step{{ loop.index0 }}.ok) return step{{ loop.index0 }};
-        {% endfor %}
-        {%- if endpoint.stored_type %}
-            {% set last = endpoint.steps | length - 1 %}
-            {% set last_pair = endpoint.steps[last].request_call.pair %}
-            {#- mergeStored keeps the first defined value for a key, matching the
+{% macro request_result(endpoint) -%}
+    {% if endpoint.stored_type %}{ ok: true; value: {{ m.render_type(endpoint.head_request) }}; stored: {{ endpoint.stored_type }} } | { ok: false; error: ValidationError | UnsupportedProjection }{% else %}DecodeResult<{{ m.render_type(endpoint.head_request) }}>{% endif %}
+{%- endmacro %}
+{% macro head_handler(endpoint) -%}
+    (request: {{ m.render_type(endpoint.head_request) }}, context: VersionContext{% if endpoint.stored_type %}, stored: {{ endpoint.stored_type }}{% endif %}) => Promise<{{ outcome(endpoint.head_result, endpoint.head_errors) }}{% if endpoint.stored %} & { stored: StoredValues }{% endif %}>
+{%- endmacro %}
+{% macro dispatch_result(endpoint) -%}
+    Promise<DispatchOutcome<{{ outcome(endpoint.result, endpoint.errors) }}, {{ outcome(endpoint.head_result, endpoint.head_errors) }}>>
+{%- endmacro %}
+
+{% macro upcast_request(endpoint) -%}
+{%- for step in endpoint.steps %}
+{%- set prev_pair = endpoint.steps[loop.index0 - 1].request_call.pair if loop.index0 > 0 else false %}
+const step{{ loop.index0 }} = {{ step.request_call.name }}({% if loop.first %}data{% else %}step{{ loop.index0 - 1 }}.value{% if prev_pair %}.value{% endif %}{% endif %}{% if step.request_call.current %}, current{% endif %}, adapters);
+if (!step{{ loop.index0 }}.ok) return step{{ loop.index0 }};
+{%- endfor %}
+{%- if endpoint.stored_type %}
+{%- set last = endpoint.steps | length - 1 %}
+{%- set last_pair = endpoint.steps[last].request_call.pair %}
+{#- mergeStored keeps the first defined value for a key, matching the
             Rust bag merge (`self.or(other)`), so step bags pass in ascending order. #}
-            return { ok: true, value: step{{ last }}.value{% if last_pair %}.value{% endif %}, stored: mergeStored({% for i in range(endpoint.steps | length) %}{% if endpoint.steps[i].request_call.pair %}step{{ i }}.value.stored, {% endif %}{% endfor %}) };
-        {%- else %}
-        return {{ ("step" ~ (endpoint.steps | length - 1)) if endpoint.steps else "ok(parsed.data)" }};
-        {%- endif %}
+return { ok: true, value: step{{ last }}.value{% if last_pair %}.value{% endif %}, stored: mergeStored({% for i in range(endpoint.steps | length) %}{% if endpoint.steps[i].request_call.pair %}step{{ i }}.value.stored, {% endif %}{% endfor %}) };
+{%- else %}
+return {{ ("step" ~ (endpoint.steps | length - 1)) if endpoint.steps else "ok(data)" }};
+{%- endif %}
+{% endmacro %}
+
+{% macro invoke_head(endpoint) -%}
+if (!request.ok) return { dispatched: false, error: request.error };
+const head = await handler(request.value, { originalVersion: {{ endpoint.version | tojson }}, originalVersionId: {{ endpoint.id | tojson }} }{% if endpoint.stored_type %}, request.stored{% endif %});
+return { dispatched: true, ...downcast{{ endpoint.prefix }}OutcomeTo{{ endpoint.from }}(head{% if endpoint.stored %}, head.stored{% endif %}, adapters) };
+{%- endmacro %}
+
+{% for endpoint in endpoints %}
+    {% if endpoint.current %}
+        function $xidlValidate{{ endpoint.prefix }}From{{ endpoint.from }}(raw: unknown) {
+            const parsed = {{ endpoint.schema }}.safeParse(raw);
+            if (!parsed.success) return { ok: false as const, error: { kind: "Validation" as const, version: {{ endpoint.version | tojson }}, operation: {{ endpoint.type_path | tojson }}, issues: parsed.error.issues } };
+            return { ok: true as const, value: parsed.data };
+        }
+
+        function $xidlUpcast{{ endpoint.prefix }}From{{ endpoint.from }}(data: z.output<typeof {{ endpoint.schema }}>, current: {{ m.render_type(endpoint.current_type) }}, adapters: VersionAdapters): {{ request_result(endpoint) }} {
+            {{ upcast_request(endpoint) | trim | indent(12) }}
+        }
+    {% endif %}
+    /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
+    export function decodeAndUpcast{{ endpoint.prefix }}From{{ endpoint.from }}(raw: unknown{% if endpoint.current %}, current: {{ m.render_type(endpoint.current_type) }}{% endif %}, adapters: VersionAdapters): {{ request_result(endpoint) }} {
+        {% if endpoint.current %}
+            const validated = $xidlValidate{{ endpoint.prefix }}From{{ endpoint.from }}(raw);
+            return validated.ok ? $xidlUpcast{{ endpoint.prefix }}From{{ endpoint.from }}(validated.value, current, adapters) : validated;
+        {% else %}
+            const parsed = {{ endpoint.schema }}.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: {{ endpoint.version | tojson }}, operation: {{ endpoint.type_path | tojson }}, issues: parsed.error.issues } };
+            const data = parsed.data;
+            {{ upcast_request(endpoint) | trim | indent(12) }}
+        {% endif %}
     }
     export function downcast{{ endpoint.prefix }}ResultTo{{ endpoint.from }}(head: {{ m.render_type(endpoint.head_result) }}{% if endpoint.stored %}, stored: StoredValues{% endif %}, adapters: VersionAdapters): VersionedResult<{{ m.render_type(endpoint.result) }}> {
         {% for step in endpoint.steps | reverse %}
@@ -61,16 +98,31 @@ export type DispatchOutcome<T, Head> =
         const result = downcast{{ endpoint.prefix }}ErrorTo{{ endpoint.from }}(head.error{% if endpoint.stored %}, stored{% endif %}, adapters);
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
+    {% if endpoint.current %}
+        async function $xidlDispatch{{ endpoint.prefix }}From{{ endpoint.from }}(
+            raw: unknown,
+            current: (request: z.output<typeof {{ endpoint.schema }}>) => {{ m.render_type(endpoint.current_type) }} | Promise<{{ m.render_type(endpoint.current_type) }}>,
+            handler: {{ head_handler(endpoint) }},
+            adapters: VersionAdapters,
+        ): {{ dispatch_result(endpoint) }} {
+            const validated = $xidlValidate{{ endpoint.prefix }}From{{ endpoint.from }}(raw);
+            if (!validated.ok) return { dispatched: false, error: validated.error };
+            const request = $xidlUpcast{{ endpoint.prefix }}From{{ endpoint.from }}(validated.value, await current(validated.value), adapters);
+            {{ invoke_head(endpoint) | indent(12) }}
+        }
+    {% endif %}
     {% if endpoint.stored %}/** The Head handler returns the stored values its outcome still needs for this version. */{% endif %}
     export async function dispatch{{ endpoint.prefix }}From{{ endpoint.from }}(
-    raw: unknown{% if endpoint.current %}, current: {{ m.render_type(endpoint.current_type) }}{% endif %},
-    handler: (request: {{ m.render_type(endpoint.head_request) }}, context: VersionContext{% if endpoint.stored_type %}, stored: {{ endpoint.stored_type }}{% endif %}) => Promise<{{ outcome(endpoint.head_result, endpoint.head_errors) }}{% if endpoint.stored %} & { stored: StoredValues }{% endif %}>,
-    adapters: VersionAdapters,
-    ): Promise<DispatchOutcome<{{ outcome(endpoint.result, endpoint.errors) }}, {{ outcome(endpoint.head_result, endpoint.head_errors) }}>> {
-        const request = decodeAndUpcast{{ endpoint.prefix }}From{{ endpoint.from }}(raw{% if endpoint.current %}, current{% endif %}, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: {{ endpoint.version | tojson }}, originalVersionId: {{ endpoint.id | tojson }} }{% if endpoint.stored_type %}, request.stored{% endif %});
-        return { dispatched: true, ...downcast{{ endpoint.prefix }}OutcomeTo{{ endpoint.from }}(head{% if endpoint.stored %}, head.stored{% endif %}, adapters) };
+        raw: unknown{% if endpoint.current %}, current: {{ m.render_type(endpoint.current_type) }}{% endif %},
+        handler: {{ head_handler(endpoint) }},
+        adapters: VersionAdapters,
+    ): {{ dispatch_result(endpoint) }} {
+        {% if endpoint.current %}
+            return $xidlDispatch{{ endpoint.prefix }}From{{ endpoint.from }}(raw, () => current, handler, adapters);
+        {% else %}
+            const request = decodeAndUpcast{{ endpoint.prefix }}From{{ endpoint.from }}(raw, adapters);
+            {{ invoke_head(endpoint) | indent(12) }}
+        {% endif %}
     }
 {% endfor %}
 
@@ -91,14 +143,7 @@ export type DispatchOutcome<T, Head> =
     }
 {% endfor %}
 
-{% for group in interface_dispatchers %}
-    /** Typed dispatcher lookup keyed by generated server operation handler name. */
-    export const {{ group.name }} = {
-        {% for entry in group.entries %}
-            {{ entry.handler }}: {{ entry.dispatcher }},
-        {% endfor %}
-    } as const;
-{% endfor %}
+{% include "adapters_bindings.ts.j2" %}
 
 {% for dispatcher in type_dispatchers %}
     {% set stored_param = ", stored: StoredValues" if dispatcher.stored else "" %}

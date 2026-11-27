@@ -179,6 +179,39 @@ Next.js Route Handler contract:
   415/406, and undeclared failures reject the route handler.
 - Export the handler from `route.ts` or compose it with your own error handling.
 
+## Mount multiple versioned interfaces
+
+Generate both the TypeScript REST server tables and the independent
+`typescript-rest-adapters` output. Pass the generated version module and
+Head service into each interface's `bindVersionedInterfaces` helper:
+
+```ts
+import { v1 } from './generated/api.server';
+
+const source = { id: 'v1', tables: v1 } as const;
+const router = createVersionedAdapterRouter({
+  parameter: { in: 'header', name: 'X-Version' },
+  versions: [{
+    id: source.id,
+    value: '2026-01-01',
+    interfaces: [
+      bindVersionedInterfaces.Accounts(source, accounts, adapters),
+      bindVersionedInterfaces.Items(source, items, adapters),
+    ],
+  }],
+});
+```
+
+Each bound interface carries its operations and their corresponding dispatchers.
+Two services can have a method with the same name. Identical method and path
+shapes across mounted interfaces are rejected at construction. Use an empty
+`interfaces` list for a projected version with no routes.
+
+For interfaces whose updates need a current value, the helper takes a fourth
+argument containing typed readers by method. The reader runs after validation
+for the selected versions whose conversions need it. A projection failure retains
+the original Head outcome in `VersionProjectionError`.
+
 ## Errors, Authorization, and Codecs
 
 Pass `ServerOptions` as the optional third argument of `createRouter` or

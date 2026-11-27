@@ -5,6 +5,7 @@ import {
 } from './business_hook_contracts';
 import type * as types from './versioned_adapters_business';
 import * as a from './versioned_adapters_business.adapters';
+import { v2, v3 } from './versioned_adapters_business.server';
 
 const take = <T>(
   result: { ok: true; value: T } | { ok: false; error: unknown },
@@ -174,6 +175,80 @@ export async function runUpdateJourney(
   );
   assert(plain.ok);
   assert.equal(plain.stored.handling_note, undefined);
+  let reads = 0;
+  const unavailable = async () => assert.fail('Unexpected Depot operation');
+  const service: Parameters<typeof a.bindVersionedInterfaces.Depot>[1] = {
+    _get: unavailable,
+    bindings: unavailable,
+    blob: unavailable,
+    choose: unavailable,
+    contact: unavailable,
+    extra: unavailable,
+    head_only: unavailable,
+    inspect: unavailable,
+    optional_change: unavailable,
+    receipt: unavailable,
+    ship: unavailable,
+    state: unavailable,
+    trace: unavailable,
+    update: handler,
+  };
+  const readers: Parameters<typeof a.bindVersionedInterfaces.Depot>[3] = {
+    update: async (_version, request) => {
+      const id: string = request.id;
+      assert.equal(id, 'p1');
+      assert.equal('extra' in request, false);
+      reads++;
+      return current;
+    },
+  };
+  const bindUpdate = (
+    source: Parameters<typeof a.bindVersionedInterfaces.Depot>[0],
+  ) => {
+    const bound = a.bindVersionedInterfaces.Depot(
+      source,
+      service,
+      {
+        ...hooks,
+        ...structurallyCompatible,
+      },
+      readers,
+    );
+    const update = bound.operations.find(
+      ({ operation }) => operation.handler === 'update',
+    );
+    assert(update);
+    return update.binding;
+  };
+  const legacy = bindUpdate({ id: 'v2', tables: v2 });
+  const invalid = await legacy.dispatch('v2', {
+    id: 'p1',
+    patch: { carrier: 'postal' },
+  });
+  assert.equal(invalid.dispatched, false);
+  assert.equal(reads, 0);
+  assert.equal(writes, 3);
+
+  const updated = await legacy.dispatch('v2', {
+    extra: 'raw only',
+    id: 'p1',
+    patch: { note: 'new note' },
+  });
+  assert(updated.dispatched && updated.projected && updated.value.ok);
+  assert.equal(reads, 1);
+  assert.equal(writes, 4);
+
+  const currentVersion = bindUpdate({ id: 'v3', tables: v3 });
+  const updatedHead = await currentVersion.dispatch('v3', {
+    id: 'p1',
+    patch: {},
+  });
+  assert(
+    updatedHead.dispatched && updatedHead.projected && updatedHead.value.ok,
+  );
+  assert.equal(reads, 1);
+  assert.equal(writes, 5);
+
   console.log(
     'PASS: update round trip persists and reads back retired members',
   );

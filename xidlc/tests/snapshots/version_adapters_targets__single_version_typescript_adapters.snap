@@ -144,12 +144,23 @@ export type DispatchOutcome<T, Head> =
 
 
 
+
+
+
+
+
+
+
+
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastStoreSaveFromOnly(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.only.StoreSaveRequest> {
-        const parsed = wireRequest0Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "only", operation: "Store.save", issues: parsed.error.issues } };
         
-        return ok(parsed.data);
+            const parsed = wireRequest0Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "only", operation: "Store.save", issues: parsed.error.issues } };
+            const data = parsed.data;
+            return ok(data);
+        
     }
     export function downcastStoreSaveResultToOnly(head: string, adapters: VersionAdapters): VersionedResult<string> {
         
@@ -169,15 +180,18 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchStoreSaveFromOnly(
-    raw: unknown,
-    handler: (request: ifaceTypes.only.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<string, errors.Invalid | FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.only.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<string, errors.Invalid | FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<string, errors.Invalid | FrameworkError>, OperationOutcome<string, errors.Invalid | FrameworkError>>> {
-        const request = decodeAndUpcastStoreSaveFromOnly(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "only", originalVersionId: "only" });
-        return { dispatched: true, ...downcastStoreSaveOutcomeToOnly(head, adapters) };
+        
+            const request = decodeAndUpcastStoreSaveFromOnly(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "only", originalVersionId: "only" });
+            return { dispatched: true, ...downcastStoreSaveOutcomeToOnly(head, adapters) };
+        
     }
 
 
@@ -203,6 +217,70 @@ export type DispatchOutcome<T, Head> =
         
             save: dispatchStoreSave,
         
+    } as const;
+
+
+
+    type $xidlOperationTable<Handler extends string> = {
+        readonly [Key in Handler]: import("xidl-typescript-server").OperationDescriptor<Record<Key, unknown>, Key>;
+    };
+
+    
+    type $xidlStoreSource =
+        
+            | {
+                id: "only";
+                tables:
+                
+                    { readonly StoreOperations:
+                
+                $xidlOperationTable<"save">
+                 };
+            }
+        ;
+    
+
+    /** Binds each interface's generated dispatchers to its Head service and adapter hooks. */
+    export const bindVersionedInterfaces = {
+    
+    "Store"<Source extends $xidlStoreSource>(
+    source: Source,
+    service: {
+        
+            save: (request: ifaceTypes.only.StoreSaveRequest, context: VersionContext) => Promise<OperationOutcome<string, errors.Invalid | FrameworkError>>;
+        
+    },
+    adapters: VersionAdapters,
+    
+    ): import("xidl-typescript-server").BoundInterface<Source["id"]> {
+        const version: Source["id"] = source.id;
+        const bindings = {
+            
+                save: {
+                    
+                        dispatch: (version: VersionId, raw: Record<string, unknown>) => StoreDispatchers.save(version, raw, service.save.bind(service), adapters),
+                    
+                },
+            
+        };
+        switch (source.id) {
+            
+                case "only":
+                    return {
+                        version,
+                        operations: [
+                            
+                                {
+                                    operation: source.tables.StoreOperations.save,
+                                    binding: bindings.save,
+                                },
+                            
+                        ],
+                    };
+            
+        }
+    },
+    
     } as const;
 
 

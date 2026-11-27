@@ -3,6 +3,7 @@ export type {
   AdaptedRouterOptions,
   AdapterDispatchOutcome,
   AdapterOperationBinding,
+  BoundInterface,
   OperationTable,
   VersionedAdapterEntry,
   VersionedAdapterRouterOptions,

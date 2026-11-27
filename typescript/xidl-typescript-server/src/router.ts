@@ -7,21 +7,75 @@ import type {
   WebHandler,
 } from './types.ts';
 
-interface Route<TService> {
+export interface BoundOperation<TService> {
   operation: OperationDescriptor<TService>;
+  service: TService;
+}
+
+interface Route<TService> extends BoundOperation<TService> {
+  path: string;
   segments: string[];
 }
+
 export function createRouter<TService>(
   operations: readonly OperationDescriptor<TService>[],
   service: TService,
   options: ServerOptions = {},
 ): WebHandler {
-  const routes = operations.flatMap(operation =>
+  const routes = expandRoutes(
+    operations.map(operation => ({ operation, service })),
+  );
+  return handleRoutes(routes, options);
+}
+
+export function createBoundRouter<TService>(
+  operations: readonly BoundOperation<TService>[],
+  options: ServerOptions,
+): WebHandler {
+  const routes = expandRoutes(operations);
+  const owners = new Map<string, Route<TService>>();
+  for (const route of routes) {
+    const shape = route.segments.map(segment => {
+      const parameter = parseParameter(segment);
+      return parameter ? [parameter.catchAll] : segment;
+    });
+    const key = JSON.stringify([route.operation.method, shape]);
+    const owner = owners.get(key);
+    if (
+      owner &&
+      (owner.service !== route.service || owner.operation !== route.operation)
+    ) {
+      const scope =
+        owner.service === route.service
+          ? 'within an operation table'
+          : 'across operation tables';
+      throw new Error(
+        `conflicting ${route.operation.method} route ${route.path} ${scope}`,
+      );
+    }
+    owners.set(key, route);
+  }
+
+  return handleRoutes(routes, options);
+}
+
+function expandRoutes<TService>(
+  operations: readonly BoundOperation<TService>[],
+): Route<TService>[] {
+  return operations.flatMap(({ operation, service }) =>
     (operation.paths ?? [operation.path]).map(path => ({
       operation,
+      path,
       segments: splitPath(path),
+      service,
     })),
   );
+}
+
+function handleRoutes<TService>(
+  routes: readonly Route<TService>[],
+  options: ServerOptions,
+): WebHandler {
   return async request => {
     const requestSegments = splitPath(new URL(request.url).pathname);
     const allowedMethods = new Set<string>();
@@ -36,7 +90,7 @@ export function createRouter<TService>(
       }
       return executeOperation(
         route.operation,
-        service,
+        route.service,
         { request, resolveParams: () => decodeRouteParams(params) },
         options,
       );

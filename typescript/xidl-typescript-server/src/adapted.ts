@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { RequestFailure } from './error.ts';
-import { createRouter } from './router.ts';
+import { createBoundRouter, createRouter } from './router.ts';
 import type {
   Awaitable,
   OperationDescriptor,
@@ -68,50 +68,83 @@ export interface AdapterOperationBinding<TVersionId extends string = string> {
 
 export type AdaptedRouterOptions = ServerOptions;
 
-export type OperationTable<TService> =
-  | readonly OperationDescriptor<TService>[]
-  | Readonly<Record<string, OperationDescriptor<TService>>>;
+export type OperationTable<
+  TService,
+  THandler extends keyof TService = keyof TService,
+> =
+  | readonly OperationDescriptor<TService, THandler>[]
+  | Readonly<Record<string, OperationDescriptor<TService, THandler>>>;
+
+type AdapterService = Record<PropertyKey, (...args: unknown[]) => unknown>;
+
+/** One version's interface operations, each paired with its Head dispatcher. */
+export interface BoundInterface<TVersionId extends string = string> {
+  readonly version: TVersionId;
+  readonly operations: readonly {
+    readonly operation: OperationDescriptor<AdapterService>;
+    readonly binding: AdapterOperationBinding<TVersionId>;
+  }[];
+}
 
 export interface VersionedAdapterEntry<TVersionId extends string = string> {
   id: TVersionId;
   value: string;
-  // biome-ignore lint/suspicious/noExplicitAny: each version has its own generated service shape
-  operations: OperationTable<any>;
+  interfaces: readonly BoundInterface<NoInfer<TVersionId>>[];
 }
 
 export interface VersionedAdapterRouterOptions<
   TVersionId extends string = string,
 > extends Omit<VersionedRouterOptions<TVersionId>, 'versions'> {
   versions: readonly VersionedAdapterEntry<TVersionId>[];
-  bindings: Readonly<
-    Record<string, AdapterOperationBinding<NoInfer<TVersionId>>>
-  >;
   routerOptions?: AdaptedRouterOptions;
 }
 
-/**
- * Bridges a generated per-version operation table to generated adapter dispatchers.
- */
-export function createAdaptedRouter<TVersionId extends string, TService>(
+/** Mounts one operation table using a binding for each operation. */
+export function createAdaptedRouter<
+  TVersionId extends string,
+  TService,
+  THandler extends keyof TService,
+>(
   version: TVersionId,
-  operations: OperationTable<TService>,
+  operations: OperationTable<TService, THandler>,
   bindings: Readonly<
-    Partial<Record<keyof TService, AdapterOperationBinding<TVersionId>>>
+    Record<NoInfer<THandler>, AdapterOperationBinding<NoInfer<TVersionId>>>
   >,
   options: AdaptedRouterOptions = {},
 ): WebHandler {
-  const list = Array.isArray(operations)
-    ? operations
-    : Object.values(operations);
-  const service = {} as Record<PropertyKey, (...args: unknown[]) => unknown>;
+  const list: readonly OperationDescriptor<TService, THandler>[] =
+    Array.isArray(operations) ? operations : Object.values(operations);
+  const group = {
+    operations: list.map(operation => {
+      const binding = bindings[operation.handler];
+      if (!binding) {
+        throw new Error(
+          `missing adapter binding for '${String(operation.handler)}'`,
+        );
+      }
+      return { binding, operation };
+    }),
+    version,
+  };
+  const adapted = attachInterface(group, 'allow');
+  return createRouter(adapted.operations, adapted.service, options);
+}
 
-  for (const operation of list) {
-    const handlerKey = operation.handler as keyof TService;
-    const binding = bindings[handlerKey];
-    if (!binding) {
-      continue;
+function attachInterface<TVersionId extends string>(
+  group: BoundInterface<TVersionId>,
+  duplicateHandlers: 'allow' | 'reject',
+) {
+  const service: AdapterService = Object.create(null);
+  const operations = group.operations.map(({ operation, binding }) => {
+    if (
+      duplicateHandlers === 'reject' &&
+      Object.hasOwn(service, operation.handler)
+    ) {
+      throw new Error(
+        `duplicate adapter handler '${String(operation.handler)}' in an operation table`,
+      );
     }
-    service[handlerKey] = async (...args: unknown[]) => {
+    service[operation.handler] = async (...args: unknown[]) => {
       const raw: Record<string, unknown> = {};
       const argKeys = operation.request.args ?? [];
       for (let index = 0; index < argKeys.length; index += 1) {
@@ -120,19 +153,11 @@ export function createAdaptedRouter<TVersionId extends string, TService>(
           raw[key] = args[index];
         }
       }
-      const outcome = await binding.dispatch(version, raw);
-      return unwrapDispatchOutcome(outcome);
+      return unwrapDispatchOutcome(await binding.dispatch(group.version, raw));
     };
-  }
-
-  const adaptedOperations = list.map(operation => {
-    const handlerKey = operation.handler as keyof TService;
-    return bindings[handlerKey]
-      ? preserveWireBodyForAdapter(operation)
-      : operation;
+    return preserveWireBodyForAdapter(operation);
   });
-
-  return createRouter(adaptedOperations, service as TService, options);
+  return { operations, service };
 }
 
 function preserveWireBodyForAdapter<TService>(
@@ -174,18 +199,22 @@ function preserveWireBodyForAdapter<TService>(
   };
 }
 
-/**
- * Mounts every version of a contract through `createAdaptedRouter` in one handler.
- */
+/** Mounts all bound interfaces of each version behind one Web handler. */
 export function createVersionedAdapterRouter<TVersionId extends string>(
   options: VersionedAdapterRouterOptions<TVersionId>,
 ): WebHandler {
   const versions: VersionEntry<TVersionId>[] = options.versions.map(entry => ({
-    handler: createAdaptedRouter(
-      entry.id,
-      entry.operations,
-      options.bindings,
-      options.routerOptions,
+    handler: createBoundRouter(
+      entry.interfaces.flatMap(group => {
+        if (group.version !== entry.id) {
+          throw new Error(
+            `cannot mount interface from version '${group.version}' on '${entry.id}'`,
+          );
+        }
+        const { operations, service } = attachInterface(group, 'reject');
+        return operations.map(operation => ({ operation, service }));
+      }),
+      options.routerOptions ?? {},
     ),
     id: entry.id,
     value: entry.value,

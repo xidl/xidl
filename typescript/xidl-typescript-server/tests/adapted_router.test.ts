@@ -185,20 +185,37 @@ test('createVersionedAdapterRouter connects OperationTables to adapter dispatche
   };
 
   const router = createVersionedAdapterRouter<VersionId>({
-    bindings: {
-      getItem: { dispatch: dispatchGetItem },
-    },
     parameter: { in: 'header', name: 'X-Version' },
     retired: ['2025-01-01'],
     versions: [
       {
         id: 'v1',
-        operations: v1Operations,
+        interfaces: [
+          {
+            operations: [
+              {
+                binding: { dispatch: dispatchGetItem },
+                operation: v1Operations.getItem,
+              },
+            ],
+            version: 'v1',
+          },
+        ],
         value: '2026-01-01',
       },
       {
         id: 'v2',
-        operations: v2Operations,
+        interfaces: [
+          {
+            operations: [
+              {
+                binding: { dispatch: dispatchGetItem },
+                operation: v2Operations.getItem,
+              },
+            ],
+            version: 'v2',
+          },
+        ],
         value: '2026-06-01',
       },
     ],

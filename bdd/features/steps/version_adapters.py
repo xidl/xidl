@@ -416,3 +416,10 @@ def rust_versioned_transforms_journey(context):
     )
     result = run(["cargo", "run", "--quiet"], cwd=output)
     assert "PASS: transform shapes" in result.stdout
+
+
+@then("generated adapter bindings route both interfaces through one versioned handler")
+def adapter_tables_journey(context):
+    output = prepare_application(context, "router_tables.ts")
+    result = run(["pnpm", "exec", "tsx", "router_tables.ts"], cwd=output)
+    assert "PASS: generated adapter tables" in result.stdout

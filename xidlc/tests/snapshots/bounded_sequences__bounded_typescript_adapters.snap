@@ -419,15 +419,25 @@ export type DispatchOutcome<T, Head> =
 
 
 
+
+
+
+
+
+
+
+
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastBatchesReserveFromV1(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.BatchesReserveRequest> {
-        const parsed = wireRequest0Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v1", operation: "Batches.reserve", issues: parsed.error.issues } };
         
-            const step0 = upcastBatchesReserveRequestFromV1(parsed.data, adapters);
+            const parsed = wireRequest0Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v1", operation: "Batches.reserve", issues: parsed.error.issues } };
+            const data = parsed.data;
+            const step0 = upcastBatchesReserveRequestFromV1(data, adapters);
             if (!step0.ok) return step0;
+            return step0;
         
-        return step0;
     }
     export function downcastBatchesReserveResultToV1(head: types.v2.Batch, adapters: VersionAdapters): VersionedResult<types.v1.Batch> {
         
@@ -453,26 +463,31 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchBatchesReserveFromV1(
-    raw: unknown,
-    handler: (request: ifaceTypes.v2.BatchesReserveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Batch, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.v2.BatchesReserveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Batch, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v1.Batch, FrameworkError>, OperationOutcome<types.v2.Batch, FrameworkError>>> {
-        const request = decodeAndUpcastBatchesReserveFromV1(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "v1", originalVersionId: "v1" });
-        return { dispatched: true, ...downcastBatchesReserveOutcomeToV1(head, adapters) };
+        
+            const request = decodeAndUpcastBatchesReserveFromV1(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "v1", originalVersionId: "v1" });
+            return { dispatched: true, ...downcastBatchesReserveOutcomeToV1(head, adapters) };
+        
     }
 
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastBatchesUploadFromV1(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.BatchesUploadRequest> {
-        const parsed = wireRequest2Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v1", operation: "Batches.upload", issues: parsed.error.issues } };
         
-            const step0 = upcastBatchesUploadRequestFromV1(parsed.data, adapters);
+            const parsed = wireRequest2Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v1", operation: "Batches.upload", issues: parsed.error.issues } };
+            const data = parsed.data;
+            const step0 = upcastBatchesUploadRequestFromV1(data, adapters);
             if (!step0.ok) return step0;
+            return step0;
         
-        return step0;
     }
     export function downcastBatchesUploadResultToV1(head: number, adapters: VersionAdapters): VersionedResult<number> {
         
@@ -498,23 +513,29 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchBatchesUploadFromV1(
-    raw: unknown,
-    handler: (request: ifaceTypes.v2.BatchesUploadRequest, context: VersionContext) => Promise<OperationOutcome<number, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.v2.BatchesUploadRequest, context: VersionContext) => Promise<OperationOutcome<number, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<number, FrameworkError>, OperationOutcome<number, FrameworkError>>> {
-        const request = decodeAndUpcastBatchesUploadFromV1(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "v1", originalVersionId: "v1" });
-        return { dispatched: true, ...downcastBatchesUploadOutcomeToV1(head, adapters) };
+        
+            const request = decodeAndUpcastBatchesUploadFromV1(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "v1", originalVersionId: "v1" });
+            return { dispatched: true, ...downcastBatchesUploadOutcomeToV1(head, adapters) };
+        
     }
 
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastBatchesReserveFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.BatchesReserveRequest> {
-        const parsed = wireRequest3Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v2", operation: "Batches.reserve", issues: parsed.error.issues } };
         
-        return ok(parsed.data);
+            const parsed = wireRequest3Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v2", operation: "Batches.reserve", issues: parsed.error.issues } };
+            const data = parsed.data;
+            return ok(data);
+        
     }
     export function downcastBatchesReserveResultToV2(head: types.v2.Batch, adapters: VersionAdapters): VersionedResult<types.v2.Batch> {
         
@@ -534,23 +555,29 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchBatchesReserveFromV2(
-    raw: unknown,
-    handler: (request: ifaceTypes.v2.BatchesReserveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Batch, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.v2.BatchesReserveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Batch, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v2.Batch, FrameworkError>, OperationOutcome<types.v2.Batch, FrameworkError>>> {
-        const request = decodeAndUpcastBatchesReserveFromV2(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "v2", originalVersionId: "v2" });
-        return { dispatched: true, ...downcastBatchesReserveOutcomeToV2(head, adapters) };
+        
+            const request = decodeAndUpcastBatchesReserveFromV2(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "v2", originalVersionId: "v2" });
+            return { dispatched: true, ...downcastBatchesReserveOutcomeToV2(head, adapters) };
+        
     }
 
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastBatchesUploadFromV2(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2.BatchesUploadRequest> {
-        const parsed = wireRequest5Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v2", operation: "Batches.upload", issues: parsed.error.issues } };
         
-        return ok(parsed.data);
+            const parsed = wireRequest5Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "v2", operation: "Batches.upload", issues: parsed.error.issues } };
+            const data = parsed.data;
+            return ok(data);
+        
     }
     export function downcastBatchesUploadResultToV2(head: number, adapters: VersionAdapters): VersionedResult<number> {
         
@@ -570,15 +597,18 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchBatchesUploadFromV2(
-    raw: unknown,
-    handler: (request: ifaceTypes.v2.BatchesUploadRequest, context: VersionContext) => Promise<OperationOutcome<number, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.v2.BatchesUploadRequest, context: VersionContext) => Promise<OperationOutcome<number, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<number, FrameworkError>, OperationOutcome<number, FrameworkError>>> {
-        const request = decodeAndUpcastBatchesUploadFromV2(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "v2", originalVersionId: "v2" });
-        return { dispatched: true, ...downcastBatchesUploadOutcomeToV2(head, adapters) };
+        
+            const request = decodeAndUpcastBatchesUploadFromV2(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "v2", originalVersionId: "v2" });
+            return { dispatched: true, ...downcastBatchesUploadOutcomeToV2(head, adapters) };
+        
     }
 
 
@@ -624,6 +654,111 @@ export type DispatchOutcome<T, Head> =
         
             upload: dispatchBatchesUpload,
         
+    } as const;
+
+
+
+    type $xidlOperationTable<Handler extends string> = {
+        readonly [Key in Handler]: import("xidl-typescript-server").OperationDescriptor<Record<Key, unknown>, Key>;
+    };
+
+    
+    type $xidlBatchesSource =
+        
+            | {
+                id: "v1";
+                tables:
+                
+                    { readonly BatchesOperations:
+                
+                $xidlOperationTable<"reserve" | "upload">
+                 };
+            }
+        
+            | {
+                id: "v2";
+                tables:
+                
+                    { readonly BatchesOperations:
+                
+                $xidlOperationTable<"reserve" | "upload">
+                 };
+            }
+        ;
+    
+
+    /** Binds each interface's generated dispatchers to its Head service and adapter hooks. */
+    export const bindVersionedInterfaces = {
+    
+    "Batches"<Source extends $xidlBatchesSource>(
+    source: Source,
+    service: {
+        
+            reserve: (request: ifaceTypes.v2.BatchesReserveRequest, context: VersionContext) => Promise<OperationOutcome<types.v2.Batch, FrameworkError>>;
+        
+            upload: (request: ifaceTypes.v2.BatchesUploadRequest, context: VersionContext) => Promise<OperationOutcome<number, FrameworkError>>;
+        
+    },
+    adapters: VersionAdapters,
+    
+    ): import("xidl-typescript-server").BoundInterface<Source["id"]> {
+        const version: Source["id"] = source.id;
+        const bindings = {
+            
+                reserve: {
+                    
+                        dispatch: (version: VersionId, raw: Record<string, unknown>) => BatchesDispatchers.reserve(version, raw, service.reserve.bind(service), adapters),
+                    
+                },
+            
+                upload: {
+                    
+                        dispatch: (version: VersionId, raw: Record<string, unknown>) => BatchesDispatchers.upload(version, raw, service.upload.bind(service), adapters),
+                    
+                },
+            
+        };
+        switch (source.id) {
+            
+                case "v1":
+                    return {
+                        version,
+                        operations: [
+                            
+                                {
+                                    operation: source.tables.BatchesOperations.reserve,
+                                    binding: bindings.reserve,
+                                },
+                            
+                                {
+                                    operation: source.tables.BatchesOperations.upload,
+                                    binding: bindings.upload,
+                                },
+                            
+                        ],
+                    };
+            
+                case "v2":
+                    return {
+                        version,
+                        operations: [
+                            
+                                {
+                                    operation: source.tables.BatchesOperations.reserve,
+                                    binding: bindings.reserve,
+                                },
+                            
+                                {
+                                    operation: source.tables.BatchesOperations.upload,
+                                    binding: bindings.upload,
+                                },
+                            
+                        ],
+                    };
+            
+        }
+    },
+    
     } as const;
 
 
