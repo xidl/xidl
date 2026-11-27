@@ -3,6 +3,7 @@
 #[cfg(test)]
 mod tests;
 
+mod imports;
 mod openapi;
 mod report;
 mod wire;
@@ -19,13 +20,14 @@ use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, Ordering};
 
+use imports::ImportedUnits;
 use openapi::OpenApiFingerprints;
 #[cfg(test)]
 use report::LockDrift;
 use report::{Evidence, LockCheckReport, LockWriteReport};
 
 const LOCK_SCHEMA_VERSION: u32 = 1;
-const LOCK_ALGORITHM_VERSION: u32 = 1;
+const LOCK_ALGORITHM_VERSION: u32 = 2;
 static TEMP_FILE_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 /// Optional generated artifact to fingerprint alongside the IDL projection.
@@ -78,6 +80,7 @@ pub(crate) struct LockedVersion {
 /// Computes and verifies stable per-version fingerprints for a versioned IDL file.
 pub(crate) struct VersionLock {
     diff: VersionDiff,
+    imported_units: ImportedUnits,
     versions: Option<BTreeSet<String>>,
     graph: UnitGraph,
     resolved: ResolvedInputs,
@@ -88,8 +91,11 @@ impl VersionLock {
     /// Resolves a versioned IDL contract using the same pipeline as `version diff`.
     pub(crate) fn from_file(path: &Path) -> IdlcResult<Self> {
         let (diff, graph, resolved) = VersionDiff::load(path)?;
+        let mut resolver = crate::library::include_resolver(resolved.mounts());
+        let imported_units = ImportedUnits::load(&graph, &mut *resolver)?;
         Ok(Self {
             diff,
+            imported_units,
             versions: None,
             graph,
             resolved,
@@ -171,12 +177,14 @@ impl VersionLock {
             if !self.selects(&definition.value) {
                 continue;
             }
-            let projection = self.diff.formatted_projection(version_id)?;
+            let mut definitions = self.diff.project(version_id)?;
+            let imports = self.imported_units.canonical(&mut definitions)?;
+            let projection = self.diff.format_projection(definitions)?;
             let mut canonical = format!(
                 "xidl-version-lock\nversion-value: {}\nversion-parameter: {}\n---\n{}",
                 definition.value, parameter_line, projection
             );
-            for (unit_path, unit_source) in self.diff.imported_units() {
+            for (unit_path, unit_source) in imports {
                 let _ = write!(canonical, "\n--- import {unit_path} ---\n{unit_source}");
             }
             let fingerprint = Self::fingerprint(canonical.as_bytes());

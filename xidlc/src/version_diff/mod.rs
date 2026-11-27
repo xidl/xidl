@@ -3,7 +3,6 @@ use crate::fmt::format_idl_source;
 use crate::library::{LibraryLoader, ResolvedInputs};
 use crate::units::{Unit, UnitGraph};
 use similar::TextDiff;
-use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use xidl_parser::hir::printer::IdlPrinter;
 use xidl_parser::hir::{Definition, ParserProperties, Pragma, Specification};
@@ -16,7 +15,6 @@ pub(crate) struct VersionDiff {
     spec: Specification,
     record: VersioningRecord,
     imports: String,
-    imported_units: BTreeMap<String, String>,
     contract: String,
 }
 
@@ -57,12 +55,10 @@ impl VersionDiff {
                 serde_json::to_string(import.path())?
             ));
         }
-        let imported_units = Self::collect_imported_units(&graph, &mut *resolver)?;
         let diff = Self {
             spec,
             record,
             imports,
-            imported_units,
             contract: input
                 .file_name()
                 .unwrap_or(input.as_os_str())
@@ -92,19 +88,26 @@ impl VersionDiff {
         &self.record
     }
 
-    /// Returns canonicalized IDL text for each transitively imported unit, keyed by unit path.
-    pub(crate) fn imported_units(&self) -> &BTreeMap<String, String> {
-        &self.imported_units
-    }
-
     /// Formats a canonical projection for `version`.
     pub(crate) fn formatted_projection(&self, version: VersionId) -> IdlcResult<String> {
-        let definitions = Self::unwrap_projected(self.record.project(&self.spec, version)?);
+        self.format_projection(self.project(version)?)
+    }
+
+    /// Builds the declarations retained in a canonical projection.
+    pub(crate) fn project(&self, version: VersionId) -> IdlcResult<Vec<Definition>> {
+        Ok(Self::unwrap_projected(
+            self.record.project(&self.spec, version)?,
+        ))
+    }
+
+    /// Formats already-projected declarations with their import statements.
+    pub(crate) fn format_projection(&self, definitions: Vec<Definition>) -> IdlcResult<String> {
         let body = format_idl_source(&IdlPrinter::render(&Specification(definitions)))?;
         Ok(self.imports.clone() + &body)
     }
 
-    fn unwrap_projected(projected: Specification) -> Vec<Definition> {
+    /// Removes the artifact wrapper around a projected contract.
+    pub(crate) fn unwrap_projected(projected: Specification) -> Vec<Definition> {
         // Projection's outer module and document version identify an artifact,
         // while the diff header or lock metadata already identifies each side.
         let mut definitions = Vec::new();
@@ -118,7 +121,8 @@ impl VersionDiff {
         definitions
     }
 
-    fn lower_unit(
+    /// Lowers a unit with its resolved integer declarations and includes.
+    pub(crate) fn lower_unit(
         graph: &UnitGraph,
         unit: &Unit,
         resolver: &mut dyn xidl_parser::parser::IncludeResolver,
@@ -133,50 +137,6 @@ impl VersionDiff {
             unit.file(),
             resolver,
         )?)
-    }
-
-    fn collect_imported_units(
-        graph: &UnitGraph,
-        resolver: &mut dyn xidl_parser::parser::IncludeResolver,
-    ) -> IdlcResult<BTreeMap<String, String>> {
-        let units = graph.units();
-        if units.len() <= 1 {
-            return Ok(BTreeMap::new());
-        }
-        let mut bound_versions: BTreeMap<&str, BTreeSet<&str>> = BTreeMap::new();
-        for unit in units {
-            for import in unit.imports() {
-                if let Some(version) = import.version() {
-                    bound_versions
-                        .entry(import.prefix())
-                        .or_default()
-                        .insert(version);
-                }
-            }
-        }
-        let mut canonical = BTreeMap::new();
-        for dep in &units[..units.len() - 1] {
-            let spec = Self::lower_unit(graph, dep, resolver)?;
-            let rendered = match (
-                VersioningRecord::analyze(&spec)?,
-                bound_versions.get(dep.prefix()),
-            ) {
-                (Some(dep_record), Some(versions)) if !versions.is_empty() => {
-                    let mut sections = String::new();
-                    for raw_version in versions {
-                        let version_id = dep_record.resolve_version(raw_version)?;
-                        let defs = Self::unwrap_projected(dep_record.project(&spec, version_id)?);
-                        let formatted =
-                            format_idl_source(&IdlPrinter::render(&Specification(defs)))?;
-                        sections.push_str(&format!("@version({raw_version})\n{formatted}"));
-                    }
-                    sections
-                }
-                _ => format_idl_source(&IdlPrinter::render(&spec))?,
-            };
-            canonical.insert(dep.path().to_string(), rendered);
-        }
-        Ok(canonical)
     }
 
     fn header(&self, version: VersionId) -> IdlcResult<String> {

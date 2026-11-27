@@ -38,3 +38,19 @@ update operations may not share one request conversion. `current` never
 routes through alias or union conversions, and never reaches a paired
 conversion hidden inside a sequence, map, or optional member. Every one of
 these shapes is a generation error naming the offending declaration.
+
+## Lock a released contract
+
+Run `xidlc version lock api.idl` to record the fingerprints of the declared
+versions and `xidlc version check api.idl` to check them. Each version includes
+only the declarations it reaches through unversioned imports. References are
+followed through aliases and across further unversioned imports. Adding an
+unused declaration leaves the fingerprints unchanged. Changing a shared type
+affects the versions that reach it.
+
+Versioned import bindings and `#include` expansion use the compiler's
+normal resolution rules. The new fingerprint algorithm requires a re-lock of
+existing files. Review the released contracts, then run
+`xidlc version lock --force --versions '["1.0"]' api.idl` with your complete
+release set. The re-lock regenerates the recorded IDL and HTTP evidence for
+those versions.
