@@ -57,9 +57,9 @@ The following statements should remain true over time.
 ### 3. Protocol semantics belong in shared protocol layers
 
 - HTTP-specific understanding belongs in `rest_hir`.
-- HTTP generators such as Axum, Go HTTP, Python HTTP, and OpenAPI should render
-  from shared HTTP semantics instead of each generator interpreting RFC rules
-  independently.
+- HTTP generators such as Rust Axum, Go REST, TypeScript REST, OpenAPI, and the
+  Rust and TypeScript version adapters should render from shared HTTP semantics
+  instead of each generator interpreting RFC rules independently.
 - The generator's job is primarily rendering, not re-deciding protocol meaning.
 
 This is why `rest_hir` exists: it centralizes interpretation of the HTTP RFCs
@@ -67,7 +67,7 @@ and prevents language-specific divergence.
 
 ### 4. RFCs are the behavioral source of truth for XIDL extensions
 
-- `docs/rfc/*.md` defines the semantics of XIDL extensions.
+- `website/src/content/docs/rfc/*.mdx` defines the semantics of XIDL extensions.
 - RFCs specify behavior, mapping rules, and contract meaning.
 - RFCs do not have to define the public API shape of every generated target.
 - Generator-specific API shape remains a renderer concern, as long as renderer
@@ -79,16 +79,16 @@ and prevents language-specific divergence.
 - Generators may produce final files, or produce another intermediate artifact
   for a later generator stage.
 - A generator can handle only part of the work and hand the result to another
-  generator through the IPC contract.
+  generator through the `Codegen` contract.
 - The flow is still one-way: later stages do not mutate earlier layers.
 
 ### 6. Plugins are first-class generators
 
 - `xidlc` uses a plugin architecture.
 - Built-in generators and external generators follow the same driver model.
-- Plugins communicate through the `Codegen` contract defined in
-  `xidlc/src/jsonrpc/ipc.idl` (built-ins call it in-process; external plugins
-  speak a small NDJSON stdio protocol).
+- Generator stages share the `Codegen` contract defined in
+  `xidlc/src/jsonrpc/ipc.idl` (built-ins implement it in-process; external
+  plugins speak a small NDJSON stdio protocol).
 - External generators replace the rendering stage, not parsing or HIR creation.
 
 ### 7. Tests protect semantics, not just code paths
@@ -131,12 +131,21 @@ The normal generation path is:
 The driver in `xidlc/src/driver/generate.rs` makes this explicit:
 
 - generation starts from IDL text
-- the initial semantic handoff is `hir`
-- returned artifacts can be `Hir`, `RestHir`, or `File`
-- the driver recursively advances until only files remain
+- the initial stage is `hir`, which compiles the source once and emits a typed
+  projection
+- stage inputs are `CodegenInput::{RpcHir, RestHir, JsonRpcHir, Compilation}`
+- stage outputs are `Artifact::{Hir, RestHir, JsonRpcHir, File}`
+- the driver recursively expands semantic artifacts until only files remain
 
 That recursion is an architectural invariant: XIDL supports staged generation,
 not only one-shot rendering.
+
+Compilation-scoped generators advertise `generation_scope = "compilation"` in
+their properties. The driver then builds one `CompilationInput` from the unit
+graph and passes it as `CodegenInput::Compilation` instead of generating each
+unit independently. Such a generator must return only `File` artifacts. The
+per-unit path lives in `xidlc/src/driver/generate.rs`; the compilation path
+lives in `xidlc/src/driver/compilation.rs`.
 
 ## HTTP Flow
 
@@ -145,7 +154,8 @@ HTTP-related code generation has an additional semantic projection:
 1. Parse IDL.
 2. Lower to `hir`.
 3. Project `hir` into `rest_hir`.
-4. Hand `hir + rest_hir` to HTTP-aware generators.
+4. Hand `rest_hir` to HTTP-aware generators. The document retains the lowered
+   `hir` specification.
 5. Render target-specific files.
 
 `rest_hir` exists so that:
@@ -156,13 +166,31 @@ HTTP-related code generation has an additional semantic projection:
 - renderer complexity stays lower
 
 Current consumers include the HTTP-oriented generators under
-`xidlc/src/generate/` (Axum, Go REST, TypeScript REST, OpenAPI, and version
-adapters) as well as external compilation-scoped plugins such as
-`crates/xidl-http-docs`.
+`xidlc/src/generate/` (`rust-axum`, `go-rest`, `typescript-rest`, `openapi`, and
+the Rust and TypeScript version adapters) as well as external compilation-scoped
+plugins such as `crates/xidl-http-docs`.
 
 JSON-RPC follows the same pattern through `xidl-parser/src/jsonrpc_hir/`:
 `rust-jsonrpc` and `openrpc` consume the shared `JsonRpcHirDocument` projection
 rather than interpreting JSON-RPC semantics independently.
+
+## Generator Targets
+
+The built-in target set is:
+
+- Rust: `rust`, `rust-jsonrpc`, `rust-axum`, `rust-axum-adapters`
+- TypeScript: `typescript`, `typescript-rest`, `typescript-rest-adapters`
+- Go: `go`, `go-rest`
+- Specifications: `openapi`, `openrpc`
+
+The driver also exposes the internal IR and inspection stages `hir`, `rest-hir`,
+`jsonrpc-hir`, `typed-ast`, and `version-map`. The external `xidl-http-docs`
+crate provides the compilation-scoped `http-docs` plugin target rather than a
+generator built into `xidlc`.
+
+Target names and aliases are resolved by `Plugin` in
+`xidlc/src/driver/lang/mod.rs`; the CLI exposes the user-facing targets and
+passes unrecognized names through as external `xidl-<lang>` plugins.
 
 ## Diagnostics and Compilation Pipeline
 
@@ -200,7 +228,7 @@ Consequences:
   targets emit a single file holding one module per version.
 - OpenAPI and OpenRPC declare the `per_version` layout; the HIR stage parses
   once and emits one artifact per version, so the targets produce
-  `openapi_<stem>.<version>.json` (or `openrpc.<version>.json`) with
+  `openapi_<stem>.<version>.json` (or `openrpc_<stem>.<version>.json`) with
   `info.version` set to the version value.
 - Unversioned contracts take the identity path, which keeps the existing
   snapshot corpus byte-identical.
@@ -326,8 +354,8 @@ What it adds:
 Why it exists:
 
 - HTTP semantics should be interpreted once and shared everywhere
-- Axum, Go HTTP, Python HTTP, and OpenAPI should agree on the meaning of the
-  same IDL contract
+- Rust Axum, Go REST, TypeScript REST, OpenAPI, and the version adapters should
+  agree on the meaning of the same IDL contract
 - renderers should focus on target-specific output, not on protocol inference
 - HTTP bug fixes should land in one semantic layer instead of many renderers
 
@@ -356,7 +384,9 @@ This code map focuses on ownership boundaries rather than every file.
 - `Cargo.toml`: workspace membership and shared dependencies.
 - `README.md`: project overview and user-facing entry points.
 - `ARCHITECTURE.md`: repository invariants and long-lived structure.
-- `docs/`: user docs, developer docs, and RFCs.
+- `docs/`: internal design notes and assets.
+- `website/src/content/docs/`: published user guides, developer docs,
+  REST/JSON-RPC references, and RFCs.
 
 ### Parsing and Semantic Lowering
 
@@ -367,6 +397,7 @@ This code map focuses on ownership boundaries rather than every file.
   - owns `hir` and `semantic` analysis
   - owns `rest_hir` and `jsonrpc_hir` protocol projections
   - owns `versioning` timeline, lifecycle validation, and version-map collection
+  - owns `xidl.toml` manifest parsing and validation
   - owns `pipeline` single-pass compilation orchestration
   - owns parser-focused tests and snapshots
 
@@ -382,6 +413,8 @@ Important subtrees:
 - `xidl-parser/src/jsonrpc_hir/`: shared JSON-RPC semantic projection
 - `xidl-parser/src/versioning/`: `@version` timeline, lifecycle validation,
   per-version projection, and version-map facts
+- `xidl-parser/src/manifest/`: `xidl.toml` package identity, input patterns,
+  compiler range, and dependency parsing
 - `xidl-parser/src/pipeline/`: unidirectional compilation orchestration
 - `xidl-parser/tests/`: parser and lowering tests
 
@@ -390,7 +423,9 @@ Important subtrees:
 - `xidlc/`
   - owns the CLI (`gen`, `lint`, `fmt`, `import`, `version diff/lock/check`)
   - owns diagnostics presentation
-  - owns the unit import graph (`units/`) and library resolution (`library/`)
+  - owns library discovery, input expansion, dependency mounts, and compiler
+    checks (`library/`)
+  - owns the unit import graph (`units/`)
   - owns the generation driver (unit-scoped and `CompilationInput`
     whole-compilation scope)
   - owns built-in generators and version adapters (`generate/adapter/`,
@@ -401,13 +436,29 @@ Important subtrees:
 
 - `xidlc/src/driver/`: language resolution, generator orchestration, staging,
   compilation output
-- `xidlc/src/units/`: multi-file `import` dependency graph and interface index
+- `xidlc/src/library/`: `xidl.toml` discovery and loading, input expansion,
+  dependency fetch/mount, and compiler-range checks
+- `xidlc/src/units/`: multi-file `import` graph built once per run, with
+  resolved sources, imports, cross-unit references, and interface facts; each
+  reached unit is generated once even when several importers reference it
 - `xidlc/src/generate/`: built-in generators, language-neutral adapter planner,
   and target adapters
 - `xidlc/src/jsonrpc/ipc.idl`: generator IPC contract
 - `xidlc/src/version_diff/` and `xidlc/src/version_lock/`: contract diffing and
   frozen-version lock checks
 - `xidlc/tests/`: codegen snapshot and integration tests
+
+### Library Manifests
+
+`xidl.toml` parsing belongs to `xidl-parser/src/manifest/`, which validates the
+package identity, input patterns, compiler range, and dependency declarations.
+`xidlc/src/library/` owns discovery and loading of those manifests, expands
+library arguments into IDL inputs, fetches or mounts dependencies, and enforces
+compiler ranges.
+
+`UnitGraph` is the per-run boundary for unit identity and resolved reference
+data. It does not cache a shared `typed_ast`; phases that need syntax parse the
+unit source they inspect.
 
 ### Runtime and Support Crates
 
@@ -496,13 +547,16 @@ disagree on the meaning of the contract.
 
 ## Rendering Model
 
-`xidlc`'s built-in generators follow one rendering pattern:
+`xidlc`'s code-emitting built-in generators follow one rendering pattern:
 
 - templates are written in Jinja and rendered with `minijinja`
 - Rust code is responsible for walking `hir` or `rest_hir`
 - Rust code builds a render-friendly context before template execution
 - templates are responsible for presentation, file layout, and simple branching
 - semantic interpretation stays in Rust, not in templates
+
+OpenAPI and OpenRPC are the exception: they assemble typed JSON values with
+`serde_json` rather than rendering a template.
 
 This is an important architectural boundary. The repository does not treat
 templates as a second implementation language for core semantics.
@@ -519,7 +573,7 @@ The split keeps generator behavior predictable:
 - the same semantic helper logic can be reused across many templates in one
   backend
 
-In practice, a generator usually does three things:
+In practice, a template-backed generator usually does three things:
 
 1. Traverse `hir` or `rest_hir`.
 2. Build a target-specific context object or JSON value.
@@ -528,8 +582,8 @@ In practice, a generator usually does three things:
 
 Examples of this pattern appear throughout `xidlc/src/generate/`:
 
-- Rust, C, C++, Go, Python, TypeScript, Axum, Go HTTP, and Python HTTP each
-  define a renderer around `minijinja`
+- Rust, Rust Axum, Rust JSON-RPC, Go, Go REST, TypeScript, TypeScript REST, and
+  the Rust/TypeScript adapters define renderers around `minijinja`
 - templates are embedded with `include_dir` and loaded by template name
 - generator properties are exposed to templates through the `opt` global
 - formatting helpers are added as Jinja filters/functions where needed
@@ -555,18 +609,19 @@ should prepare a better context first.
 
 ## Plugin Architecture
 
-`xidlc` treats generators as RPC services. This is true for both built-ins and
-external plugins.
+`xidlc` treats generators as uniform codegen stages behind the `Codegen`
+contract.
 
 Stable properties of the plugin model:
 
 - generator selection happens in the driver
-- built-ins are started in-process over an inproc transport
-- external plugins are started as child processes
-- communication is done through the `Codegen` interface in
-  `xidlc/src/jsonrpc/ipc.idl` (in-process calls for built-ins, NDJSON over stdio
-  for external plugins)
-- artifacts are passed forward as `Hir`, `RestHir`, or `File`
+- built-ins implement `Codegen` and are called directly in-process; no transport
+  is created for them
+- external plugins are started as `xidl-<lang>` child processes
+- both expose the same methods from `xidlc/src/jsonrpc/ipc.idl`:
+  `get_engine_version`, `get_properties`, and `generate`
+- built-ins use direct trait calls; external plugins use NDJSON over stdio
+- artifacts are passed forward as `Hir`, `RestHir`, `JsonRpcHir`, or `File`
 
 This means a plugin can:
 
@@ -579,7 +634,8 @@ isolated monoliths.
 
 ### Session model
 
-`xidlc` starts every generator through `CodegenSession`.
+`CodegenSession` is the driver's single handle for one generator stage
+invocation.
 
 - built-in generators are hosted in-process and called directly through the
   `Codegen` trait (no transport)
@@ -588,9 +644,12 @@ isolated monoliths.
 - both kinds of generators are wrapped as the same `CodegenSession` from the
   driver's point of view
 - version compatibility is checked through `get_engine_version()`
+- `finish()` releases the session, closing an external plugin's stdio and
+  waiting for the child process
 
-This gives the driver one orchestration model regardless of whether a stage is
-compiled into `xidlc` or shipped separately.
+The session is scoped to the stage invocation rather than to the whole compiler
+run. This gives the driver one orchestration model regardless of whether a stage
+is compiled into `xidlc` or shipped separately.
 
 ### How plugins call each other
 
@@ -599,16 +658,23 @@ Plugins do not directly invoke each other. The driver is the orchestrator.
 The flow is:
 
 1. The driver starts a generator session for the current stage.
-2. It calls `generate(hir, path, props)`.
+2. It calls `generate(input, path, props)` with a typed `CodegenInput`.
 3. The generator returns a sequence of `Artifact` values.
 4. The driver inspects each artifact and decides the next step.
 
 That next step depends on the artifact kind:
 
 - `File`: generation for that branch is complete and the file is collected
-- `Hir`: the driver starts another generator using the returned `lang`
-- `RestHir`: the driver stores `rest_hir` into properties and starts the next
-  generator using the returned `lang`
+- `Hir`: the driver starts another generator using the returned `lang` and
+  `CodegenInput::RpcHir`
+- `RestHir`: the driver starts the next generator using the returned `lang` and
+  `CodegenInput::RestHir`
+- `JsonRpcHir`: the driver starts the next generator using the returned `lang`
+  and `CodegenInput::JsonRpcHir`
+
+A compilation-scoped generator is called once instead of entering this
+recursion. The driver passes `CodegenInput::Compilation` and requires `File`
+artifacts in return.
 
 So the call graph is not plugin-to-plugin. It is:
 
@@ -621,16 +687,18 @@ Stages exchange typed artifacts, but stage transitions are owned by the driver.
 
 ### Multi-stage generation
 
-Because generators can emit `Hir` or `RestHir`, a backend can delegate part of
-its work to another backend or to an intermediate semantic stage.
+Because generators can emit `Hir`, `RestHir`, or `JsonRpcHir`, a backend can
+delegate part of its work to another backend or to an intermediate semantic
+stage.
 
 Examples:
 
 - the initial `hir` stage parses and lowers the source before final generation
-- HTTP-capable targets are routed through `rest-hir` before Axum, Go HTTP,
-  Python HTTP, or OpenAPI rendering
-- the TypeScript generator can emit files and also return a `Hir` artifact for
-  Rust generation of the non-interface portion
+- HTTP-capable targets are routed through `rest-hir` before `rust-axum`,
+  `go-rest`, `typescript-rest`, or `openapi` rendering
+- `go-rest`, `rust-jsonrpc`, and `typescript-rest` emit protocol files and
+  return a `Hir` artifact for the non-interface portion to `go`, `rust`, or
+  `typescript` respectively
 
 This staged model is the reason the driver recursively processes artifacts until
 only `File` values remain.
@@ -642,20 +710,21 @@ properties forward.
 
 - each stage contributes default properties through `get_properties()`
 - the driver merges CLI/input metadata into those properties
-- a stage may return extra `props` together with `Hir` or `RestHir`
+- a stage may return extra `props` together with `Hir`, `RestHir`, or
+  `JsonRpcHir`
 - later stages read those properties, often exposing them to templates as `opt`
 
 This is how cross-stage metadata such as render options, timestamps, target
-settings, and `rest_hir` data flow through the pipeline without breaking the
-layered architecture.
+settings, and import bindings flow through the pipeline without breaking the
+layered architecture. Semantic payloads stay in typed artifact fields.
 
 ## Documentation Architecture
 
-`docs/` contains three long-lived documentation classes:
+Long-lived documentation is split between two trees:
 
-- user documentation
-- development documentation
-- RFCs
+- `docs/`: internal design notes and assets
+- `website/src/content/docs/`: published user guides, developer docs,
+  REST/JSON-RPC references, and RFCs
 
 The most stable contract among them is:
 
@@ -663,8 +732,9 @@ The most stable contract among them is:
 - development docs explain how to work on the system
 - RFCs define extension semantics and expected behavior
 
-RFCs are especially important because they are the factual standard for XIDL
-extensions such as HTTP and JSON-RPC-related behavior.
+RFCs under `website/src/content/docs/rfc/` are especially important because they
+are the factual standard for XIDL extensions such as HTTP and JSON-RPC-related
+behavior.
 
 ## Testing Architecture
 
@@ -702,8 +772,11 @@ Purpose:
 
 Layout invariant:
 
-- language folders such as `c/`, `cpp/`, `rust/`, `ts/`, `golang-http/`,
-  `python-rest/`, `axum/`, `openapi/`, and `openrpc/` hold IDL inputs
+- language folders `rust/`, `ts/`, `ts-http/`, `golang/`, `golang-http/`,
+  `axum/`, `openapi/`, and `openrpc/` hold IDL inputs discovered by
+  `codegen_snapshot.rs`
+- `adapter_baseline/`, `version_adapters/`, `versioned_libraries/`, and
+  `invalid/` hold target-specific fixtures for the integration tests
 - `shared/` contains reusable includes
 - `snapshots/` stores approved output snapshots
 - `codegen_snapshot.rs` discovers cases automatically
