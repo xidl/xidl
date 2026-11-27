@@ -6,7 +6,7 @@ export type ExtractedParameter =
       kind: 'error';
       error: 'repeated' | 'malformed';
       message: string;
-      rawValue?: string;
+      rawValue: string;
     };
 
 export function extractVersionParameter(
@@ -50,13 +50,14 @@ export function extractVersionParameter(
         rawValue: values.join(', '),
       };
     }
-    const value = (values[0] ?? '').trim();
+    const rawValue = values[0] ?? '';
+    const value = rawValue.trim();
     return value.length === 0
       ? {
           error: 'malformed',
           kind: 'error',
           message: `malformed version query parameter '${parameter.name}'`,
-          rawValue: values[0],
+          rawValue,
         }
       : { kind: 'ok', value };
   }
@@ -101,13 +102,14 @@ function extractVersionCookie(
       rawValue: matches.join(', '),
     };
   }
-  const value = (matches[0] ?? '').trim();
+  const rawValue = matches[0] ?? '';
+  const value = rawValue.trim();
   return value.length === 0
     ? {
         error: 'malformed',
         kind: 'error',
         message: `malformed version cookie '${name}'`,
-        rawValue: matches[0],
+        rawValue,
       }
     : { kind: 'ok', value };
 }
@@ -124,37 +126,32 @@ export function varyTokenForParameter(
   return undefined;
 }
 
-export function withVersionHeaders(
-  response: Response,
-  headerName: string,
-  versionValue: string,
-  varyToken?: string,
-): Response {
-  const headers = new Headers(response.headers);
-  headers.set(headerName, versionValue);
-  if (varyToken) {
-    addVaryToken(headers, varyToken);
+export function withVary(response: Response, token?: string): Response {
+  if (!token || response.status === 0) {
+    return response;
   }
+  const existing = response.headers.get('Vary');
+  const tokens = new Map<string, string>();
+  for (const item of (existing ?? '').split(',')) {
+    const value = item.trim();
+    const lower = value.toLowerCase();
+    if (value && !tokens.has(lower)) {
+      tokens.set(lower, value);
+    }
+  }
+  const lower = token.toLowerCase();
+  if (!tokens.has(lower)) {
+    tokens.set(lower, token);
+  }
+  const vary = tokens.has('*') ? '*' : [...tokens.values()].join(', ');
+  if (vary === existing) {
+    return response;
+  }
+  const headers = new Headers(response.headers);
+  headers.set('Vary', vary);
   return new Response(response.body, {
     headers,
     status: response.status,
     statusText: response.statusText,
   });
-}
-
-export function addVaryToken(headers: Headers, token: string): void {
-  const existing = headers.get('Vary');
-  if (!existing) {
-    headers.set('Vary', token);
-    return;
-  }
-  const tokens = existing
-    .split(',')
-    .map(item => item.trim())
-    .filter(Boolean);
-  if (tokens.some(item => item.toLowerCase() === token.toLowerCase())) {
-    return;
-  }
-  tokens.push(token);
-  headers.set('Vary', tokens.join(', '));
 }

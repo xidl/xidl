@@ -252,7 +252,7 @@ test('createVersionedAdapterRouter connects OperationTables to adapter dispatche
     }),
   );
   assert.equal(badRes.status, 400);
-  assert.equal(badRes.headers.get('X-Version'), '2026-01-01');
+  assert.equal(badRes.headers.get('X-Version'), null);
   assert.equal(badRes.headers.get('Vary'), 'X-Version');
   assert.deepEqual(await badRes.json(), { code: 400, msg: 'bad id' });
 
@@ -262,7 +262,7 @@ test('createVersionedAdapterRouter connects OperationTables to adapter dispatche
     }),
   );
   assert.equal(unprojectableRes.status, 422);
-  assert.equal(unprojectableRes.headers.get('X-Version'), '2026-01-01');
+  assert.equal(unprojectableRes.headers.get('Vary'), 'X-Version');
   assert.deepEqual(await unprojectableRes.json(), {
     code: 422,
     msg: 'cannot downcast',
@@ -274,7 +274,7 @@ test('createVersionedAdapterRouter connects OperationTables to adapter dispatche
     }),
   );
   assert.equal(boomRes.status, 503);
-  assert.equal(boomRes.headers.get('X-Version'), '2026-06-01');
+  assert.equal(boomRes.headers.get('Vary'), 'X-Version');
   assert.deepEqual(await boomRes.json(), { code: 503, msg: 'upstream down' });
 
   const single = createAdaptedRouter('v1', v1Operations, {

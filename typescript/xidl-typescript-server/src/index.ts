@@ -41,8 +41,6 @@ export type {
   VersionParameterLocation,
   VersionParameterSpec,
   VersionResolutionError,
-  VersionResolutionOutcome,
-  VersionResolver,
 } from './versioned.ts';
 export { createVersionedRouter } from './versioned.ts';
 export type {
