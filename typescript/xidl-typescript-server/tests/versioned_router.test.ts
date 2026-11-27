@@ -78,10 +78,10 @@ test('createVersionedRouter routes by header, enforces lifecycles, echoes versio
       {
         handler: v1Handler,
         id: 'v1',
-        status: 'maintained',
+        status: 'active',
         value: '2026-01-01',
       },
-      { handler: v2Handler, id: 'v2', status: 'latest', value: '2026-06-01' },
+      { handler: v2Handler, id: 'v2', value: '2026-06-01' },
     ],
   });
 
@@ -137,6 +137,19 @@ test('createVersionedRouter routes by header, enforces lifecycles, echoes versio
   );
   assert.equal(unknown.status, 400);
   assert.equal((await unknown.json()).kind, 'unknown');
+
+  const unmounted = await router(
+    new Request('http://localhost/items/42', {
+      headers: { 'X-Version': '2028-06-01' },
+    }),
+  );
+  assert.equal(unmounted.status, 400);
+  assert.deepEqual(await unmounted.json(), {
+    code: 400,
+    kind: 'unknown',
+    msg: "unsupported version '2028-06-01'",
+    supportedVersions: ['2026-01-01', '2026-06-01'],
+  });
 
   const retired = await router(
     new Request('http://localhost/items/42', {
@@ -258,6 +271,27 @@ test('createVersionedRouter supports query, cookie, defaultVersion, Vary semanti
   assert.deepEqual(await res.json(), { version: 'v2' });
   assert.equal(res.headers.get('X-Version'), '2026-06-01');
   assert.equal(res.headers.get('Vary'), 'Accept, X-Version');
+});
+
+test('createVersionedRouter rejects unsupported statuses from JavaScript callers', () => {
+  for (const status of ['preview', 'latest', 'maintained']) {
+    assert.throws(
+      () =>
+        createVersionedRouter({
+          parameter: { in: 'header', name: 'X-Version' },
+          versions: [
+            {
+              handler: async () => new Response(),
+              id: 'v1',
+              // A JavaScript caller can supply any string at runtime.
+              status: status as 'active',
+              value: '2028-06-01',
+            },
+          ],
+        }),
+      new RegExp(`version '2028-06-01' has invalid status '${status}'`),
+    );
+  }
 });
 
 test('createVersionedRouter validates duplicate versions and invalid defaultVersion eagerly', () => {

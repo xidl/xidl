@@ -175,13 +175,12 @@ test('createVersionedAdapterRouter connects OperationTables to adapter dispatche
       {
         id: 'v1',
         operations: v1Operations,
-        status: 'maintained',
+        status: 'active',
         value: '2026-01-01',
       },
       {
         id: 'v2',
         operations: v2Operations,
-        status: 'latest',
         value: '2026-06-01',
       },
     ],
@@ -202,6 +201,19 @@ test('createVersionedAdapterRouter connects OperationTables to adapter dispatche
   );
   assert.equal(res2.status, 200);
   assert.deepEqual(await res2.json(), { id: '7', title: 'title-7' });
+
+  const unmounted = await router(
+    new Request('http://localhost/items/7', {
+      headers: { 'X-Version': '2028-06-01' },
+    }),
+  );
+  assert.equal(unmounted.status, 400);
+  assert.deepEqual(await unmounted.json(), {
+    code: 400,
+    kind: 'unknown',
+    msg: "unsupported version '2028-06-01'",
+    supportedVersions: ['2026-01-01', '2026-06-01'],
+  });
 
   const err1 = await router(
     new Request('http://localhost/items/missing', {

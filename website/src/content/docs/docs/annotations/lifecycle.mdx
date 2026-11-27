@@ -43,9 +43,12 @@ members cannot themselves carry `@added` or `@removed`.
 Generated REST clients pin their version parameter. Generated servers serve
 their own version module; they do not choose one by reading a request. Header
 versions also declare and emit that module's response header. The application
-or gateway resolves the requested version and routes it to the appropriate
-module or adapter. See [API Versioning](/rest/versioning/) for name
-collisions, browser restrictions, target support, and selection flags.
+or gateway can resolve the version itself. In TypeScript,
+`createVersionedRouter` and `createVersionedAdapterRouter` resolve the request
+against the versions the application mounts. The caller owns lifecycle policy,
+including whether a preview is mounted. See [Carrying the version](/rest/versioning/carrying/)
+for router behavior and [API Versioning](/rest/versioning/) for target
+support and selection flags.
 
 ## `@added` and `@removed`
 
