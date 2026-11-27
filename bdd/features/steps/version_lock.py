@@ -148,3 +148,47 @@ def version_lock_with_force_succeeds(context):
     assert after != context.pre_force_lock_content, (
         "forced lock did not update fingerprint"
     )
+
+
+@when('I lock only version "{version}"')
+def lock_one_version(context, version):
+    result = run_xidlc(
+        context, "version", "lock", "--version", version, context.version_lock_idl
+    )
+    assert result.returncode == 0, (result.stdout, result.stderr)
+
+
+@then('the lock contains only "{version}"')
+def lock_has_only_version(context, version):
+    lock_file = context.version_lock_dir / "workspace.versions.lock.json"
+    assert list(json.loads(lock_file.read_text())["versions"]) == [version]
+
+
+@when("I rename a field added in the second version")
+def rename_second_version_field(context):
+    source = context.version_lock_idl.read_text()
+    assert "string actor;" in source
+    context.version_lock_idl.write_text(source.replace("string actor;", "string author;"))
+
+
+@then('a strict check of only version "{version}" succeeds')
+def strictly_check_one_version(context, version):
+    result = run_xidlc(
+        context,
+        "version",
+        "check",
+        "--strict",
+        "--version",
+        version,
+        context.version_lock_idl,
+    )
+    assert result.returncode == 0, (result.stdout, result.stderr)
+
+
+@then('checking only version "{version}" reports it is not locked')
+def check_unlocked_version(context, version):
+    result = run_xidlc(
+        context, "version", "check", "--version", version, context.version_lock_idl
+    )
+    assert result.returncode == 1, (result.stdout, result.stderr)
+    assert version in result.stderr and "is not present in the lock file" in result.stderr

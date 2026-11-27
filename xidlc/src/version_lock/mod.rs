@@ -7,7 +7,7 @@ use crate::error::{IdlcError, IdlcResult};
 use crate::version_diff::VersionDiff;
 use crown::hash::sha256::sum256;
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Write as _;
 use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
@@ -123,13 +123,47 @@ impl LockWriteReport {
 /// Computes and verifies stable per-version fingerprints for a versioned IDL file.
 pub(crate) struct VersionLock {
     diff: VersionDiff,
+    versions: Option<BTreeSet<String>>,
 }
 
 impl VersionLock {
     /// Resolves a versioned IDL contract using the same pipeline as `version diff`.
     pub(crate) fn from_file(path: &Path) -> IdlcResult<Self> {
         let diff = VersionDiff::from_file(path)?;
-        Ok(Self { diff })
+        Ok(Self {
+            diff,
+            versions: None,
+        })
+    }
+
+    /// Limits lock and check to the given version values when supplied.
+    pub(crate) fn with_versions(mut self, values: Vec<String>) -> Self {
+        self.versions = (!values.is_empty()).then(|| values.into_iter().collect());
+        self
+    }
+
+    fn selects(&self, value: &str) -> bool {
+        self.versions
+            .as_ref()
+            .is_none_or(|versions| versions.contains(value))
+    }
+
+    fn validate_selection(
+        &self,
+        current: &LockDocument,
+        existing: Option<&LockDocument>,
+    ) -> IdlcResult<()> {
+        if let Some(versions) = &self.versions
+            && let Some(unknown) = versions.iter().find(|value| {
+                !current.versions.contains_key(*value)
+                    && !existing.is_some_and(|document| document.versions.contains_key(*value))
+            })
+        {
+            return Err(IdlcError::fmt(format!(
+                "version selection: version '{unknown}' is not declared in the contract"
+            )));
+        }
+        Ok(())
     }
 
     /// Derives the default lock file path next to `idl`.
@@ -157,8 +191,8 @@ impl VersionLock {
         out
     }
 
-    /// Builds a deterministic lock document for every declared version.
-    pub(crate) fn document(&self) -> IdlcResult<LockDocument> {
+    /// Builds a deterministic lock document for the selected versions.
+    fn document(&self) -> IdlcResult<LockDocument> {
         let record = self.diff.record();
         let parameter_line = match record.parameter() {
             Some(param) => format!("{}:{}", param.location.as_str(), param.name),
@@ -166,6 +200,9 @@ impl VersionLock {
         };
         let mut versions = BTreeMap::new();
         for (version_id, definition) in record.timeline().iter() {
+            if !self.selects(&definition.value) {
+                continue;
+            }
             let projection = self.diff.formatted_projection(version_id)?;
             let mut canonical = format!(
                 "xidl-version-lock-v1\nversion-value: {}\nversion-parameter: {}\n---\n{}",
@@ -192,7 +229,9 @@ impl VersionLock {
     /// Writes a lock file atomically, refusing to overwrite drifted existing entries unless `force` is set.
     pub(crate) fn write_lock(&self, lock_path: &Path, force: bool) -> IdlcResult<LockWriteReport> {
         let current = self.document()?;
-        if !force && let Some(existing) = Self::read_document_if_exists(lock_path)? {
+        self.validate_selection(&current, None)?;
+        if !force && let Some(mut existing) = Self::read_document_if_exists(lock_path)? {
+            existing.versions.retain(|value, _| self.selects(value));
             let report = Self::compare(&existing, &current, false);
             if !report.is_clean() {
                 return Ok(LockWriteReport {
@@ -225,9 +264,27 @@ impl VersionLock {
 
     /// Verifies that every version in `lock_path` still matches the contract.
     pub(crate) fn check(&self, lock_path: &Path, strict: bool) -> IdlcResult<LockCheckReport> {
-        let existing = Self::read_document(lock_path)?;
+        let mut existing = Self::read_document(lock_path)?;
         let current = self.document()?;
-        Ok(Self::compare(&existing, &current, strict))
+        self.validate_selection(&current, Some(&existing))?;
+        if self.versions.is_some() {
+            let declared: BTreeSet<&str> = self
+                .diff
+                .record()
+                .timeline()
+                .iter()
+                .map(|(_, definition)| definition.value.as_str())
+                .collect();
+            // Temporarily omitted versions can still be declared. Keep only actual removals.
+            existing
+                .versions
+                .retain(|value, _| self.selects(value) || !declared.contains(value.as_str()));
+        }
+        Ok(Self::compare(
+            &existing,
+            &current,
+            strict || self.versions.is_some(),
+        ))
     }
 
     fn read_document_if_exists(lock_path: &Path) -> IdlcResult<Option<LockDocument>> {
