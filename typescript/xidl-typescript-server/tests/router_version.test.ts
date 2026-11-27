@@ -47,8 +47,10 @@ const getItem = defineOperation<ItemServer, 'getItem'>({
   security: [],
 });
 
-test('fixed operation headers survive success, parsing, authorization and handler errors', async () => {
+test('operation headers survive framework and declared responses, and applications own other failures', async () => {
   const typed = new Error('conflict');
+  const denied = new XidlServerError(401, 'denied');
+  const failure = new Error('handler failed');
   let calls = 0;
   const operation = defineOperation<ItemServer, 'getItem'>({
     ...getItem,
@@ -74,14 +76,13 @@ test('fixed operation headers survive success, parsing, authorization and handle
       getItem: id => {
         calls++;
         if (id === 2) throw typed;
-        if (id === 3) throw new Error('handler failed');
+        if (id === 3) throw failure;
         return { id };
       },
     },
     {
       authorize: request => {
-        if (request.headers.has('Reject'))
-          throw new XidlServerError(401, 'denied');
+        if (request.headers.has('Reject')) throw denied;
       },
     },
   );
@@ -95,9 +96,23 @@ test('fixed operation headers survive success, parsing, authorization and handle
   ] as const) {
     const headers = new Headers({ 'X-Version': 'v1' });
     if (reject) headers.set('Reject', 'yes');
-    const response = await handler(
+    const result = handler(
       new Request(`http://localhost/items/${path}`, { headers }),
     );
+    const response =
+      status === 401 || status === 500
+        ? await result.then(
+            () =>
+              assert.fail('expected the application to receive the failure'),
+            error => {
+              assert.equal(error, status === 401 ? denied : failure);
+              return new Response(null, {
+                headers: { 'X-Version': 'v2' },
+                status,
+              });
+            },
+          )
+        : await result;
     assert.equal(response.status, status, path);
     assert.equal(response.headers.get('X-Version'), 'v2', path);
     if (status === 409) {
@@ -110,23 +125,22 @@ test('fixed operation headers survive success, parsing, authorization and handle
     3,
     'invalid and unauthorized requests never invoke business handlers',
   );
-  const custom = createRouter(
-    [operation],
-    {
-      createItem: name => ({ name }),
-      getItem: () => {
-        throw new Error('offline');
-      },
+  const offline = new Error('offline');
+  const custom = createRouter([operation], {
+    createItem: name => ({ name }),
+    getItem: () => {
+      throw offline;
     },
-    {
-      onError: () =>
-        new Response('offline', {
-          headers: { 'X-Version': 'old' },
-          status: 503,
-        }),
+  });
+  const response = await custom(new Request('http://localhost/items/1')).catch(
+    error => {
+      assert.equal(error, offline);
+      return new Response('offline', {
+        headers: { 'X-Version': 'v2' },
+        status: 503,
+      });
     },
   );
-  const response = await custom(new Request('http://localhost/items/1'));
   assert.equal(response.status, 503);
   assert.equal(response.headers.get('X-Version'), 'v2');
   assert.equal(await response.text(), 'offline');

@@ -70,7 +70,18 @@ const handler = (request: Request) =>
 const server = createServer(async (req, res) => {
   const response = await handler(
     new Request(`http://${req.headers.host}${req.url}`),
-  );
+  ).catch(error => {
+    if (error instanceof XidlServerError) {
+      return Response.json(
+        { code: error.code, msg: error.msg },
+        {
+          headers: error.headers,
+          status: error.code,
+        },
+      );
+    }
+    throw error;
+  });
   res.statusCode = response.status;
   for (const [name, value] of response.headers) {
     if (name !== 'set-cookie') res.setHeader(name, value);

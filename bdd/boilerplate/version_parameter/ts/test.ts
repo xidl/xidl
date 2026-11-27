@@ -84,6 +84,7 @@ for (const [clientModule, serverModule, Conflict, expected] of [
 ] as const) {
   const requests: Observed[] = [];
   const handshakes: Observed[] = [];
+  const storageFailure = new Error('storage offline');
   const handler = createRouter(Object.values(serverModule.StoreOperations), {
     _get(id: number, search: string, theme: string) {
       assert.equal(search, 'a +/%');
@@ -95,7 +96,7 @@ for (const [clientModule, serverModule, Conflict, expected] of [
     },
     fail(id: number) {
       if (id === 1) throw new Conflict({ message: 'conflict' });
-      throw new Error('storage offline');
+      throw storageFailure;
     },
     remove() {},
   });
@@ -109,9 +110,17 @@ for (const [clientModule, serverModule, Conflict, expected] of [
       headers: observed.headers,
       method: req.method,
     });
-    const response = await (observed.url.pathname === '/health'
-      ? health(request)
-      : handler(request));
+    const route = observed.url.pathname === '/health' ? health : handler;
+    const response = await route(request).catch(error => {
+      if (error !== storageFailure) throw error;
+      return Response.json(
+        { code: 500, msg: String(storageFailure) },
+        {
+          headers: serverModule.StoreOperations.fail.response.fixedHeaders,
+          status: 500,
+        },
+      );
+    });
     responseVersion(response.headers, expected);
     res.writeHead(response.status, Object.fromEntries(response.headers));
     res.end(Buffer.from(await response.arrayBuffer()));

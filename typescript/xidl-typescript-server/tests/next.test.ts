@@ -231,16 +231,28 @@ test('createNextRoute passes the response schema to custom codecs', async () => 
   assert.equal(receivedSchema, userSchema);
 });
 
-test('createNextRoute maps typed server errors', async () => {
+test('createNextRoute maps declared server errors', async () => {
+  const notFound = new XidlServerError(404, 'not found');
   const server: UserServer = {
     async createUser(id, name) {
       return { id, name };
     },
     async getUser() {
-      throw new XidlServerError(404, 'not found');
+      throw notFound;
     },
   };
-  const handler = createNextRoute(getUser, server);
+  const handler = createNextRoute(
+    {
+      ...getUser,
+      errors: {
+        match: error =>
+          error === notFound
+            ? { body: { code: 404, msg: 'not found' }, status: 404 }
+            : undefined,
+      },
+    },
+    server,
+  );
   const response = await handler(new Request('http://localhost/users/9'), {
     params: Promise.resolve({ id: '9' }),
   });
@@ -252,39 +264,47 @@ test('createNextRoute maps typed server errors', async () => {
   });
 });
 
-test('createNextRoute keeps unexpected server errors at 500', async () => {
+test('createNextRoute rejects with the original unexpected error', async () => {
+  const failure = new Error('backend failure');
   const server: UserServer = {
     async createUser(id, name) {
       return { id, name };
     },
     async getUser() {
-      throw new Error('database password leaked');
+      throw failure;
     },
   };
   const handler = createNextRoute(getUser, server);
-  const response = await handler(new Request('http://localhost/users/9'), {
-    params: Promise.resolve({ id: '9' }),
-  });
-
-  assert.equal(response.status, 500);
-  assert.deepEqual(await response.json(), {
-    code: 500,
-    msg: 'Error: database password leaked',
-  });
+  await assert.rejects(
+    handler(new Request('http://localhost/users/9'), {
+      params: Promise.resolve({ id: '9' }),
+    }),
+    error => error === failure,
+  );
 });
 
-test('createNextRoute maps XidlServerError code and msg to the HTTP response', async () => {
+test('Next.js application code can map an undeclared XidlServerError', async () => {
+  const teapot = new XidlServerError(418, 'teapot');
   const server: UserServer = {
     async createUser(id, name) {
       return { id, name };
     },
     async getUser() {
-      throw new XidlServerError(418, 'teapot');
+      throw teapot;
     },
   };
   const handler = createNextRoute(getUser, server);
-  const response = await handler(new Request('http://localhost/users/9'), {
-    params: Promise.resolve({ id: '9' }),
+  const request = new Request('http://localhost/users/9');
+  const context = { params: Promise.resolve({ id: '9' }) };
+  await assert.rejects(handler(request, context), error => error === teapot);
+  const response = await handler(request, context).catch(error => {
+    if (error instanceof XidlServerError) {
+      return Response.json(
+        { code: error.code, msg: error.msg },
+        { status: error.code },
+      );
+    }
+    throw error;
   });
 
   assert.equal(response.status, 418);
@@ -294,7 +314,7 @@ test('createNextRoute maps XidlServerError code and msg to the HTTP response', a
   });
 });
 
-test('Next params remain decoded and rejected parameter promises retain operation headers', async () => {
+test('Next params remain decoded and rejected parameter promises propagate', async () => {
   const operation = defineOperation<{ read(id: string): string }, 'read'>({
     ...getUser,
     handler: 'read',
@@ -317,12 +337,11 @@ test('Next params remain decoded and rejected parameter promises retain operatio
     assert.equal(await response.text(), id);
     assert.equal(response.headers.get('X-Version'), 'v2');
   }
-  const rejected = await handler(
-    new Request('http://localhost/users/ignored'),
-    {
-      params: Promise.reject(new XidlServerError(400, 'invalid route')),
-    },
+  const failure = new XidlServerError(400, 'invalid route');
+  await assert.rejects(
+    handler(new Request('http://localhost/users/ignored'), {
+      params: Promise.reject(failure),
+    }),
+    error => error === failure,
   );
-  assert.equal(rejected.status, 400);
-  assert.equal(rejected.headers.get('X-Version'), 'v2');
 });

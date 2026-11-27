@@ -1,6 +1,5 @@
 import { serialize, type XidlSchema } from 'xidl-typescript-codec';
 
-import { projectError, XidlServerError } from './error.ts';
 import { assertAccepts, encodeScalar, normalizeMime } from './scalar.ts';
 import { byteStreamResponse, sseResponse } from './stream.ts';
 import type {
@@ -9,6 +8,7 @@ import type {
   OperationDescriptor,
   ValueBinding,
 } from './types.ts';
+import { parseResponse } from './validation.ts';
 
 export function encodeOperationResponse<TService>(
   operation: OperationDescriptor<TService>,
@@ -26,10 +26,7 @@ export function encodeOperationResponse<TService>(
     return sseResponse(
       result as AsyncIterable<unknown>,
       operation.response.streamSchema,
-      error => {
-        const failure = operation.errors?.match(error) ?? projectError(error);
-        return { body: failure.body ?? null, status: failure.status };
-      },
+      error => operation.errors?.match(error),
     );
   }
 
@@ -104,17 +101,6 @@ export function encodeOperationResponse<TService>(
       status: operation.response.status,
     },
   );
-}
-
-export function parseResponse(value: unknown, schema?: XidlSchema): unknown {
-  if (!schema) {
-    return value;
-  }
-  try {
-    return schema.parse(value);
-  } catch {
-    throw new XidlServerError(500, 'invalid response');
-  }
 }
 
 function toRecord(value: unknown): Record<string, unknown> {

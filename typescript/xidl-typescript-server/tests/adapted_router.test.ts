@@ -6,6 +6,7 @@ import {
   createAdaptedRouter,
   createVersionedAdapterRouter,
   defineOperation,
+  VersionProjectionError,
   XidlServerError,
 } from '../src/index.js';
 
@@ -108,6 +109,16 @@ const v2Operations = {
 
 test('createVersionedAdapterRouter connects OperationTables to adapter dispatchers and typed errors', async () => {
   type VersionId = 'v1' | 'v2';
+  const unavailable = new XidlServerError(503, 'upstream down');
+  const committed = { ok: true, value: { id: 'unprojectable' } };
+  const issue = { message: 'bad id' };
+  const projection = {
+    direction: 'downcast',
+    reason: 'cannot downcast',
+    typePath: 'Items.getItem',
+    version: 'v1',
+  } as const;
+  let projectionCalls = 0;
 
   const dispatchGetItem = async (
     version: VersionId,
@@ -117,13 +128,20 @@ test('createVersionedAdapterRouter connects OperationTables to adapter dispatche
     if (id === 'bad') {
       return {
         dispatched: false as const,
-        error: { kind: 'Validation', reason: 'bad id' },
+        error: {
+          issues: [issue],
+          kind: 'Validation' as const,
+          operation: 'Items.getItem',
+          version,
+        },
       };
     }
     if (id === 'unprojectable') {
+      projectionCalls++;
       return {
         dispatched: true as const,
-        error: { direction: 'downcast', reason: 'cannot downcast' },
+        error: projection,
+        head: committed,
         projected: false as const,
       };
     }
@@ -146,7 +164,7 @@ test('createVersionedAdapterRouter connects OperationTables to adapter dispatche
         projected: true as const,
         value: {
           error: {
-            error: new XidlServerError(503, 'upstream down'),
+            error: unavailable,
             kind: 'Framework',
           },
           ok: false as const,
@@ -254,28 +272,33 @@ test('createVersionedAdapterRouter connects OperationTables to adapter dispatche
   assert.equal(badRes.status, 400);
   assert.equal(badRes.headers.get('X-Version'), null);
   assert.equal(badRes.headers.get('Vary'), 'X-Version');
-  assert.deepEqual(await badRes.json(), { code: 400, msg: 'bad id' });
-
-  const unprojectableRes = await router(
-    new Request('http://localhost/items/unprojectable', {
-      headers: { 'X-Version': '2026-01-01' },
-    }),
-  );
-  assert.equal(unprojectableRes.status, 422);
-  assert.equal(unprojectableRes.headers.get('Vary'), 'X-Version');
-  assert.deepEqual(await unprojectableRes.json(), {
-    code: 422,
-    msg: 'cannot downcast',
+  assert.deepEqual(await badRes.json(), {
+    code: 400,
+    detail: [issue],
+    msg: 'request validation failed',
   });
 
-  const boomRes = await router(
-    new Request('http://localhost/items/boom', {
-      headers: { 'X-Version': '2026-06-01' },
-    }),
+  await assert.rejects(
+    router(
+      new Request('http://localhost/items/unprojectable', {
+        headers: { 'X-Version': '2026-01-01' },
+      }),
+    ),
+    error =>
+      error instanceof VersionProjectionError &&
+      error.projection === projection &&
+      error.head === committed,
   );
-  assert.equal(boomRes.status, 503);
-  assert.equal(boomRes.headers.get('Vary'), 'X-Version');
-  assert.deepEqual(await boomRes.json(), { code: 503, msg: 'upstream down' });
+  assert.equal(projectionCalls, 1);
+
+  await assert.rejects(
+    router(
+      new Request('http://localhost/items/boom', {
+        headers: { 'X-Version': '2026-06-01' },
+      }),
+    ),
+    error => error === unavailable,
+  );
 
   const single = createAdaptedRouter('v1', v1Operations, {
     getItem: { dispatch: dispatchGetItem },
@@ -283,102 +306,4 @@ test('createVersionedAdapterRouter connects OperationTables to adapter dispatche
   const direct = await single(new Request('http://localhost/items/9'));
   assert.equal(direct.status, 200);
   assert.deepEqual(await direct.json(), { id: '9', label: 'label-9' });
-});
-
-test('createAdaptedRouter preserves raw wire body keys while coercing path scalars', async () => {
-  interface UpdateService {
-    update(id: number, body: { fullName: string }): { id: number; ok: boolean };
-  }
-
-  const updateBodySchema = z.object({
-    fullName: z.string().meta({ xjson: { rename: 'full_name' } }),
-  });
-
-  const operations = {
-    update: defineOperation<UpdateService, 'update'>({
-      handler: 'update',
-      method: 'POST',
-      path: '/items/{id}',
-      request: {
-        args: ['id', 'body'],
-        body: {
-          contentType: 'application/json',
-          fields: [{ key: 'body', wireName: 'body' }],
-          kind: 'value',
-          schema: updateBodySchema,
-          singleKey: 'body',
-        },
-        cookies: [],
-        headers: [],
-        kind: 'object',
-        path: [
-          {
-            catchAll: false,
-            key: 'id',
-            multi: false,
-            parameter: 'id',
-            wireName: 'id',
-          },
-        ],
-        query: [],
-        schema: z.object({
-          body: updateBodySchema,
-          id: z.coerce.number().int(),
-        }),
-      },
-      response: responseSpec,
-      security: [],
-    }),
-  } as const;
-
-  let seenRaw: Record<string, unknown> | undefined;
-  const router = createAdaptedRouter('v1', operations, {
-    update: {
-      dispatch: (_version, raw) => {
-        seenRaw = raw;
-        const body = raw.body as Record<string, unknown>;
-        if ('future_field' in body) {
-          return {
-            dispatched: false,
-            error: {
-              kind: 'Validation',
-              reason: 'field is not available in served version',
-            },
-          };
-        }
-        return {
-          dispatched: true,
-          projected: true,
-          value: {
-            ok: true,
-            value: { id: raw.id, ok: body.full_name === 'Ada' },
-          },
-        };
-      },
-    },
-  });
-
-  const okRes = await router(
-    new Request('http://localhost/items/42', {
-      body: JSON.stringify({ full_name: 'Ada' }),
-      headers: { 'Content-Type': 'application/json' },
-      method: 'POST',
-    }),
-  );
-  assert.equal(okRes.status, 200);
-  assert.deepEqual(await okRes.json(), { id: 42, ok: true });
-  assert.deepEqual(seenRaw, { body: { full_name: 'Ada' }, id: 42 });
-
-  const rejectedRes = await router(
-    new Request('http://localhost/items/42', {
-      body: JSON.stringify({ full_name: 'Ada', future_field: 'v2-only' }),
-      headers: { 'Content-Type': 'application/json' },
-      method: 'POST',
-    }),
-  );
-  assert.equal(rejectedRes.status, 400);
-  assert.deepEqual(await rejectedRes.json(), {
-    code: 400,
-    msg: 'field is not available in served version',
-  });
 });

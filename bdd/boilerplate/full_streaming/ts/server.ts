@@ -58,7 +58,18 @@ const server = createServer(async (request, response) => {
     headers: request.headers as HeadersInit,
     method: request.method,
   });
-  const webResponse = await handler(webRequest);
+  const webResponse = await handler(webRequest).catch(error => {
+    if (error instanceof XidlServerError) {
+      return Response.json(
+        { code: error.code, msg: error.msg },
+        {
+          headers: error.headers,
+          status: error.code,
+        },
+      );
+    }
+    throw error;
+  });
   response.statusCode = webResponse.status;
   webResponse.headers.forEach((value, name) => {
     response.setHeader(name, value);

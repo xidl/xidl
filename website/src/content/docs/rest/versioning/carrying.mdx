@@ -80,6 +80,10 @@ the router. To replace a version rejection response, use `onVersionError`.
 The error's `kind` identifies its status, and a retired rejection includes
 its wire value in `rawValue`.
 
+Undeclared exceptions from a mounted handler or from the rejection callback
+propagate to the caller. Wrap the router or use the host framework's error
+handling to turn those exceptions into HTTP responses.
+
 | Location | HTTP clients | WebSocket handshake |
 | --- | --- | --- |
 | header | Rust, TypeScript, and Go REST send the pinned header | Rust and Node send it; browsers use the server default |
