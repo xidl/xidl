@@ -1,8 +1,8 @@
 use super::command::{CommandRunner, argument};
 use super::error::LibraryError;
+use super::manifest::{Dependency, Revision};
 use super::source::PackageSource;
 use std::path::{Path, PathBuf};
-use xidl_parser::manifest::{Dependency, Revision};
 
 /// Directory of the shared cache, relative to the xidl home.
 pub const PACKAGE_DIR: &str = "pkg";

@@ -1,6 +1,5 @@
 pub mod diagnostic;
 pub mod error;
-pub mod manifest;
 pub mod parser;
 pub mod semantic;
 pub mod typed_ast;

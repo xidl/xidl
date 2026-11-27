@@ -1,7 +1,7 @@
 use super::error::LibraryError;
+use super::manifest::Manifest;
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
-use xidl_parser::manifest::Manifest;
 
 /// Default input pattern of a library: `.idl` files beside the manifest.
 const DEFAULT_PATTERN: &str = "*.idl";

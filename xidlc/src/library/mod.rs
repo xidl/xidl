@@ -11,6 +11,7 @@ mod discovery;
 mod error;
 mod home;
 mod inputs;
+mod manifest;
 mod package;
 mod source;
 mod toolchain;
@@ -24,6 +25,9 @@ use std::path::PathBuf;
 pub use discovery::LoadedManifest;
 pub use error::LibraryError;
 pub use inputs::LibraryInputs;
+pub use manifest::{
+    Dependency, DependencySource, MANIFEST_FILE_NAME, Manifest, ManifestError, Revision,
+};
 pub use package::{GitPackageFetcher, PackageFetcher, PackageStore};
 pub use source::{LOCAL_HOST, PackageSource};
 pub use toolchain::{Toolchain, ToolchainSource};

@@ -1,7 +1,7 @@
 use super::error::LibraryError;
 use super::inputs::LibraryInputs;
+use super::manifest::{MANIFEST_FILE_NAME, Manifest};
 use std::path::{Path, PathBuf};
-use xidl_parser::manifest::{MANIFEST_FILE_NAME, Manifest};
 
 /// A manifest discovered among the compiler inputs.
 #[derive(Debug, Clone)]

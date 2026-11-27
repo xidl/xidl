@@ -52,7 +52,7 @@ impl PackageFetcher for FakeFetcher {
     fn fetch(
         &self,
         name: &str,
-        dependency: &xidl_parser::manifest::Dependency,
+        dependency: &Dependency,
         destination: &Path,
     ) -> Result<(), LibraryError> {
         let Some((src, revision)) = dependency.git() else {
@@ -78,11 +78,7 @@ impl PackageFetcher for FakeFetcher {
         Ok(())
     }
 
-    fn is_current(
-        &self,
-        dependency: &xidl_parser::manifest::Dependency,
-        destination: &Path,
-    ) -> bool {
+    fn is_current(&self, dependency: &Dependency, destination: &Path) -> bool {
         let Some((_, revision)) = dependency.git() else {
             return false;
         };
@@ -98,17 +94,13 @@ impl PackageFetcher for SharedFetcher {
     fn fetch(
         &self,
         name: &str,
-        dependency: &xidl_parser::manifest::Dependency,
+        dependency: &Dependency,
         destination: &Path,
     ) -> Result<(), LibraryError> {
         self.0.fetch(name, dependency, destination)
     }
 
-    fn is_current(
-        &self,
-        dependency: &xidl_parser::manifest::Dependency,
-        destination: &Path,
-    ) -> bool {
+    fn is_current(&self, dependency: &Dependency, destination: &Path) -> bool {
         self.0.is_current(dependency, destination)
     }
 }
@@ -148,16 +140,13 @@ impl ToolchainSource for FakeSource {
 
 /// A dependency declaration for `src` pinned to `tag`.
 /// A dependency declaration for `src` pinned to `tag`.
-pub(super) fn dependency(src: &str, tag: &str) -> xidl_parser::manifest::Dependency {
-    xidl_parser::manifest::Dependency::new(
-        src,
-        xidl_parser::manifest::Revision::Tag(tag.to_string()),
-    )
+pub(super) fn dependency(src: &str, tag: &str) -> Dependency {
+    Dependency::new(src, Revision::Tag(tag.to_string()))
 }
 
 /// Parses a manifest fixture under `dir`.
-pub(super) fn manifest_for(dir: &Path, text: &str) -> xidl_parser::manifest::Manifest {
+pub(super) fn manifest_for(dir: &Path, text: &str) -> Manifest {
     let path = dir.join("xidl.toml");
     write(&path, text);
-    xidl_parser::manifest::Manifest::load(&path).expect("fixture manifest parses")
+    Manifest::load(&path).expect("fixture manifest parses")
 }
