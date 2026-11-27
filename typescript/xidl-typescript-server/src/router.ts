@@ -1,4 +1,3 @@
-import { errorResponse, XidlServerError } from './error.ts';
 import { executeOperation } from './execute.ts';
 import { decodeRouteParams } from './request.ts';
 import type {
@@ -24,37 +23,37 @@ export function createRouter<TService>(
     })),
   );
   return async request => {
-    try {
-      const requestSegments = splitPath(new URL(request.url).pathname);
-      const allowedMethods = new Set<string>();
-      for (const route of routes) {
-        const params = matchRoute(route, requestSegments);
-        if (!params) {
-          continue;
-        }
-        if (route.operation.method !== request.method.toUpperCase()) {
-          allowedMethods.add(route.operation.method);
-          continue;
-        }
-        return executeOperation(
-          route.operation,
-          service,
-          request,
-          () => decodeRouteParams(params),
-          options,
-        );
+    const requestSegments = splitPath(new URL(request.url).pathname);
+    const allowedMethods = new Set<string>();
+    for (const route of routes) {
+      const params = matchRoute(route, requestSegments);
+      if (!params) {
+        continue;
       }
-      if (allowedMethods.size > 0) {
-        return errorResponse(
-          new XidlServerError(405, 'method not allowed', {
-            Allow: [...allowedMethods].sort().join(', '),
-          }),
-        );
+      if (route.operation.method !== request.method.toUpperCase()) {
+        allowedMethods.add(route.operation.method);
+        continue;
       }
-      return errorResponse(new XidlServerError(404, 'route not found'));
-    } catch (error) {
-      return errorResponse(error);
+      return executeOperation(
+        route.operation,
+        service,
+        { request, resolveParams: () => decodeRouteParams(params) },
+        options,
+      );
     }
+    if (allowedMethods.size > 0) {
+      return Response.json(
+        { code: 405, msg: 'method not allowed' },
+        {
+          headers: { Allow: [...allowedMethods].sort().join(', ') },
+          status: 405,
+        },
+      );
+    }
+    return Response.json(
+      { code: 404, msg: 'route not found' },
+      { status: 404 },
+    );
   };
 }
 

@@ -1,4 +1,4 @@
-import { XidlServerError } from './error.ts';
+import { RequestFailure } from './error.ts';
 
 export function normalizeMime(value: string): string {
   return value.split(';')[0]?.trim().toLowerCase() || 'application/json';
@@ -14,7 +14,7 @@ export function assertRequestContentType(
   }
   const expected = normalizeMime(expectedContentType);
   if (normalizeMime(actual) !== expected) {
-    throw new XidlServerError(
+    throw new RequestFailure(
       415,
       `unsupported request content type: ${normalizeMime(actual)}`,
     );
@@ -37,7 +37,7 @@ export function assertAccepts(headers: Headers, contentType: string): void {
   ) {
     return;
   }
-  throw new XidlServerError(406, `not acceptable: expected ${expected}`);
+  throw new RequestFailure(406, `not acceptable: expected ${expected}`);
 }
 
 export function encodeScalar(value: unknown): string {
@@ -68,13 +68,13 @@ export function readRequestCookies(headers: Headers): Map<string, string[]> {
       // The Rust cookie crate treats a leading bare word as a missing pair
       // and later bare words as attributes.
       if (!seenPair) {
-        throw new XidlServerError(400, `malformed cookie pair: ${item}`);
+        throw new RequestFailure(400, `malformed cookie pair: ${item}`);
       }
       continue;
     }
     const name = item.slice(0, separator).trim();
     if (name.length === 0) {
-      throw new XidlServerError(400, 'malformed cookie pair: empty name');
+      throw new RequestFailure(400, 'malformed cookie pair: empty name');
     }
     // Values keep surrounding quotes and trim around '=' exactly like the
     // cookie crate; invalid percent escapes stay literal.

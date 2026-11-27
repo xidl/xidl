@@ -1,70 +1,77 @@
 import {
   decodeStreamFrame,
-  deserialize,
-  type StreamFailure,
-  StreamInterruptedError,
+  type StreamFrame,
   StreamLifecycle,
   serialize,
-  type XidlSchema,
 } from 'xidl-typescript-codec';
+import {
+  declaredErrorResponse,
+  RequestFailure,
+  RequestStreamFailure,
+} from './error.ts';
+import type { TypedErrorResponse } from './types.ts';
+import {
+  parseRequest,
+  parseResponse,
+  type ServerSchema,
+} from './validation.ts';
 
-import { projectError, XidlServerError } from './error.ts';
+function readFrame(line: string): StreamFrame {
+  try {
+    return decodeStreamFrame(JSON.parse(line));
+  } catch (error) {
+    throw new RequestFailure(400, `invalid NDJSON request: ${String(error)}`);
+  }
+}
 
 export async function* ndjsonRequestStream<T>(
   request: Request,
-  schema?: XidlSchema,
+  schema?: ServerSchema,
 ): AsyncIterable<T> {
-  const lifecycle = new StreamLifecycle();
-  if (!request.body) return lifecycle.interrupted('NDJSON request has no body');
+  if (!request.body) {
+    throw new RequestStreamFailure(
+      new RequestFailure(400, 'NDJSON request has no body'),
+    );
+  }
   const reader = request.body.getReader();
   const decoder = new TextDecoder();
   let buffer = '';
   try {
     while (true) {
       const next = await reader.read();
-      if (next.done)
-        lifecycle.interrupted('NDJSON request ended without a terminal frame');
+      if (next.done) {
+        throw new RequestFailure(
+          400,
+          'NDJSON request ended without a terminal frame',
+        );
+      }
       buffer += decoder.decode(next.value, { stream: true });
       let end = buffer.indexOf('\n');
       while (end >= 0) {
         const line = buffer.slice(0, end).trim();
         buffer = buffer.slice(end + 1);
         if (line) {
-          const frame = decodeStreamFrame(JSON.parse(line));
-          if (frame.t === 'complete') {
-            lifecycle.finish('Completed');
-            return;
-          }
+          const frame = readFrame(line);
+          if (frame.t === 'complete') return;
           if (frame.t === 'error') {
-            lifecycle.finish('Failed');
-            throw new XidlServerError(
-              frame.error.status,
+            throw new RequestFailure(
+              frame.error.status >= 400 ? frame.error.status : 400,
               'NDJSON producer failed',
             );
           }
-          if (frame.t === 'next')
-            yield (
-              schema
-                ? schema.parse(deserialize(frame.data, schema))
-                : frame.data
-            ) as T;
+          if (frame.t === 'next') {
+            yield (schema ? parseRequest(frame.data, schema) : frame.data) as T;
+          }
         }
         end = buffer.indexOf('\n');
       }
     }
   } catch (error) {
-    if (!lifecycle.outcome) lifecycle.finish('Interrupted');
-    if (
-      lifecycle.outcome === 'Interrupted' &&
-      !(error instanceof StreamInterruptedError)
-    ) {
-      throw new StreamInterruptedError(
-        `invalid NDJSON request: ${String(error)}`,
-      );
+    if (error instanceof RequestFailure) {
+      throw new RequestStreamFailure(error);
     }
     throw error;
   } finally {
-    lifecycle.finish('Cancelled');
     try {
       await reader.cancel().catch(() => undefined);
     } finally {
@@ -91,32 +98,59 @@ export async function* byteRequestStream(
 
 export async function sseResponse<T>(
   source: AsyncIterable<T>,
-  schema?: XidlSchema,
-  mapError: (error: unknown) => StreamFailure = projectError,
+  schema?: ServerSchema,
+  matchError?: (error: unknown) => TypedErrorResponse | undefined,
 ): Promise<Response> {
   const iterator = source[Symbol.asyncIterator]();
   const encoder = new TextEncoder();
   const lifecycle = new StreamLifecycle();
+  const complete = encoder.encode('event: complete\ndata: {}\n\n');
+
+  const closeAfterFailure = async () => {
+    try {
+      await iterator.return?.();
+    } catch {
+      // An exception already determined the stream's outcome.
+    }
+  };
   const encode = (value: T): Uint8Array => {
-    const wire = schema ? serialize(value, schema) : value;
+    const wire = schema
+      ? serialize(parseResponse(value, schema), schema)
+      : value;
     const json = JSON.stringify(wire);
-    if (json === undefined)
+    if (json === undefined) {
       throw new Error('SSE item has no JSON representation');
+    }
     return encoder.encode(`event: next\ndata: ${json}\n\n`);
   };
-  let first: Uint8Array;
+
+  let first: IteratorResult<T>;
   try {
-    const item = await iterator.next();
-    if (item.done) {
-      lifecycle.finish('Completed');
-      first = encoder.encode('event: complete\ndata: {}\n\n');
-    } else first = encode(item.value);
+    first = await iterator.next();
   } catch (error) {
-    // Preserve the first-output exception if producer cleanup also fails.
-    await iterator.return?.().catch(() => undefined);
+    await closeAfterFailure();
+    const declared = RequestFailure.from(error)
+      ? undefined
+      : matchError?.(error);
+    if (declared) {
+      return declaredErrorResponse(declared);
+    }
     throw error;
   }
-  let pending: Uint8Array | undefined = first;
+
+  let pending: Uint8Array | undefined;
+  try {
+    if (first.done) {
+      lifecycle.finish('Completed');
+      pending = complete;
+    } else {
+      pending = encode(first.value);
+    }
+  } catch (error) {
+    await closeAfterFailure();
+    throw error;
+  }
+
   return new Response(
     new ReadableStream<Uint8Array>({
       async cancel() {
@@ -130,28 +164,45 @@ export async function sseResponse<T>(
           if (lifecycle.outcome) controller.close();
           return;
         }
+        let item: IteratorResult<T>;
         try {
-          const item = await iterator.next();
-          if (item.done) {
-            lifecycle.finish('Completed');
-            controller.enqueue(encoder.encode('event: complete\ndata: {}\n\n'));
-            controller.close();
-          } else controller.enqueue(encode(item.value));
+          item = await iterator.next();
         } catch (error) {
           lifecycle.finish('Failed');
+          await closeAfterFailure();
           try {
-            const failure = mapError(error);
+            const declared = RequestFailure.from(error)
+              ? undefined
+              : matchError?.(error);
+            if (!declared) {
+              controller.error(error);
+              return;
+            }
+            const payload = JSON.stringify({
+              body: declared.body ?? null,
+              status: declared.status,
+            });
             controller.enqueue(
-              encoder.encode(
-                `event: error\ndata: ${JSON.stringify({ body: failure.body ?? null, status: failure.status })}\n\n`,
-              ),
+              encoder.encode(`event: error\ndata: ${payload}\n\n`),
             );
             controller.close();
           } catch (encodingError) {
             controller.error(encodingError);
-          } finally {
-            await iterator.return?.().catch(() => undefined);
           }
+          return;
+        }
+        if (item.done) {
+          lifecycle.finish('Completed');
+          controller.enqueue(complete);
+          controller.close();
+          return;
+        }
+        try {
+          controller.enqueue(encode(item.value));
+        } catch (error) {
+          lifecycle.finish('Failed');
+          await closeAfterFailure();
+          controller.error(error);
         }
       },
     }),

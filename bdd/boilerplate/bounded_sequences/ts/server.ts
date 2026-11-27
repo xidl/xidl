@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
-import { createRouter } from 'xidl-typescript-server';
+import { createRouter, ResponseValidationError } from 'xidl-typescript-server';
 import { BatchesClient } from './bounded_sequences.client.js';
 import { BatchRejected } from './bounded_sequences.errors.js';
 import { BatchesOperations } from './bounded_sequences.server.js';
@@ -83,7 +83,12 @@ const server = createServer(async (request, response) => {
     headers: request.headers as HeadersInit,
     method: request.method,
   });
-  const webResponse = await handler(webRequest);
+  const webResponse = await handler(webRequest).catch(error => {
+    if (error instanceof ResponseValidationError) {
+      return Response.json({ code: 500, msg: error.message }, { status: 500 });
+    }
+    throw error;
+  });
   response.statusCode = webResponse.status;
   webResponse.headers.forEach((value, name) => {
     if (name !== 'set-cookie') response.setHeader(name, value);

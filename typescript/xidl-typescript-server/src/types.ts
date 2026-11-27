@@ -1,4 +1,5 @@
 import type { XidlSchema } from 'xidl-typescript-codec';
+import type { ServerSchema } from './validation.ts';
 
 export type Awaitable<T> = T | Promise<T>;
 
@@ -41,7 +42,7 @@ export interface RequestBodySpec {
   contentType: string;
   fields: BodyField[];
   kind: 'none' | 'value' | 'stream';
-  schema?: XidlSchema;
+  schema?: ServerSchema;
   singleKey?: string;
 }
 
@@ -53,14 +54,14 @@ export interface OperationRequestSpec {
   kind: 'none' | 'object' | 'stream';
   path: PathBinding[];
   query: RequestValueBinding[];
-  schema?: XidlSchema;
+  schema?: ServerSchema;
 }
 
 /** One negotiated representation of an `@http` union response. */
 export interface ResponseRepresentation {
   contentType: string;
   kind: string;
-  schema?: XidlSchema;
+  schema?: ServerSchema;
 }
 
 export interface OperationResponseSpec {
@@ -73,9 +74,9 @@ export interface OperationResponseSpec {
   headers: ValueBinding[];
   /** Fixed contract headers applied to every response of this operation. */
   fixedHeaders?: Readonly<Record<string, string>>;
-  schema?: XidlSchema;
+  schema?: ServerSchema;
   stream: boolean;
-  streamSchema?: XidlSchema;
+  streamSchema?: ServerSchema;
   /** Non-empty for `@http` union responses (content negotiation). */
   representations?: ResponseRepresentation[];
 }
@@ -129,7 +130,6 @@ export interface ServerOptions {
     context: ServerContext,
   ) => Awaitable<void>;
   codecs?: Record<string, HttpCodec>;
-  onError?: (error: unknown, context: ServerContext) => Awaitable<Response>;
 }
 
 export interface NextRouteContext {

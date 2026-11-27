@@ -1,6 +1,6 @@
-import { deserialize, type XidlSchema } from 'xidl-typescript-codec';
+import type { XidlSchema } from 'xidl-typescript-codec';
 
-import { XidlServerError } from './error.ts';
+import { RequestFailure } from './error.ts';
 import {
   assertRequestContentType,
   normalizeMime,
@@ -13,6 +13,7 @@ import type {
   RequestValueBinding,
   RouteParams,
 } from './types.ts';
+import { parseRequest } from './validation.ts';
 
 export async function decodeOperationRequest<TService>(
   operation: OperationDescriptor<TService>,
@@ -101,9 +102,7 @@ export async function decodeOperationRequest<TService>(
   if (!operation.request.schema) {
     return payload;
   }
-  return operation.request.schema.parse(
-    deserialize(payload, operation.request.schema),
-  );
+  return parseRequest(payload, operation.request.schema);
 }
 
 function readValues(
@@ -117,7 +116,7 @@ function readValues(
   // Only query extraction rejects duplicates; the Rust target's header and
   // cookie maps keep the first occurrence for scalar bindings.
   if (source === 'query' && !binding.multi && values.length > 1) {
-    throw new XidlServerError(
+    throw new RequestFailure(
       400,
       `duplicate value for parameter ${binding.wireName}`,
     );
@@ -133,7 +132,7 @@ function readHeader(
     return binding.multi && !binding.optional ? [] : undefined;
   }
   if (!headerValueIsVisibleAscii(value)) {
-    throw new XidlServerError(
+    throw new RequestFailure(
       400,
       `header ${binding.wireName} contains non-ASCII bytes`,
     );
@@ -171,7 +170,7 @@ async function decodeRequestBody(
       return await request.json();
     } catch (error) {
       if (error instanceof SyntaxError) {
-        throw new XidlServerError(400, 'invalid JSON request body');
+        throw new RequestFailure(400, 'invalid JSON request body');
       }
       throw error;
     }
@@ -188,7 +187,7 @@ async function decodeRequestBody(
   if (mime.startsWith('text/')) {
     return request.text();
   }
-  throw new XidlServerError(415, `unsupported request content type: ${mime}`);
+  throw new RequestFailure(415, `unsupported request content type: ${mime}`);
 }
 
 function applyBody(
@@ -220,7 +219,7 @@ export function decodeRouteParams(params: RouteParams): RouteParams {
     try {
       return decodeURIComponent(value);
     } catch {
-      throw new XidlServerError(400, `invalid route segment: ${value}`);
+      throw new RequestFailure(400, `invalid route segment: ${value}`);
     }
   };
   return Object.fromEntries(

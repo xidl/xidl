@@ -1,4 +1,7 @@
 import { StreamInterruptedError } from 'xidl-typescript-codec';
+import type { TypedErrorResponse } from './types.ts';
+
+/** An application-side helper for producing an HTTP response at the host boundary. */
 export class XidlServerError extends Error {
   readonly code: number;
   readonly msg: string;
@@ -12,49 +15,56 @@ export class XidlServerError extends Error {
   }
 }
 
-function isZodErrorLike(error: unknown): error is { issues: unknown[] } {
-  if (typeof error !== 'object' || error === null) {
-    return false;
+/** Identifies a rejection produced while interpreting an incoming request. */
+export class RequestFailure extends Error {
+  constructor(
+    readonly code: number,
+    message: string,
+    readonly detail?: readonly unknown[],
+  ) {
+    super(message);
   }
-  const candidate = error as { issues?: unknown; name?: unknown };
-  if (!Array.isArray(candidate.issues)) {
-    return false;
+
+  static from(error: unknown): RequestFailure | undefined {
+    if (error instanceof RequestFailure) {
+      return error;
+    }
+    if (error instanceof RequestStreamFailure) {
+      return error.failure;
+    }
+    return undefined;
   }
-  if (typeof candidate.name === 'string' && candidate.name.includes('Zod')) {
-    return true;
+
+  response(): Response {
+    return Response.json(
+      {
+        code: this.code,
+        msg: this.message,
+        ...(this.detail === undefined ? {} : { detail: this.detail }),
+      },
+      { status: this.code },
+    );
   }
-  // Fall back to the issues shape alone so validation errors from a
-  // different Zod copy are still mapped to 400.
-  return true;
 }
 
-export function projectError(error: unknown): {
-  status: number;
-  body: unknown;
-} {
-  if (error instanceof StreamInterruptedError) {
-    return { body: { code: 400, msg: error.message }, status: 400 };
+/** An NDJSON request failed while the service was reading its input stream. */
+export class RequestStreamFailure extends StreamInterruptedError {
+  constructor(readonly failure: RequestFailure) {
+    super(failure.message);
   }
-  if (error instanceof XidlServerError) {
-    return { body: { code: error.code, msg: error.msg }, status: error.code };
-  }
-  if (isZodErrorLike(error)) {
-    return {
-      body: { code: 400, detail: error.issues, msg: 'invalid request' },
-      status: 400,
-    };
-  }
-  return { body: { code: 500, msg: String(error) }, status: 500 };
 }
 
-export function errorResponse(error: unknown): Response {
-  const failure = projectError(error);
-  const headers = new Headers(
-    error instanceof XidlServerError ? error.headers : undefined,
+/** The service result failed its declared response schema. */
+export class ResponseValidationError extends Error {
+  constructor(readonly issues: readonly unknown[]) {
+    super('invalid response');
+    this.name = 'ResponseValidationError';
+  }
+}
+
+export function declaredErrorResponse(error: TypedErrorResponse): Response {
+  return new Response(
+    error.body === undefined ? null : JSON.stringify(error.body),
+    { headers: error.headers, status: error.status },
   );
-  headers.set('Content-Type', 'application/json');
-  return new Response(JSON.stringify(failure.body), {
-    headers,
-    status: failure.status,
-  });
 }

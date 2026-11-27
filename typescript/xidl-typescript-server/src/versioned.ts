@@ -1,4 +1,3 @@
-import { errorResponse } from './error.ts';
 import type { Awaitable, WebHandler } from './types.ts';
 import {
   extractVersionParameter,
@@ -149,13 +148,7 @@ export function createVersionedRouter<TVersionId extends string = string>(
     );
   };
 
-  return async request => {
-    try {
-      return withVary(await route(request), varyToken);
-    } catch (error) {
-      return withVary(errorResponse(error), varyToken);
-    }
-  };
+  return async request => withVary(await route(request), varyToken);
 }
 
 function respondVersionError(

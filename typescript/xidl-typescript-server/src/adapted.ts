@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { XidlServerError } from './error.ts';
+import { RequestFailure } from './error.ts';
 import { createRouter } from './router.ts';
 import type {
   Awaitable,
@@ -13,12 +13,49 @@ import {
   type VersionedRouterOptions,
 } from './versioned.ts';
 
-/** Structural contract matching generated `DispatchOutcome` from `typescript-rest-adapters`. */
-export interface AdapterDispatchOutcome {
-  dispatched: boolean;
-  projected?: boolean;
-  error?: unknown;
-  value?: { ok: true; value: unknown } | { ok: false; error: unknown };
+interface AdapterValidationError {
+  kind: 'Validation';
+  version: string;
+  operation: string;
+  issues: readonly unknown[];
+}
+
+interface AdapterProjectionFailure {
+  kind?: never;
+  version: string;
+  direction: 'upcast' | 'downcast';
+  typePath: string;
+  wireName?: string;
+  reason: string;
+}
+
+/** Structural contract matching the generated dispatch and projection union. */
+export type AdapterDispatchOutcome =
+  | {
+      dispatched: false;
+      error: AdapterValidationError | AdapterProjectionFailure;
+    }
+  | {
+      dispatched: true;
+      projected: false;
+      error: AdapterProjectionFailure;
+      head: unknown;
+    }
+  | {
+      dispatched: true;
+      projected: true;
+      value: { ok: true; value: unknown } | { ok: false; error: unknown };
+    };
+
+/** A conversion refusal retains the generated projection details and available Head outcome. */
+export class VersionProjectionError extends Error {
+  constructor(
+    readonly projection: AdapterProjectionFailure,
+    readonly head?: unknown,
+  ) {
+    super(projection.reason);
+    this.name = 'VersionProjectionError';
+  }
 }
 
 /** One operation dispatcher bound to its Head handler and adapter hooks. */
@@ -29,12 +66,7 @@ export interface AdapterOperationBinding<TVersionId extends string = string> {
   ) => Awaitable<AdapterDispatchOutcome>;
 }
 
-export interface AdaptedRouterOptions extends ServerOptions {
-  /** Converts a dispatch failure (`!dispatched`) into a thrown error. */
-  onDispatchError?: (error: unknown) => unknown;
-  /** Converts a downcast refusal (`!projected`) into a thrown error. */
-  onProjectionError?: (error: unknown) => unknown;
-}
+export type AdaptedRouterOptions = ServerOptions;
 
 export type OperationTable<TService> =
   | readonly OperationDescriptor<TService>[]
@@ -89,7 +121,7 @@ export function createAdaptedRouter<TVersionId extends string, TService>(
         }
       }
       const outcome = await binding.dispatch(version, raw);
-      return unwrapDispatchOutcome(outcome, options);
+      return unwrapDispatchOutcome(outcome);
     };
   }
 
@@ -167,28 +199,19 @@ export function createVersionedAdapterRouter<TVersionId extends string>(
   });
 }
 
-function unwrapDispatchOutcome(
-  outcome: AdapterDispatchOutcome,
-  options: AdaptedRouterOptions,
-): unknown {
+function unwrapDispatchOutcome(outcome: AdapterDispatchOutcome): unknown {
   if (!outcome.dispatched) {
-    if (options.onDispatchError) {
-      throw options.onDispatchError(outcome.error);
+    if (outcome.error.kind === 'Validation') {
+      throw new RequestFailure(
+        400,
+        'request validation failed',
+        outcome.error.issues,
+      );
     }
-    throw formatAdapterFailure(400, outcome.error, 'invalid versioned request');
+    throw new VersionProjectionError(outcome.error);
   }
   if (!outcome.projected) {
-    if (options.onProjectionError) {
-      throw options.onProjectionError(outcome.error);
-    }
-    throw formatAdapterFailure(
-      422,
-      outcome.error,
-      'cannot project response to requested version',
-    );
-  }
-  if (!outcome.value) {
-    throw new XidlServerError(500, 'adapter returned empty outcome');
+    throw new VersionProjectionError(outcome.error, outcome.head);
   }
   if (outcome.value.ok) {
     return outcome.value.value;
@@ -209,25 +232,4 @@ function isFrameworkError(
     (error as { kind?: unknown }).kind === 'Framework' &&
     'error' in error
   );
-}
-
-function formatAdapterFailure(
-  status: number,
-  error: unknown,
-  fallback: string,
-): XidlServerError {
-  if (error instanceof XidlServerError) {
-    return error;
-  }
-  if (typeof error === 'object' && error !== null) {
-    const reason = (error as { reason?: unknown }).reason;
-    if (typeof reason === 'string' && reason.length > 0) {
-      return new XidlServerError(status, reason);
-    }
-    const kind = (error as { kind?: unknown }).kind;
-    if (kind === 'Validation') {
-      return new XidlServerError(status, 'request validation failed');
-    }
-  }
-  return new XidlServerError(status, fallback);
 }

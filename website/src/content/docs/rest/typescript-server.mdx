@@ -59,9 +59,14 @@ struct User {
     string name;
 };
 
+@http(404)
+exception UserNotFound {
+    string reason;
+};
+
 interface UserService {
     @get(path = "/api/users/{id}")
-    User get_user(@path uint32 id);
+    User get_user(@path uint32 id) raises(UserNotFound);
 
     @post(path = "/api/users")
     User create_user(User user);
@@ -72,8 +77,8 @@ Implement the interface generated in `api.server.ts` once, and share it across
 all routers and route handlers:
 
 ```ts
-import { XidlServerError } from 'xidl-typescript-server';
 import type { User } from './generated/api';
+import { UserNotFound } from './generated/api.errors';
 import type { UserService } from './generated/api.server';
 
 export class AppUserService implements UserService {
@@ -82,7 +87,7 @@ export class AppUserService implements UserService {
   async get_user(id: number): Promise<User> {
     const user = this.users.get(id);
     if (!user) {
-      throw new XidlServerError(404, 'user not found');
+      throw new UserNotFound({ reason: 'user not found' });
     }
     return user;
   }
@@ -171,8 +176,8 @@ Next.js Route Handler contract:
 - Path, query, header, cookie, and body values are extracted, coerced, and
   validated against the generated Zod schema before the service method runs.
 - Invalid requests produce HTTP 400 responses, unsupported media types produce
-  415/406, and unhandled service errors produce HTTP 500.
-- Return the handler as a named export from `route.ts`; never call it manually.
+  415/406, and undeclared failures reject the route handler.
+- Export the handler from `route.ts` or compose it with your own error handling.
 
 ## Errors, Authorization, and Codecs
 
@@ -185,10 +190,7 @@ export const POST = createNextRoute(
   userService,
   {
     authorize: async (request, requirements) => {
-      // inspect headers/cookies, throw XidlServerError to reject
-    },
-    onError: async (error, context) => {
-      // map unexpected errors to a custom response
+      // Check the operation's security requirements.
     },
     codecs: {
       'application/msgpack': {
@@ -200,16 +202,38 @@ export const POST = createNextRoute(
 );
 ```
 
-- Throw `XidlServerError(code, msg)` from the service for an explicit
-  HTTP status and typed JSON error body. The HTTP status is set from `code`.
+- Throw an exception listed by the operation's `raises` declaration to use its
+  HTTP status, response body, and headers.
 - Invalid generated request schemas return HTTP 400 responses.
 - Unsupported request and response media types return HTTP 415 and 406.
 - `authorize` receives the original request, the operation's security
-  requirements, and a `ServerContext`; throw to reject the request.
+  requirements, and a `ServerContext`. It can reject with an application error.
 - `codecs` overrides request/response encoding per media type.
-- `onError` handles unexpected errors, for example to add logging; by default
-  errors that are not `XidlServerError` produce HTTP 500 with `msg` set to
-  `String(error)`.
+- A result that fails its response schema throws `ResponseValidationError`
+  with the validation issues. Provide `safeParse` on custom operation schemas
+  so the runtime can identify validation failures at the schema boundary.
+- An adapter conversion refusal throws `VersionProjectionError`. The error
+  carries the conversion facts in `projection` and any committed `head`
+  outcome from the original call.
+
+Handle undeclared exceptions around the router or through the host
+framework. Applications can use `XidlServerError` to pass a status, message,
+and optional headers to their own error handler. For example, an application
+can translate its authorization error at the boundary where it attaches the
+router:
+
+```ts
+export async function fetch(request: Request): Promise<Response> {
+  try {
+    return await handler(request);
+  } catch (error) {
+    if (error instanceof AuthorizationError) {
+      return new Response(null, { status: 401 });
+    }
+    throw error;
+  }
+}
+```
 
 ## Streaming
 
@@ -219,7 +243,15 @@ the service or route handler:
 
 - SSE server streams and NDJSON client streams work through the same
   `createRouter` / `createNextRoute` handlers.
+- Reading invalid NDJSON input throws `StreamInterruptedError` into the
+  service. A producer error frame can select a status from 400 through 599.
+  Other invalid input receives HTTP 400 if the response has yet to start.
 - `sequence<octet>` mapped to raw byte streams is served as `Response` bodies.
+- A declared SSE exception before the first item produces its HTTP response.
+  After the first item it produces a terminal error event. An undeclared
+  failure after the first item fails the response reader with the original
+  exception. To publish an intentional error event, catch the error in the
+  producer and throw an exception declared by the operation.
 
 ## Recommended Reading
 

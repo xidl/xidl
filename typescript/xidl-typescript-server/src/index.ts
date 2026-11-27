@@ -1,4 +1,4 @@
-export type { XidlSchema } from 'xidl-typescript-codec';
+export { StreamInterruptedError, type XidlSchema } from 'xidl-typescript-codec';
 export type {
   AdaptedRouterOptions,
   AdapterDispatchOutcome,
@@ -10,9 +10,10 @@ export type {
 export {
   createAdaptedRouter,
   createVersionedAdapterRouter,
+  VersionProjectionError,
 } from './adapted.ts';
-export { XidlServerError } from './error.ts';
-export { parseResponse, writeResponseBindings } from './response.ts';
+export { ResponseValidationError, XidlServerError } from './error.ts';
+export { writeResponseBindings } from './response.ts';
 export { createRouter } from './router.ts';
 export type {
   Awaitable,
@@ -34,6 +35,7 @@ export type {
   WebHandler,
 } from './types.ts';
 export { defineOperation } from './types.ts';
+export { parseResponse, type ServerSchema } from './validation.ts';
 export type {
   VersionEntry,
   VersionErrorKind,

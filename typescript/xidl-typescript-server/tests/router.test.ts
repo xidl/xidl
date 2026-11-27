@@ -3,7 +3,11 @@ import test from 'node:test';
 import { xjson } from 'xidl-typescript-codec';
 import { z } from 'zod';
 
-import { createRouter, defineOperation } from '../src/index.js';
+import {
+  createRouter,
+  defineOperation,
+  ResponseValidationError,
+} from '../src/index.js';
 
 interface ItemServer {
   createItem(name: string): { name: string };
@@ -103,9 +107,13 @@ test('response contract failures are server errors in every representation', asy
       new Request('http://test/items/invalid'),
     );
     assert.equal(invalidRequest.status, 400);
-    const invalidResponse = await serve(new Request('http://test/items/1'));
-    assert.equal(invalidResponse.status, 500);
-    assert.equal((await invalidResponse.json()).msg, 'invalid response');
+    await assert.rejects(
+      serve(new Request('http://test/items/1')),
+      error =>
+        error instanceof ResponseValidationError &&
+        error.message === 'invalid response' &&
+        error.issues.length === 1,
+    );
   }
 });
 

@@ -14,8 +14,7 @@ export function createNextRoute<TService, THandler extends keyof TService>(
     return executeOperation(
       operation,
       service,
-      request,
-      () => routeContext.params,
+      { request, resolveParams: () => routeContext.params },
       options,
     );
   };

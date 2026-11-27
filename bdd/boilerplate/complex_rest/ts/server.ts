@@ -87,6 +87,14 @@ const server = createServer(async (req, res) => {
     }
     res.end();
   } catch (err) {
+    if (err instanceof XidlServerError) {
+      res.writeHead(err.code, {
+        'Content-Type': 'application/json',
+        ...err.headers,
+      });
+      res.end(JSON.stringify({ code: err.code, msg: err.msg }));
+      return;
+    }
     console.error('Handler error:', err);
     res.statusCode = 500;
     res.end('Internal Server Error');
