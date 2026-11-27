@@ -46,7 +46,7 @@ fn imported_unit_changes_trigger_drift_while_unrelated_imported_versions_stay_st
     assert!(
         VersionLock::from_file(&root_idl)
             .unwrap()
-            .check(&lock, false)
+            .check(&lock)
             .unwrap()
             .is_clean()
     );
@@ -65,7 +65,7 @@ fn imported_unit_changes_trigger_drift_while_unrelated_imported_versions_stay_st
     .unwrap();
     let drift = VersionLock::from_file(&root_idl)
         .unwrap()
-        .check(&lock, false)
+        .check(&lock)
         .unwrap();
     assert!(
         matches!(

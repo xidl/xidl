@@ -27,7 +27,13 @@ Feature: version lock and check
     And I lock only version "2026-12-01"
     Then the lock contains only "2026-12-01"
     When I rename a field added in the second version
-    Then a strict check of only version "2026-12-01" succeeds
+    Then checking only version "2026-12-01" succeeds
     And checking only version "2027-06-01" reports it is not locked
     When I lock only version "2026-12-01"
     Then the lock contains only "2026-12-01"
+
+  Scenario: an explicit empty version set clears the lock
+    Given a temporary workspace with a single-version IDL contract
+    When I lock the contract versions with xidlc version lock
+    And I lock the explicit empty version set
+    Then the lock contains no versions and the empty version check succeeds

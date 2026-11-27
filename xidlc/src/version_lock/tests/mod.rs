@@ -75,18 +75,16 @@ fn locked_version_stays_stable_when_later_versions_or_comments_are_added() {
     )
     .unwrap();
 
-    let check = VersionLock::from_file(&idl)
-        .unwrap()
-        .check(&lock, false)
-        .unwrap();
+    let check = VersionLock::from_file(&idl).unwrap().check(&lock).unwrap();
     assert!(check.is_clean(), "{:?}", check.drifts);
 
-    let strict = VersionLock::from_file(&idl)
+    let selected = VersionLock::from_file(&idl)
         .unwrap()
-        .check(&lock, true)
+        .with_versions(Some(["2026-12-01".into(), "2027-06-01".into()].into()))
+        .check(&lock)
         .unwrap();
     assert_eq!(
-        strict.drifts,
+        selected.drifts,
         vec![LockDrift::Unlocked {
             version: "2027-06-01".into(),
             id: "v2".into(),
@@ -150,10 +148,7 @@ fn detects_silent_edit_removed_version_and_parameter_changes() {
     .unwrap();
 
     let before_refusal = std::fs::read_to_string(&lock).unwrap();
-    let report = VersionLock::from_file(&idl)
-        .unwrap()
-        .check(&lock, false)
-        .unwrap();
+    let report = VersionLock::from_file(&idl).unwrap().check(&lock).unwrap();
     assert_eq!(report.drifts.len(), 2);
     assert!(
         report.drifts.iter().all(|drift| matches!(
@@ -189,7 +184,7 @@ fn detects_silent_edit_removed_version_and_parameter_changes() {
     assert!(
         VersionLock::from_file(&idl)
             .unwrap()
-            .check(&lock, false)
+            .check(&lock)
             .unwrap()
             .is_clean()
     );
@@ -211,10 +206,7 @@ fn detects_silent_edit_removed_version_and_parameter_changes() {
         "#,
     )
     .unwrap();
-    let param_drift = VersionLock::from_file(&idl)
-        .unwrap()
-        .check(&lock, false)
-        .unwrap();
+    let param_drift = VersionLock::from_file(&idl).unwrap().check(&lock).unwrap();
     assert_eq!(param_drift.drifts.len(), 2);
     assert!(
         param_drift
@@ -239,10 +231,7 @@ fn detects_silent_edit_removed_version_and_parameter_changes() {
         "#,
     )
     .unwrap();
-    let removed = VersionLock::from_file(&idl)
-        .unwrap()
-        .check(&lock, false)
-        .unwrap();
+    let removed = VersionLock::from_file(&idl).unwrap().check(&lock).unwrap();
     assert_eq!(
         removed.drifts,
         vec![LockDrift::Removed {
@@ -260,19 +249,19 @@ fn invalid_lock_files_and_missing_paths_return_typed_errors() {
     let lock = VersionLock::from_file(&idl).unwrap();
 
     let missing = dir.path().join("missing.lock.json");
-    let missing_err = lock.check(&missing, false).unwrap_err().to_string();
+    let missing_err = lock.check(&missing).unwrap_err().to_string();
     assert!(missing_err.contains("cannot read"), "{missing_err}");
 
     let bad_json = dir.path().join("bad.lock.json");
     std::fs::write(&bad_json, "not json").unwrap();
-    let bad_json_err = lock.check(&bad_json, false).unwrap_err().to_string();
+    let bad_json_err = lock.check(&bad_json).unwrap_err().to_string();
     assert!(bad_json_err.contains("invalid JSON"), "{bad_json_err}");
     let write_bad_err = lock.write_lock(&bad_json, false).unwrap_err().to_string();
     assert!(write_bad_err.contains("invalid JSON"), "{write_bad_err}");
 
     let bad_schema = dir.path().join("future.lock.json");
     std::fs::write(&bad_schema, r#"{"schema_version": 99, "versions": {}}"#).unwrap();
-    let err = lock.check(&bad_schema, false).unwrap_err().to_string();
+    let err = lock.check(&bad_schema).unwrap_err().to_string();
     assert!(err.contains("schema_version 99"), "{err}");
 
     assert_eq!(
