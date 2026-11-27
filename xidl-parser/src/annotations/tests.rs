@@ -9,19 +9,38 @@ fn lookup_matches_canonical_case_and_hyphenated_spellings() {
     assert_eq!(definition.name, "client_stream");
     assert_eq!(definition.kind, AnnotationKind::ClientStream);
     assert_eq!(
-        AnnotationDefinition::lookup("client_stream").map(|entry| entry.name),
-        Some("client_stream")
+        AnnotationDefinition::lookup("Client_Stream").map(|entry| entry.kind),
+        Some(AnnotationKind::ClientStream)
     );
-    assert!(AnnotationDefinition::lookup("unknown-annotation").is_none());
-    assert!(AnnotationDefinition::lookup("doc").is_none());
+    assert_eq!(
+        AnnotationKind::from_name("CLIENT-STREAM"),
+        Some(AnnotationKind::ClientStream)
+    );
+    for unknown in [
+        "",
+        "unknown-annotation",
+        "doc",
+        "client--stream",
+        "@optional",
+    ] {
+        assert!(AnnotationDefinition::lookup(unknown).is_none(), "{unknown}");
+        assert!(AnnotationKind::from_name(unknown).is_none(), "{unknown}");
+    }
 }
 
 #[test]
 fn passthrough_matches_target_prefixes_case_insensitively() {
-    for name in ["rust-derive", "RUST_derive", "ts-special", "TS_special"] {
+    for name in [
+        "rust-derive",
+        "RUST_derive",
+        "ts-special",
+        "TS_special",
+        "rust-",
+        "ts_",
+    ] {
         assert!(AnnotationDefinition::is_passthrough(name), "{name}");
     }
-    for name in ["relay_audit", "rust", "typescript", ""] {
+    for name in ["relay_audit", "rust", "ts", "typescript", ""] {
         assert!(!AnnotationDefinition::is_passthrough(name), "{name}");
     }
 }
@@ -61,14 +80,21 @@ fn builtin_table_is_unique_and_consistent_with_lookups() {
 #[test]
 fn argument_shapes_and_lifecycle_kinds_remain_typed() {
     let upgrade = AnnotationDefinition::lookup("upgrade").expect("upgrade exists");
-    assert!(matches!(
+    assert_eq!(
         upgrade.arguments,
-        ArgumentShape::Named { required, optional }
-            if required == ["protocol"]
-                && optional.contains(&"heartbeat")
-    ));
-    assert!(AnnotationKind::Version.is_lifecycle());
-    assert!(AnnotationKind::Added.is_lifecycle());
-    assert!(AnnotationKind::Removed.is_lifecycle());
-    assert!(!AnnotationKind::Deprecated.is_lifecycle());
+        ArgumentShape::Named {
+            required: &["protocol"],
+            optional: &["codec", "subprotocol", "heartbeat", "max_message"],
+        }
+    );
+
+    let lifecycle_names: BTreeSet<_> = BUILTIN_ANNOTATIONS
+        .iter()
+        .filter(|entry| entry.kind.is_lifecycle())
+        .map(|entry| entry.name)
+        .collect();
+    assert_eq!(
+        lifecycle_names,
+        BTreeSet::from(["added", "removed", "version"])
+    );
 }
