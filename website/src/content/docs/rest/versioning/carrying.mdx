@@ -49,7 +49,7 @@ adapter dispatchers. Applications and gateways can also resolve and route the
 version themselves.
 
 Both routers use `versions` for mounted versions. Each entry supplies a
-handler or an operation table. The optional `retired` list holds the wire
+handler or a list of bound interfaces. The optional `retired` list holds the wire
 values of retired versions. A matching request returns HTTP 410 with
 `retiredVersion`. An unknown value returns HTTP 400. `supportedVersions`
 contains the mounted wire values, and `defaultVersion` names a mounted ID.

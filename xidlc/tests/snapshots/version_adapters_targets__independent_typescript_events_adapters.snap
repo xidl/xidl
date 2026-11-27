@@ -710,18 +710,27 @@ export type DispatchOutcome<T, Head> =
 
 
 
+
+
+
+
+
+
+
+
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastNotifierEmitFromV20260101(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2026_07_01.NotifierEmitRequest> {
-        const parsed = wireRequest0Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-01-01", operation: "Notifier.emit", issues: parsed.error.issues } };
         
-            const step0 = upcastNotifierEmitRequestFromV20260101(parsed.data, adapters);
+            const parsed = wireRequest0Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-01-01", operation: "Notifier.emit", issues: parsed.error.issues } };
+            const data = parsed.data;
+            const step0 = upcastNotifierEmitRequestFromV20260101(data, adapters);
             if (!step0.ok) return step0;
-        
             const step1 = upcastNotifierEmitRequestFromV20260401(step0.value, adapters);
             if (!step1.ok) return step1;
+            return step1;
         
-        return step1;
     }
     export function downcastNotifierEmitResultToV20260101(head: types.v2026_07_01.Event, adapters: VersionAdapters): VersionedResult<types.v2026_01_01.Event> {
         
@@ -753,29 +762,33 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchNotifierEmitFromV20260101(
-    raw: unknown,
-    handler: (request: ifaceTypes.v2026_07_01.NotifierEmitRequest, context: VersionContext) => Promise<OperationOutcome<types.v2026_07_01.Event, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.v2026_07_01.NotifierEmitRequest, context: VersionContext) => Promise<OperationOutcome<types.v2026_07_01.Event, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v2026_01_01.Event, FrameworkError>, OperationOutcome<types.v2026_07_01.Event, FrameworkError>>> {
-        const request = decodeAndUpcastNotifierEmitFromV20260101(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "2026-01-01", originalVersionId: "v2026_01_01" });
-        return { dispatched: true, ...downcastNotifierEmitOutcomeToV20260101(head, adapters) };
+        
+            const request = decodeAndUpcastNotifierEmitFromV20260101(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "2026-01-01", originalVersionId: "v2026_01_01" });
+            return { dispatched: true, ...downcastNotifierEmitOutcomeToV20260101(head, adapters) };
+        
     }
 
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastNotifierFeedFromV20260101(raw: unknown, adapters: VersionAdapters): DecodeResult<{  }> {
-        const parsed = wireRequest3Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-01-01", operation: "Notifier.feed", issues: parsed.error.issues } };
         
-            const step0 = upcastNotifierFeedRequestFromV20260101(parsed.data, adapters);
+            const parsed = wireRequest3Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-01-01", operation: "Notifier.feed", issues: parsed.error.issues } };
+            const data = parsed.data;
+            const step0 = upcastNotifierFeedRequestFromV20260101(data, adapters);
             if (!step0.ok) return step0;
-        
             const step1 = upcastNotifierFeedRequestFromV20260401(step0.value, adapters);
             if (!step1.ok) return step1;
+            return step1;
         
-        return step1;
     }
     export function downcastNotifierFeedResultToV20260101(head: Array<types.v2026_07_01.Event>, adapters: VersionAdapters): VersionedResult<Array<types.v2026_01_01.Event>> {
         
@@ -807,26 +820,31 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchNotifierFeedFromV20260101(
-    raw: unknown,
-    handler: (request: {  }, context: VersionContext) => Promise<OperationOutcome<Array<types.v2026_07_01.Event>, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: {  }, context: VersionContext) => Promise<OperationOutcome<Array<types.v2026_07_01.Event>, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<Array<types.v2026_01_01.Event>, FrameworkError>, OperationOutcome<Array<types.v2026_07_01.Event>, FrameworkError>>> {
-        const request = decodeAndUpcastNotifierFeedFromV20260101(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "2026-01-01", originalVersionId: "v2026_01_01" });
-        return { dispatched: true, ...downcastNotifierFeedOutcomeToV20260101(head, adapters) };
+        
+            const request = decodeAndUpcastNotifierFeedFromV20260101(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "2026-01-01", originalVersionId: "v2026_01_01" });
+            return { dispatched: true, ...downcastNotifierFeedOutcomeToV20260101(head, adapters) };
+        
     }
 
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastNotifierEmitFromV20260401(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2026_07_01.NotifierEmitRequest> {
-        const parsed = wireRequest4Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04-01", operation: "Notifier.emit", issues: parsed.error.issues } };
         
-            const step0 = upcastNotifierEmitRequestFromV20260401(parsed.data, adapters);
+            const parsed = wireRequest4Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04-01", operation: "Notifier.emit", issues: parsed.error.issues } };
+            const data = parsed.data;
+            const step0 = upcastNotifierEmitRequestFromV20260401(data, adapters);
             if (!step0.ok) return step0;
+            return step0;
         
-        return step0;
     }
     export function downcastNotifierEmitResultToV20260401(head: types.v2026_07_01.Event, adapters: VersionAdapters): VersionedResult<types.v2026_04_01.Event> {
         
@@ -852,26 +870,31 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchNotifierEmitFromV20260401(
-    raw: unknown,
-    handler: (request: ifaceTypes.v2026_07_01.NotifierEmitRequest, context: VersionContext) => Promise<OperationOutcome<types.v2026_07_01.Event, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.v2026_07_01.NotifierEmitRequest, context: VersionContext) => Promise<OperationOutcome<types.v2026_07_01.Event, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v2026_04_01.Event, FrameworkError>, OperationOutcome<types.v2026_07_01.Event, FrameworkError>>> {
-        const request = decodeAndUpcastNotifierEmitFromV20260401(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "2026-04-01", originalVersionId: "v2026_04_01" });
-        return { dispatched: true, ...downcastNotifierEmitOutcomeToV20260401(head, adapters) };
+        
+            const request = decodeAndUpcastNotifierEmitFromV20260401(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "2026-04-01", originalVersionId: "v2026_04_01" });
+            return { dispatched: true, ...downcastNotifierEmitOutcomeToV20260401(head, adapters) };
+        
     }
 
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastNotifierFeedFromV20260401(raw: unknown, adapters: VersionAdapters): DecodeResult<{  }> {
-        const parsed = wireRequest7Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04-01", operation: "Notifier.feed", issues: parsed.error.issues } };
         
-            const step0 = upcastNotifierFeedRequestFromV20260401(parsed.data, adapters);
+            const parsed = wireRequest7Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-04-01", operation: "Notifier.feed", issues: parsed.error.issues } };
+            const data = parsed.data;
+            const step0 = upcastNotifierFeedRequestFromV20260401(data, adapters);
             if (!step0.ok) return step0;
+            return step0;
         
-        return step0;
     }
     export function downcastNotifierFeedResultToV20260401(head: Array<types.v2026_07_01.Event>, adapters: VersionAdapters): VersionedResult<Array<types.v2026_04_01.Event>> {
         
@@ -897,23 +920,29 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchNotifierFeedFromV20260401(
-    raw: unknown,
-    handler: (request: {  }, context: VersionContext) => Promise<OperationOutcome<Array<types.v2026_07_01.Event>, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: {  }, context: VersionContext) => Promise<OperationOutcome<Array<types.v2026_07_01.Event>, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<Array<types.v2026_04_01.Event>, FrameworkError>, OperationOutcome<Array<types.v2026_07_01.Event>, FrameworkError>>> {
-        const request = decodeAndUpcastNotifierFeedFromV20260401(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "2026-04-01", originalVersionId: "v2026_04_01" });
-        return { dispatched: true, ...downcastNotifierFeedOutcomeToV20260401(head, adapters) };
+        
+            const request = decodeAndUpcastNotifierFeedFromV20260401(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "2026-04-01", originalVersionId: "v2026_04_01" });
+            return { dispatched: true, ...downcastNotifierFeedOutcomeToV20260401(head, adapters) };
+        
     }
 
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastNotifierEmitFromV20260701(raw: unknown, adapters: VersionAdapters): DecodeResult<ifaceTypes.v2026_07_01.NotifierEmitRequest> {
-        const parsed = wireRequest8Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07-01", operation: "Notifier.emit", issues: parsed.error.issues } };
         
-        return ok(parsed.data);
+            const parsed = wireRequest8Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07-01", operation: "Notifier.emit", issues: parsed.error.issues } };
+            const data = parsed.data;
+            return ok(data);
+        
     }
     export function downcastNotifierEmitResultToV20260701(head: types.v2026_07_01.Event, adapters: VersionAdapters): VersionedResult<types.v2026_07_01.Event> {
         
@@ -933,23 +962,29 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchNotifierEmitFromV20260701(
-    raw: unknown,
-    handler: (request: ifaceTypes.v2026_07_01.NotifierEmitRequest, context: VersionContext) => Promise<OperationOutcome<types.v2026_07_01.Event, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: ifaceTypes.v2026_07_01.NotifierEmitRequest, context: VersionContext) => Promise<OperationOutcome<types.v2026_07_01.Event, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<types.v2026_07_01.Event, FrameworkError>, OperationOutcome<types.v2026_07_01.Event, FrameworkError>>> {
-        const request = decodeAndUpcastNotifierEmitFromV20260701(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "2026-07-01", originalVersionId: "v2026_07_01" });
-        return { dispatched: true, ...downcastNotifierEmitOutcomeToV20260701(head, adapters) };
+        
+            const request = decodeAndUpcastNotifierEmitFromV20260701(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "2026-07-01", originalVersionId: "v2026_07_01" });
+            return { dispatched: true, ...downcastNotifierEmitOutcomeToV20260701(head, adapters) };
+        
     }
 
+    
     /** raw is a source-parameter envelope; its nested payloads still use wire keys. */
     export function decodeAndUpcastNotifierFeedFromV20260701(raw: unknown, adapters: VersionAdapters): DecodeResult<{  }> {
-        const parsed = wireRequest11Schema.safeParse(raw);
-        if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07-01", operation: "Notifier.feed", issues: parsed.error.issues } };
         
-        return ok(parsed.data);
+            const parsed = wireRequest11Schema.safeParse(raw);
+            if (!parsed.success) return { ok: false, error: { kind: "Validation", version: "2026-07-01", operation: "Notifier.feed", issues: parsed.error.issues } };
+            const data = parsed.data;
+            return ok(data);
+        
     }
     export function downcastNotifierFeedResultToV20260701(head: Array<types.v2026_07_01.Event>, adapters: VersionAdapters): VersionedResult<Array<types.v2026_07_01.Event>> {
         
@@ -969,15 +1004,18 @@ export type DispatchOutcome<T, Head> =
         return result.ok ? { projected: true, value: { ok: false, error: result.value } } : { projected: false, head, error: result.error };
     }
     
+    
     export async function dispatchNotifierFeedFromV20260701(
-    raw: unknown,
-    handler: (request: {  }, context: VersionContext) => Promise<OperationOutcome<Array<types.v2026_07_01.Event>, FrameworkError>>,
-    adapters: VersionAdapters,
+        raw: unknown,
+        handler: (request: {  }, context: VersionContext) => Promise<OperationOutcome<Array<types.v2026_07_01.Event>, FrameworkError>>,
+        adapters: VersionAdapters,
     ): Promise<DispatchOutcome<OperationOutcome<Array<types.v2026_07_01.Event>, FrameworkError>, OperationOutcome<Array<types.v2026_07_01.Event>, FrameworkError>>> {
-        const request = decodeAndUpcastNotifierFeedFromV20260701(raw, adapters);
-        if (!request.ok) return { dispatched: false, error: request.error };
-        const head = await handler(request.value, { originalVersion: "2026-07-01", originalVersionId: "v2026_07_01" });
-        return { dispatched: true, ...downcastNotifierFeedOutcomeToV20260701(head, adapters) };
+        
+            const request = decodeAndUpcastNotifierFeedFromV20260701(raw, adapters);
+            if (!request.ok) return { dispatched: false, error: request.error };
+            const head = await handler(request.value, { originalVersion: "2026-07-01", originalVersionId: "v2026_07_01" });
+            return { dispatched: true, ...downcastNotifierFeedOutcomeToV20260701(head, adapters) };
+        
     }
 
 
@@ -1027,6 +1065,139 @@ export type DispatchOutcome<T, Head> =
         
             feed: dispatchNotifierFeed,
         
+    } as const;
+
+
+
+    type $xidlOperationTable<Handler extends string> = {
+        readonly [Key in Handler]: import("xidl-typescript-server").OperationDescriptor<Record<Key, unknown>, Key>;
+    };
+
+    
+    type $xidlNotifierSource =
+        
+            | {
+                id: "v2026_01_01";
+                tables:
+                
+                    { readonly NotifierOperations:
+                
+                $xidlOperationTable<"emit" | "feed">
+                 };
+            }
+        
+            | {
+                id: "v2026_04_01";
+                tables:
+                
+                    { readonly NotifierOperations:
+                
+                $xidlOperationTable<"emit" | "feed">
+                 };
+            }
+        
+            | {
+                id: "v2026_07_01";
+                tables:
+                
+                    { readonly NotifierOperations:
+                
+                $xidlOperationTable<"emit" | "feed">
+                 };
+            }
+        ;
+    
+
+    /** Binds each interface's generated dispatchers to its Head service and adapter hooks. */
+    export const bindVersionedInterfaces = {
+    
+    "Notifier"<Source extends $xidlNotifierSource>(
+    source: Source,
+    service: {
+        
+            emit: (request: ifaceTypes.v2026_07_01.NotifierEmitRequest, context: VersionContext) => Promise<OperationOutcome<types.v2026_07_01.Event, FrameworkError>>;
+        
+            feed: (request: {  }, context: VersionContext) => Promise<OperationOutcome<Array<types.v2026_07_01.Event>, FrameworkError>>;
+        
+    },
+    adapters: VersionAdapters,
+    
+    ): import("xidl-typescript-server").BoundInterface<Source["id"]> {
+        const version: Source["id"] = source.id;
+        const bindings = {
+            
+                emit: {
+                    
+                        dispatch: (version: VersionId, raw: Record<string, unknown>) => NotifierDispatchers.emit(version, raw, service.emit.bind(service), adapters),
+                    
+                },
+            
+                feed: {
+                    
+                        dispatch: (version: VersionId, raw: Record<string, unknown>) => NotifierDispatchers.feed(version, raw, service.feed.bind(service), adapters),
+                    
+                },
+            
+        };
+        switch (source.id) {
+            
+                case "v2026_01_01":
+                    return {
+                        version,
+                        operations: [
+                            
+                                {
+                                    operation: source.tables.NotifierOperations.emit,
+                                    binding: bindings.emit,
+                                },
+                            
+                                {
+                                    operation: source.tables.NotifierOperations.feed,
+                                    binding: bindings.feed,
+                                },
+                            
+                        ],
+                    };
+            
+                case "v2026_04_01":
+                    return {
+                        version,
+                        operations: [
+                            
+                                {
+                                    operation: source.tables.NotifierOperations.emit,
+                                    binding: bindings.emit,
+                                },
+                            
+                                {
+                                    operation: source.tables.NotifierOperations.feed,
+                                    binding: bindings.feed,
+                                },
+                            
+                        ],
+                    };
+            
+                case "v2026_07_01":
+                    return {
+                        version,
+                        operations: [
+                            
+                                {
+                                    operation: source.tables.NotifierOperations.emit,
+                                    binding: bindings.emit,
+                                },
+                            
+                                {
+                                    operation: source.tables.NotifierOperations.feed,
+                                    binding: bindings.feed,
+                                },
+                            
+                        ],
+                    };
+            
+        }
+    },
+    
     } as const;
 
 

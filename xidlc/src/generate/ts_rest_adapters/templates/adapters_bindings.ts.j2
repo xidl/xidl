@@ -1,0 +1,97 @@
+{% for group in interface_dispatchers %}
+    /** Typed dispatcher lookup keyed by generated server operation handler name. */
+    export const {{ group.name }} = {
+        {% for entry in group.entries %}
+            {{ entry.handler }}: dispatch{{ entry.prefix }},
+        {% endfor %}
+    } as const;
+{% endfor %}
+
+{% if interface_dispatchers %}
+    type $xidlOperationTable<Handler extends string> = {
+        readonly [Key in Handler]: import("xidl-typescript-server").OperationDescriptor<Record<Key, unknown>, Key>;
+    };
+
+    {% for group in interface_dispatchers %}
+    type {{ group.source }} =
+        {% for mount in group.mounts %}
+            | {
+                id: {{ mount.id | tojson }};
+                tables:
+                {% for segment in group.table_path %}
+                    { readonly {{ segment }}:
+                {% endfor %}
+                $xidlOperationTable<{% for handler in mount.handlers %}{{ handler | tojson }}{% if not loop.last %} | {% endif %}{% endfor %}>
+                {% for segment in group.table_path %} }{% endfor %};
+            }
+        {% endfor %};
+    {% endfor %}
+
+    /** Binds each interface's generated dispatchers to its Head service and adapter hooks. */
+    export const bindVersionedInterfaces = {
+    {% for group in interface_dispatchers %}
+    {{ group.interface | tojson }}<Source extends {{ group.source }}>(
+    source: Source,
+    service: {
+        {% for entry in group.entries %}
+            {{ entry.handler }}: {{ head_handler(entry.service) }};
+        {% endfor %}
+    },
+    adapters: VersionAdapters,
+    {% if group.readers %}
+    current: {
+        {% for reader in group.readers %}
+            {{ reader.handler }}: (
+                ...args: {% for version in reader.versions %}[version: {{ version.id | tojson }}, request: z.output<typeof {{ version.request_schema }}>]{% if not loop.last %} | {% endif %}{% endfor %}
+            ) => {{ m.render_type(reader.result) }} | Promise<{{ m.render_type(reader.result) }}>;
+        {% endfor %}
+    },
+    {% endif %}
+    ): import("xidl-typescript-server").BoundInterface<Source["id"]> {
+        const version: Source["id"] = source.id;
+        const bindings = {
+            {% for entry in group.entries %}
+                {{ entry.handler }}: {
+                    {% if entry.dispatch %}
+                        async dispatch(version: VersionId, raw: Record<string, unknown>) {
+                            const handler = service.{{ entry.handler }}.bind(service);
+                            switch (version) {
+                                {% for variant in entry.dispatch.cases %}
+                                    case {{ variant.id | tojson }}:
+                                        return {{ variant.function }}(raw,
+                                            {% if variant.read_current %}request => current.{{ entry.handler }}(version, request),{% endif %}
+                                            {% if variant.supply_empty_stored %}(request, context) => handler(request, context, {}),{% else %}handler,{% endif %}
+                                            adapters);
+                                {% endfor %}
+                                {% if entry.dispatch.unavailable %}
+                                    default:
+                                        return { dispatched: false as const, error: { version, direction: "upcast" as const, typePath: {{ entry.dispatch.unavailable | tojson }}, reason: "operation is not available in this version" } };
+                                {% endif %}
+                            }
+                        },
+                    {% else %}
+                        dispatch: (version: VersionId, raw: Record<string, unknown>) => {{ group.name }}.{{ entry.handler }}(version, raw, service.{{ entry.handler }}.bind(service), adapters),
+                    {% endif %}
+                },
+            {% endfor %}
+        };
+        switch (source.id) {
+            {% for mount in group.mounts %}
+                case {{ mount.id | tojson }}:
+                    return {
+                        version,
+                        operations: [
+                            {% for handler in mount.handlers %}
+                                {
+                                    operation: source.tables.{{ group.table_path | join(".") }}.{{ handler }},
+                                    binding: bindings.{{ handler }},
+                                },
+                            {% endfor %}
+                        ],
+                    };
+            {% endfor %}
+        }
+    },
+    {% endfor %}
+    } as const;
+{% endif %}

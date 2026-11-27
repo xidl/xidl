@@ -1,16 +1,14 @@
 //! Assemble resolved-version entry points that compose the adjacent conversions.
 
-use super::context::{
-    Dispatcher, DispatcherVersion, Endpoint, FileContext, InterfaceDispatcher,
-    InterfaceDispatcherEntry,
-};
+use super::bindings::InterfaceBindings;
+use super::context::{Dispatcher, DispatcherVersion, Endpoint, FileContext};
 use super::names::Names;
 use super::render::AdapterRenderer;
 use super::wire::WireDecoderBuilder;
 use crate::error::{IdlcError, IdlcResult};
 use crate::generate::adapter::{Member, Operation};
 use crate::generate::typescript::definition::contexts::TsType;
-use crate::generate::typescript::definition::names::{method_struct_prefix, ts_ident};
+use crate::generate::typescript::definition::names::method_struct_prefix;
 use convert_case::{Case, Casing};
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -30,7 +28,7 @@ impl AdapterRenderer<'_> {
         };
         let mut wire = WireDecoderBuilder::new(self.plan);
         let mut dispatchers: BTreeMap<String, Dispatcher> = BTreeMap::new();
-        let mut interface_dispatchers: BTreeMap<String, BTreeMap<String, String>> = BTreeMap::new();
+        let mut bindings = InterfaceBindings::default();
         for (index, version) in self.plan.versions.iter().enumerate() {
             let keys = version.surface.types.keys().cloned().collect();
             let names = Names {
@@ -61,16 +59,7 @@ impl AdapterRenderer<'_> {
                 } else {
                     format!("{}_{}", operation.scope.join("_"), base)
                 };
-                let iface_name = if operation.scope.is_empty() {
-                    ts_ident(interface)
-                } else {
-                    format!("{}_{}", operation.scope.join("_"), ts_ident(interface))
-                };
-                let dispatchers_suffix = "Dispatchers";
-                interface_dispatchers
-                    .entry(format!("{iface_name}{dispatchers_suffix}"))
-                    .or_default()
-                    .insert(ts_ident(&operation.name), format!("dispatch{prefix}"));
+                bindings.record(operation, interface, key)?;
                 let request = self.request_type(operation, &names)?;
                 let result = self.result_type(&operation.outputs, &names)?;
                 let head_request = self.request_type(head_operation, &head_names)?;
@@ -135,6 +124,7 @@ impl AdapterRenderer<'_> {
                 dispatcher.versions.push(DispatcherVersion {
                     id: version.version.id.clone(),
                     pascal: from.clone(),
+                    request_schema: schema.clone(),
                     current,
                     stored: stored_type.is_some(),
                 });
@@ -172,20 +162,8 @@ impl AdapterRenderer<'_> {
                 .into_iter()
                 .collect();
         }
+        file.interface_dispatchers = bindings.render(&dispatchers, self.plan.versions.len())?;
         file.dispatchers = dispatchers.into_values().collect();
-        file.interface_dispatchers = interface_dispatchers
-            .into_iter()
-            .map(|(name, entries)| InterfaceDispatcher {
-                name,
-                entries: entries
-                    .into_iter()
-                    .map(|(handler, dispatcher)| InterfaceDispatcherEntry {
-                        handler,
-                        dispatcher,
-                    })
-                    .collect(),
-            })
-            .collect();
         file.wire_definitions = wire.finish();
         Ok(())
     }
