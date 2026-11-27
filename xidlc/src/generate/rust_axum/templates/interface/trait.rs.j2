@@ -1,0 +1,53 @@
+{%- macro trait_return_ty(method) -%}
+{%- if method.trait_return_kind == "byte_stream" -%}
+xidl_rust_axum::stream::ByteStream
+{%- elif method.trait_return_kind == "sse_stream" -%}
+xidl_rust_axum::stream::SseStream<{{ method.response_ty }}{% if method.has_raises %}, {{ method.error_ty }}{% endif %}>
+{%- elif method.trait_return_kind == "unit" -%}
+()
+{%- elif method.trait_return_kind == "upgrade" -%}
+::xidl_rust_axum::axum::response::Response
+{%- else -%}
+{{ method.response_ty }}
+{%- endif -%}
+{%- endmacro -%}
+{% if rust_attrs and rust_attrs | length > 0 -%}
+    {% for attr in rust_attrs -%}
+        #[{{ attr }}]
+    {% endfor -%}
+{%- endif -%}
+{% if opt.enable_server %}
+    {% if opt.mock -%}
+        #[allow(deprecated, useless_deprecated)]
+        #[mockall::automock]
+    {%- endif %}
+    #[allow(non_snake_case, unused_attributes, unused_variables, unused_mut, unreachable_code, clippy::let_unit_value)]
+    #[async_trait::async_trait]
+    pub trait {{ ident }} {
+        {% for method in methods %}
+            {% if method.deprecated_param_notes | length > 0 %}
+                ///
+                /// # Deprecated parameters
+                ///
+                {% for note in method.deprecated_param_notes %}
+                    /// {{ note }}
+                {% endfor %}
+            {% endif %}
+            {% if method.rust_attrs and method.rust_attrs | length > 0 %}
+                {% for attr in method.rust_attrs %}
+                    #[{{ attr }}]
+                {% endfor %}
+            {% endif %}
+            {%- if method.deprecated %}
+                #[deprecated{% if method.deprecated_note %}(note = "{{ method.deprecated_note }}"){% endif %}]
+            {% endif -%}
+                async fn {{ method.name }}(
+                &self{% if method.is_streaming %},
+                req: ::xidl_rust_axum::Request<{{ method.request_payload_ty }}>{% if method.handshake_params | length > 0 %},
+                {{ method.handshake_params | join(", ") }}{% endif %}{% else %}{% if method.server_params | length > 0 %},
+                {{ method.server_params | join(", ") }}{% endif %}{% if method.is_upgrade %},
+                upgrade: ::xidl_rust_axum::upgrade::Upgrade{% endif %}{% endif %}
+                ) -> {% if method.has_raises %}::std::result::Result<{{ trait_return_ty(method) }}, {{ method.error_ty }}>{% else %}::xidl_rust_axum::Result<{{ trait_return_ty(method) }}>{% endif %};
+            {% endfor %}
+        }
+    {% endif %}

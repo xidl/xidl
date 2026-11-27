@@ -6,6 +6,7 @@ use crate::generate::rust_axum::interface::{
         cors_layer, deprecated_context_from_http, http_method_code, http_method_fn,
         http_method_from_hir, reqwest_method_code, security_context,
     },
+    interface_method_flags::MethodFlags,
     interface_method_params::{MethodParams, collect_method_params},
     interface_method_support::{
         ensure_streaming_constraints, method_struct_prefix, op_decode_expr, op_encode_expr,
@@ -288,6 +289,7 @@ pub(crate) fn render_op_from_http(
     };
 
     Ok(MethodContext {
+        flags: MethodFlags::default(),
         name: method_name.clone(),
         raw_name: op.ident.clone(),
         rust_attrs: rust_passthrough_attrs_from_annotations(&op.annotations),
@@ -391,5 +393,6 @@ pub(crate) fn render_op_from_http(
         },
         representations,
         response_union,
-    })
+    }
+    .with_computed_flags())
 }

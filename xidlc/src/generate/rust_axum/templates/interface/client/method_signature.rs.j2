@@ -1,0 +1,2 @@
+        #[allow(clippy::useless_conversion, unused_mut, unreachable_code, unused_variables{% if method.raises_deprecated %}, deprecated{% endif %})]
+        pub async fn {{ method.name }}(&self{% if method.params | length > 0 %}, {{ method.params | join(", ") }}{% endif %}) -> Result<{{ client_return_ty(method) }}, {% if method.has_raises %}{{ method.error_ty }}{% else %}xidl_rust_axum::Error{% endif %}> {

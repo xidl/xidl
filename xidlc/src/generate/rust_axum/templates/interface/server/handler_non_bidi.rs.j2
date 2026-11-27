@@ -1,0 +1,6 @@
+{% if not method.is_bidi_stream %}
+    {% include 'interface/server/handler_invoke.rs.j2' %}
+    {% include 'interface/server/handler_response.rs.j2' %}
+    {% include 'interface/server/handler_headers.rs.j2' %}
+    {% include 'interface/server/handler_tail.rs.j2' %}
+{% endif %}

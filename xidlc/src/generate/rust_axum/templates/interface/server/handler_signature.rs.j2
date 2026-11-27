@@ -1,0 +1,19 @@
+        #[allow(clippy::let_and_return, clippy::needless_return, clippy::useless_conversion, unused_mut, unreachable_code, clippy::let_unit_value, unused_variables{% if method.deprecated %}, deprecated{% endif %})]
+        async fn {{ method.name }}(
+        ::xidl_rust_axum::axum::extract::State(svc): ::xidl_rust_axum::axum::extract::State<::std::sync::Arc<T>>,
+        headers: ::xidl_rust_axum::axum::http::HeaderMap,
+        uri: ::xidl_rust_axum::axum::http::Uri{% if method.has_bearer_auth %},
+        auth_header: Option<::xidl_rust_axum::axum_extra::extract::TypedHeader<::xidl_rust_axum::auth::bearer::BearerHeader>>{% endif %}{% if method.handler_uses_path %},
+        ::xidl_rust_axum::axum::extract::Path(path): ::xidl_rust_axum::axum::extract::Path<{{ method.struct_prefix }}Path>{% endif %}{% if method.handler_uses_query %},
+        xidl_rust_axum::axum_extra::extract::Query(query): xidl_rust_axum::axum_extra::extract::Query<{{ method.struct_prefix }}RequestInQuery>{% endif %}{% if method.is_bidi_stream %},
+        ws: ::xidl_rust_axum::axum::extract::ws::WebSocketUpgrade{% elif method.is_client_stream %},
+        body: ::xidl_rust_axum::axum::body::Body{% elif method.is_upgrade %},
+        req: ::xidl_rust_axum::axum::extract::Request{% elif method.handler_uses_request %},
+        request: {{ method.request_struct }}{% endif %}
+        ) -> ::xidl_rust_axum::Result<::xidl_rust_axum::axum::response::Response> {
+            let _ = &headers;
+            {% if method.representations | length == 0 and method.response_content_type and method.response_content_type != "" and not method.is_bidi_stream and not method.is_upgrade %}
+                if !xidl_rust_axum::http::accepts_media_type(&headers, "{{ method.response_content_type }}") {
+                    return Err(xidl_rust_axum::Error::not_acceptable());
+                }
+            {% endif %}

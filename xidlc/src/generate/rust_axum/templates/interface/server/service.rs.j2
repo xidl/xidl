@@ -1,0 +1,8 @@
+            impl<T> xidl_rust_axum::Service for {{ ident }}Server<T>
+            where
+            T: {{ ident }} + Send + Sync + 'static,
+            {
+                fn into_router(self) -> xidl_rust_axum::axum::Router {
+                    self.router()
+                }
+            }

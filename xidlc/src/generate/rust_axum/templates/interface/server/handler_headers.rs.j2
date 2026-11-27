@@ -1,0 +1,50 @@
+                                    {% if method.response_header_params | length > 0 %}
+
+                                        {% for param in method.response_header_params %}
+                                            let header_name = ::xidl_rust_axum::axum::http::HeaderName::from_bytes(
+                                            "{{ param.wire_name }}".as_bytes(),
+                                            ).map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                            {% if param.is_sequence %}
+                                                for value_str in {{ param.name }}_header_values {
+                                                    let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&value_str)
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                                    resp.headers_mut().append(header_name.clone(), header_value);
+                                                }
+                                            {% elif param.optional %}
+                                                if let Some(value_str) = &{{ param.name }}_header_value {
+                                                    let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(value_str)
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                                    resp.headers_mut().insert(header_name, header_value);
+                                                }
+                                            {% else %}
+                                                let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&{{ param.name }}_header_value)
+                                                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                                resp.headers_mut().insert(header_name, header_value);
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if method.response_cookie_params | length > 0 %}
+                                        {% for param in method.response_cookie_params %}
+                                            {% if param.is_sequence %}
+                                                for value_str in {{ param.name }}_cookie_values {
+                                                    let cookie_str = xidl_rust_axum::cookie::Cookie::new("{{ param.wire_name }}", value_str).encoded().to_string();
+                                                    let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                                    resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
+                                                }
+                                            {% elif param.optional %}
+                                                if let Some(value_str) = {{ param.name }}_cookie_value {
+                                                    let cookie_str = xidl_rust_axum::cookie::Cookie::new("{{ param.wire_name }}", value_str).encoded().to_string();
+                                                    let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
+                                                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                                    resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
+                                                }
+                                            {% else %}
+                                                let cookie_str = xidl_rust_axum::cookie::Cookie::new("{{ param.wire_name }}", {{ param.name }}_cookie_value).encoded().to_string();
+                                                let header_value = ::xidl_rust_axum::axum::http::HeaderValue::from_str(&cookie_str)
+                                                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                                                resp.headers_mut().append(::xidl_rust_axum::axum::http::header::SET_COOKIE, header_value);
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                    resp

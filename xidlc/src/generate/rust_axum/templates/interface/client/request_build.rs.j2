@@ -1,0 +1,125 @@
+            {% for param in method.header_params + method.cookie_params %}
+                let {{ param.name }}: {{ param.out_ty }} = {{ param.out_expr }};
+            {% endfor %}
+            let xidl_path = "{{ method.path }}".to_string();
+            {% for param in method.path_params %}
+                let xidl_path = xidl_path.replace("{{ ['{', param.path_template_name, '}'] | join }}", &{{ param.name }}.to_string());
+            {% endfor %}
+            let mut req = self
+                .client
+                .http()
+                .request(xidl_rust_axum::reqwest::Method::{{ method.reqwest_method }}, self.client.url(&xidl_path))
+                .build()
+                .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+            req.headers_mut().insert(
+                xidl_rust_axum::reqwest::header::ACCEPT,
+                xidl_rust_axum::reqwest::header::HeaderValue::from_str(
+                    {% if method.union_accept %}"{{ method.union_accept }}"{% else %}"{{ method.response_content_type }}"{% endif %}
+                )
+                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+            );
+            {% if method.is_upgrade %}
+                req.headers_mut().insert(
+                    xidl_rust_axum::reqwest::header::UPGRADE,
+                    xidl_rust_axum::reqwest::header::HeaderValue::from_str("{{ method.upgrade_protocol }}")
+                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?,
+                );
+                req.headers_mut().insert(
+                    xidl_rust_axum::reqwest::header::CONNECTION,
+                    xidl_rust_axum::reqwest::header::HeaderValue::from_static("upgrade"),
+                );
+            {% endif %}
+            {% for param in method.header_params %}
+                {% if param.optional %}if let Some({{ param.name }}) = {{ param.name }} { {% endif %}
+                let header_name = xidl_rust_axum::reqwest::header::HeaderName::from_bytes("{{ param.wire_name }}".as_bytes())
+                    .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                {% if param.is_sequence %}
+                    for value in {{ param.name }} {
+                        let header_value_str = {% if param.header_item_is_string %}value{% elif param.header_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(&value)
+                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
+                        {% if param.header_item_is_string or param.header_item_is_primitive %}
+                            if header_value_str.contains(',') || header_value_str.trim() != header_value_str {
+                                return Err(xidl_rust_axum::Error::new(400, concat!("unrepresentable simple header collection element: ", {{ param.wire_name | tojson }})).into());
+                            }
+                        {% endif %}
+                        let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(&header_value_str)
+                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                        req.headers_mut().append(header_name.clone(), header_value);
+                    }
+                {% else %}
+                    let header_value_str = {% if param.header_item_is_string %}{{ param.name }}{% elif param.header_item_is_primitive %}{{ param.name }}.to_string(){% else %}xidl_rust_axum::serde_json::to_string(&{{ param.name }})
+                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
+                    let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(&header_value_str)
+                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    req.headers_mut().insert(header_name, header_value);
+                {% endif %}
+                {% if param.optional %} }{% endif %}
+            {% endfor %}
+            {% if method.cookie_params | length > 0 %}
+                let mut cookie_pairs: Vec<String> = Vec::new();
+                {% for param in method.cookie_params %}
+                    {% if param.optional %}if let Some({{ param.name }}) = {{ param.name }} { {% endif %}
+                    {% if param.is_sequence %}
+                        for value in {{ param.name }} {
+                            let value_str = {% if param.cookie_item_is_string %}value{% elif param.cookie_item_is_primitive %}value.to_string(){% else %}xidl_rust_axum::serde_json::to_string(&value)
+                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
+                            cookie_pairs.push(xidl_rust_axum::cookie::Cookie::new("{{ param.wire_name }}", value_str).encoded().to_string());
+                        }
+                    {% else %}
+                        let value_str = {% if param.cookie_item_is_string %}{{ param.name }}{% elif param.cookie_item_is_primitive %}{{ param.name }}.to_string(){% else %}xidl_rust_axum::serde_json::to_string(&{{ param.name }})
+                            .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?{% endif %};
+                        cookie_pairs.push(xidl_rust_axum::cookie::Cookie::new("{{ param.wire_name }}", value_str).encoded().to_string());
+                    {% endif %}
+                    {% if param.optional %} }{% endif %}
+                {% endfor %}
+                if !cookie_pairs.is_empty() {
+                    let cookie_value = cookie_pairs.join("; ");
+                    let cookie_name = xidl_rust_axum::reqwest::header::HeaderName::from_static("cookie");
+                    let merged = match req.headers().get(&cookie_name) {
+                        Some(existing) => {
+                            let existing = existing
+                                .to_str()
+                                .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                            if existing.is_empty() { cookie_value } else { format!("{existing}; {cookie_value}") }
+                        }
+                        None => cookie_value,
+                    };
+                    let header_value = xidl_rust_axum::reqwest::header::HeaderValue::from_str(&merged)
+                        .map_err(|err| xidl_rust_axum::Error::new(400, format!("{err:?}")))?;
+                    req.headers_mut().insert(cookie_name, header_value);
+                }
+            {% endif %}
+            {% if method.query_params | length > 0 and not method.is_bidi_stream %}
+                let query = {{ method.struct_prefix }}RequestOutQuery {
+                    {% for param in method.query_params %}
+                        {{ param.name }}{% if param.name != param.out_expr %}: {{ param.out_expr }}{% endif %},
+                    {% endfor %}
+                };
+                let query = xidl_rust_axum::serde_html_form::to_string(&query)
+                    .map_err(|err| xidl_rust_axum::Error::new(500, format!("{err:?}")))?;
+                if !query.is_empty() {
+                    req.url_mut().set_query(Some(&query));
+                }
+            {% endif %}
+            {% if method.auth_source_method and method.auth_param %}
+                {% if method.auth_kind == "client" %}
+                    let auth_client = self.client.with_auth_override(Some({{ method.auth_param }}));
+                {% else %}
+                    let auth = xidl_rust_axum::ClientAuth {
+                        basic: {% if method.auth_kind == "basic" %}Some({{ method.auth_param }}){% else %}None{% endif %},
+                        bearer: {% if method.auth_kind == "bearer" %}Some({{ method.auth_param }}.token.clone()){% else %}None{% endif %},
+                        api_keys: {% if method.auth_kind == "api_key" %}::std::vec![{{ method.auth_param }}]{% else %}::std::vec![]{% endif %},
+                    };
+                    let auth_client = self.client.with_auth_override(Some(auth));
+                {% endif %}
+                let auth_target = &auth_client;
+            {% else %}
+                let auth_target = &self.client;
+            {% endif %}
+            let _ = auth_target;
+            {% if method.has_auth_requirements and not method.is_bidi_stream %}
+                {{ apply_http_auth_requirements(method) }}
+            {% endif %}
+            {% if version_parameter and not method.is_bidi_stream %}
+                {{ pin_http() }}
+            {% endif %}

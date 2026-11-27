@@ -4,6 +4,7 @@ use crate::generate::rust_axum::interface::interface_http::{
     cors_layer, deprecated_context_from_http, http_method_code, http_method_fn,
     http_method_from_hir, reqwest_method_code, security_context,
 };
+use crate::generate::rust_axum::interface::interface_method_flags::MethodFlags;
 use crate::generate::rust_axum::interface::interface_method_params::find_input_binding;
 use crate::generate::rust_axum::interface::{MethodContext, ParamContext, ParamSource, RenderEnv};
 use crate::generate::rust_axum::transport::{
@@ -135,6 +136,7 @@ pub(crate) fn render_attr_operation_from_http(
     }
 
     Ok(MethodContext {
+        flags: MethodFlags::default(),
         name: rust_ident(&http_op.meta.name),
         raw_name: http_op.meta.name.clone(),
         rust_attrs,
@@ -247,7 +249,8 @@ pub(crate) fn render_attr_operation_from_http(
         representations: Vec::new(),
         union_accept: None,
         response_union: String::new(),
-    })
+    }
+    .with_computed_flags())
 }
 
 fn method_struct_prefix(interface_name: &str, method_name: &str) -> String {

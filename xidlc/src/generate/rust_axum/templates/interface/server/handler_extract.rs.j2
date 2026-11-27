@@ -1,0 +1,53 @@
+            {% if method.handler_uses_path %}
+                let {{ method.struct_prefix }}Path {
+                    {% for param in method.path_params %}
+                        {{ param.name }},
+                    {% endfor %}
+                } = path;
+                {% for param in method.path_params %}
+                    let {{ param.name }}: {{ param.ty }} = {{ param.in_expr }};
+                {% endfor %}
+            {% endif %}
+            {% if method.handler_uses_query %}
+                let {{ method.struct_prefix }}RequestInQuery {
+                    {% for param in method.query_params %}
+                        {{ param.name }},
+                    {% endfor %}
+                } = query;
+                {% for param in method.query_params %}
+                    let {{ param.name }}: {{ param.ty }} = {{ param.in_expr }};
+                {% endfor %}
+                {% for param in method.query_params %}
+                    {% if param.is_floating %}
+                        {% if param.is_sequence %}
+                            if {{ param.name }}.iter().any(|value| !value.is_finite()) {
+                                return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for query parameter ", {{ param.wire_name | tojson }})));
+                            }
+                        {% elif param.optional %}
+                            if let Some(value) = &{{ param.name }} {
+                                if !value.is_finite() {
+                                    return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for query parameter ", {{ param.wire_name | tojson }})));
+                                }
+                            }
+                        {% else %}
+                            if !{{ param.name }}.is_finite() {
+                                return Err(::xidl_rust_axum::Error::new(400, concat!("non-finite value for query parameter ", {{ param.wire_name | tojson }})));
+                            }
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+            {% if method.is_streaming_or_upgrade %}
+                {% set request_headers = "headers" %}
+                {% include 'interface/request_metadata.rs.j2' %}
+            {% endif %}
+                {% if method.handler_uses_request %}
+                    let {{ method.request_struct }} {
+                        {% for param in method.request_params %}
+                            {{ param.name }},
+                        {% endfor %}
+                    } = request;
+                    {% for param in method.request_params %}
+                        let {{ param.name }}: {{ param.ty }} = {{ param.in_expr }};
+                    {% endfor %}
+                {% endif %}
