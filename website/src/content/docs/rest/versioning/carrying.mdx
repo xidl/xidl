@@ -41,9 +41,18 @@ and the server writes **its own module's version**, including errors. A v2
 server writes v2 even when the request carries v1, an unknown value, or no
 version. Query and cookie parameters are not echoed.
 
-**Servers never resolve the version.** Routing to a version remains the
-application or gateway's responsibility. A generated server does not read the
-version parameter to choose a module or reject a request.
+A generated server serves its own version module. In TypeScript,
+`xidl-typescript-server` supplies `createVersionedRouter` to resolve the
+request's version and dispatch to its mounted handler. Use
+`createVersionedAdapterRouter` to mount versioned operation tables backed by
+adapter dispatchers. Applications and gateways can also resolve and route the
+version themselves.
+
+Both routers accept active or retired entries. An omitted `status` means
+`'active'`. A `'retired'` entry returns HTTP 410. The application selects
+which versions to mount, including any previews, before constructing the
+router. An omitted version returns the unknown-version error with HTTP 400.
+Only mounted active versions appear in `supportedVersions`.
 
 | Location | HTTP clients | WebSocket handshake |
 | --- | --- | --- |

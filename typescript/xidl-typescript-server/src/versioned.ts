@@ -7,7 +7,8 @@ import {
   withVersionHeaders,
 } from './version_extract.ts';
 
-export type VersionLifecycle = 'preview' | 'latest' | 'maintained' | 'retired';
+/** Whether a mounted version serves requests or responds with 410 Gone. */
+export type VersionLifecycle = 'active' | 'retired';
 
 export type VersionParameterLocation = 'header' | 'query' | 'cookie';
 
@@ -21,7 +22,7 @@ export interface VersionEntry<TVersionId extends string = string> {
   id: TVersionId;
   /** Wire value exchanged in HTTP requests and echoed in responses. */
   value: string;
-  /** Lifecycle status; `'retired'` responds with `410 Gone`. */
+  /** Mounted status, defaulting to `'active'`. */
   status?: VersionLifecycle;
   /** Handler mounted for this version (required unless status is `'retired'`). */
   handler?: WebHandler;
@@ -93,6 +94,15 @@ export function createVersionedRouter<TVersionId extends string = string>(
   const byValue = new Map<string, VersionEntry<TVersionId>>();
   const supportedVersions: string[] = [];
   for (const entry of options.versions) {
+    if (
+      entry.status !== undefined &&
+      entry.status !== 'active' &&
+      entry.status !== 'retired'
+    ) {
+      throw new Error(
+        `version '${entry.value}' has invalid status '${entry.status}'`,
+      );
+    }
     if (byId.has(entry.id)) {
       throw new Error(`duplicate version id '${entry.id}'`);
     }
