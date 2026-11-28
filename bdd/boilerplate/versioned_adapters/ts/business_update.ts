@@ -226,11 +226,20 @@ export async function runUpdateJourney(
     patch: { carrier: 'postal' },
   });
   assert.equal(invalid.dispatched, false);
+
+  const unexpectedMember = await legacy.dispatch('v2', {
+    extra: 'raw only',
+    id: 'p1',
+    patch: { note: 'new note' },
+  });
+  assert(
+    !unexpectedMember.dispatched &&
+      unexpectedMember.error.kind === 'Validation',
+  );
   assert.equal(reads, 0);
   assert.equal(writes, 3);
 
   const updated = await legacy.dispatch('v2', {
-    extra: 'raw only',
     id: 'p1',
     patch: { note: 'new note' },
   });
