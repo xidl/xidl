@@ -1,4 +1,22 @@
 // biome-ignore-all lint/suspicious/noExplicitAny: JSON serialization library needs to handle arbitrary object structures.
+import {
+  defOf,
+  defTypeOf,
+  elementOf,
+  isArraySchema,
+  isObjectSchema,
+  shapeOf,
+  unwrapSchema,
+} from './schema-structure.js';
+import {
+  captureWireDecode,
+  decodeRequestUnion,
+  deserializeUnion,
+  type UnionDecoder,
+  type WireDecode,
+  type WireDecodeResult,
+} from './union-decode.js';
+
 export {
   decodeStreamFrame,
   SseDecoder,
@@ -8,6 +26,7 @@ export {
   StreamLifecycle,
   type StreamOutcome,
 } from './stream.js';
+export type { WireDecodeResult } from './union-decode.js';
 /**
  * Minimal structural schema accepted by the codec.
  *
@@ -69,47 +88,6 @@ export function xjson<T extends XidlSchema & { clone(): T }>(
   meta: XidlJsonMeta,
 ): T {
   return setMeta(schema, meta);
-}
-
-function defOf(schema: any): any {
-  return schema?._zod?.def ?? schema?._def ?? schema?.def;
-}
-
-function shapeOf(schema: any): Record<string, any> | undefined {
-  const shape = schema?.shape;
-  return shape && typeof shape === 'object' ? shape : undefined;
-}
-
-function elementOf(schema: any): any {
-  return schema?.element ?? defOf(schema)?.element;
-}
-
-function defTypeOf(schema: any): string | undefined {
-  return defOf(schema)?.type;
-}
-
-function isObjectSchema(schema: any): boolean {
-  return defTypeOf(schema) === 'object' && shapeOf(schema) !== undefined;
-}
-
-function isArraySchema(schema: any): boolean {
-  return defTypeOf(schema) === 'array';
-}
-
-function unwrapSchema(schema: XidlSchema): any {
-  let current: any = schema;
-  while (true) {
-    if (isArraySchema(current)) break;
-
-    if (typeof current?.unwrap === 'function') {
-      current = current.unwrap();
-    } else if (defOf(current)?.innerType) {
-      current = defOf(current).innerType;
-    } else {
-      break;
-    }
-  }
-  return current;
 }
 
 function setJsonProperty(
@@ -269,6 +247,14 @@ export function serialize(value: any, schema: XidlSchema): any {
 
 /** Deserialize JSON into a Zod object using attached {@link XidlJsonMeta}. */
 export function deserializeZodObject(jsonObj: any, schema: XidlSchema): any {
+  return decodeZodObject(jsonObj, schema, deserialize);
+}
+
+function decodeZodObject(
+  jsonObj: any,
+  schema: XidlSchema,
+  decode: WireDecode,
+): any {
   if (jsonObj === null || typeof jsonObj !== 'object') {
     return jsonObj;
   }
@@ -290,7 +276,7 @@ export function deserializeZodObject(jsonObj: any, schema: XidlSchema): any {
     if (meta.flatten) {
       if (isObjectSchema(unwrapped)) {
         // Struct flatten
-        const subResult = deserializeZodObject(jsonObj, unwrapped);
+        const subResult = decodeZodObject(jsonObj, unwrapped, decode);
         setJsonProperty(result, key, subResult);
 
         // Track which keys in jsonObj were matched by this sub-object
@@ -306,7 +292,7 @@ export function deserializeZodObject(jsonObj: any, schema: XidlSchema): any {
       const inKey = meta.name || key;
       const value = Object.hasOwn(jsonObj, inKey) ? jsonObj[inKey] : undefined;
       if (value !== undefined) {
-        setJsonProperty(result, key, deserialize(value, fieldSchema));
+        setJsonProperty(result, key, decode(value, fieldSchema));
         matchedKeys.add(inKey);
       }
     }
@@ -326,7 +312,7 @@ export function deserializeZodObject(jsonObj: any, schema: XidlSchema): any {
       if (!matchedKeys.has(wireKey))
         setJsonProperty(catchAllObj, wireKey, value);
     }
-    setJsonProperty(result, key, deserialize(catchAllObj, fieldSchema));
+    setJsonProperty(result, key, decode(catchAllObj, fieldSchema));
   }
 
   return result;
@@ -334,33 +320,41 @@ export function deserializeZodObject(jsonObj: any, schema: XidlSchema): any {
 
 /** Deserialize a value using attached {@link XidlJsonMeta}. */
 export function deserialize(value: any, schema: XidlSchema): any {
+  return decodeValue(value, schema, deserialize, deserializeUnion);
+}
+
+/** Decode a wire value, reporting union validation rejections and propagating exceptions. */
+export function tryDeserialize(
+  value: unknown,
+  schema: XidlSchema,
+): WireDecodeResult {
+  const decode: WireDecode = (input, inputSchema) =>
+    decodeValue(input, inputSchema, decode, decodeRequestUnion);
+  return captureWireDecode(() => decode(value, schema));
+}
+
+function decodeValue(
+  value: any,
+  schema: XidlSchema,
+  decode: WireDecode,
+  decodeUnion: UnionDecoder,
+): any {
   if (value === null || value === undefined) return value;
   const unwrapped = unwrapSchema(schema);
 
   if (isObjectSchema(unwrapped)) {
-    return deserializeZodObject(value, unwrapped);
+    return decodeZodObject(value, unwrapped, decode);
   }
   if (isArraySchema(unwrapped)) {
     if (!Array.isArray(value)) return value;
     const elementSchema = elementOf(unwrapped) as XidlSchema;
-    return value.map(item => deserialize(item, elementSchema));
+    return value.map(item => decode(item, elementSchema));
   }
   if (defTypeOf(unwrapped) === 'record') {
-    return transformRecordValues(value, unwrapped, deserialize);
+    return transformRecordValues(value, unwrapped, decode);
   }
   if (defTypeOf(unwrapped) === 'union') {
-    let failure: unknown;
-    for (const option of defOf(unwrapped).options) {
-      try {
-        const candidate = deserialize(value, option);
-        const parsed = option.safeParse(candidate);
-        if (parsed.success) return candidate;
-        failure = parsed.error;
-      } catch (error) {
-        failure = error;
-      }
-    }
-    throw failure;
+    return decodeUnion(value, defOf(unwrapped).options, decode);
   }
 
   return value;

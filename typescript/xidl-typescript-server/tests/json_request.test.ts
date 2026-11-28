@@ -75,6 +75,7 @@ test('handler exceptions keep their identity even when they look like decoding f
     new SyntaxError('handler failure'),
     { issues: [], name: 'UpstreamProblem' },
     validation.error,
+    42,
   ];
   for (const failure of failures) {
     const serve = createRouter([createItem], {
@@ -95,7 +96,7 @@ test('handler exceptions keep their identity even when they look like decoding f
   }
 });
 
-test('a union validation error without the local Zod prototype produces a bad request', async () => {
+test('a failed wire union decode produces a bad request without inspecting the error name', async () => {
   const text = z.string();
   const validate = text.safeParse.bind(text);
   text.safeParse = value => {
@@ -103,7 +104,7 @@ test('a union validation error without the local Zod prototype produces a bad re
     if (result.success) return result;
     // A different Zod copy can supply issues without sharing the error prototype.
     return {
-      error: { issues: result.error.issues, name: result.error.name },
+      error: { issues: result.error.issues },
       success: false,
     } as typeof result;
   };
@@ -140,4 +141,37 @@ test('a union validation error without the local Zod prototype produces a bad re
     [{ code: 'invalid_type', expected: 'string', path: [] }],
   );
   assert.equal(calls, 0);
+});
+
+test('exceptions thrown while decoding a union propagate with their identity intact', async () => {
+  const validation = z.string().safeParse(0);
+  assert(!validation.success);
+  for (const failure of [validation.error, 42]) {
+    const text = z.string();
+    text.safeParse = () => {
+      throw failure;
+    };
+    const operation = {
+      ...createItem,
+      request: {
+        ...createItem.request,
+        schema: z.object({ name: z.union([text, z.literal('accepted')]) }),
+      },
+    };
+    const serve = createRouter([operation], {
+      createItem(name) {
+        return { name };
+      },
+    });
+    await assert.rejects(
+      serve(
+        new Request('http://test/items', {
+          body: '{"name":"accepted"}',
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+        }),
+      ),
+      error => error === failure,
+    );
+  }
 });

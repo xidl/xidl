@@ -1,4 +1,4 @@
-import { deserialize, type XidlSchema } from 'xidl-typescript-codec';
+import { tryDeserialize, type XidlSchema } from 'xidl-typescript-codec';
 import { RequestFailure, ResponseValidationError } from './error.ts';
 
 /** Structural validation results also accept schemas from another Zod copy. */
@@ -11,24 +11,11 @@ export interface ServerSchema extends XidlSchema {
 }
 
 export function parseRequest(value: unknown, schema: ServerSchema): unknown {
-  let decoded: unknown;
-  try {
-    decoded = deserialize(value, schema);
-  } catch (error) {
-    // Union decoding can throw a validation error from the schema's Zod copy.
-    if (
-      error &&
-      typeof error === 'object' &&
-      'name' in error &&
-      (error.name === 'ZodError' || error.name === '$ZodError') &&
-      'issues' in error &&
-      Array.isArray(error.issues)
-    ) {
-      throw new RequestFailure(400, 'invalid request', error.issues);
-    }
-    throw error;
+  const decoded = tryDeserialize(value, schema);
+  if (!decoded.ok) {
+    throw new RequestFailure(400, 'invalid request', decoded.issues);
   }
-  const parsed = schema.safeParse(decoded);
+  const parsed = schema.safeParse(decoded.value);
   if (!parsed.success) {
     throw new RequestFailure(400, 'invalid request', parsed.error.issues);
   }
