@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.115.0](https://github.com/xidl/xidl/compare/v0.114.0...v0.115.0) (2026-11-28)
+
+
+### Features
+
+* **typescript-server:** bind generated versioned interface tables ([624c741](https://github.com/xidl/xidl/commit/624c741557618a2e875f999d1ad9e92036bcc69f))
+
+
+### Bug Fixes
+
+* **typescript-server:** align adapter scenario with strict request validation ([bcfd18d](https://github.com/xidl/xidl/commit/bcfd18d7427e31aee90db7545906015f6ba898c0))
+* **typescript-server:** propagate undeclared runtime failures ([65e9578](https://github.com/xidl/xidl/commit/65e9578078336ded51463596385ed196717c9c85))
+* **typescript-server:** stop guessing Zod errors from their shape ([d01e9c9](https://github.com/xidl/xidl/commit/d01e9c98c19803f901766bd17ea5f95dde128772))
+* **xidlc:** fingerprint reachable declarations from shared imports ([31e1f0b](https://github.com/xidl/xidl/commit/31e1f0b69f2fcd00f750dab5957b1f39367eeb4b))
+* **xidlc:** verify recorded HTTP contract evidence ([0c36cf8](https://github.com/xidl/xidl/commit/0c36cf8b65a9b67ec9a5842291ce4973605c3c12))
+
 ## [0.114.0](https://github.com/xidl/xidl/compare/v0.113.0...v0.114.0) (2026-11-28)
 
 
