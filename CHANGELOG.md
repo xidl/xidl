@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.114.0](https://github.com/xidl/xidl/compare/v0.113.0...v0.114.0) (2026-11-28)
+
+
+### Features
+
+* **xidlc:** allow selecting versions for lock and check ([af82b24](https://github.com/xidl/xidl/commit/af82b241374a69d81e7a35030d3612240e432ea1))
+
+
+### Bug Fixes
+
+* **typescript-server:** derive version response caching from the carrier ([3ea63e6](https://github.com/xidl/xidl/commit/3ea63e679bf08877d682c2c3646ef175238d6aa1))
+* **typescript-server:** limit mounted version status to active and retired ([0421ef6](https://github.com/xidl/xidl/commit/0421ef6b143b61319e56440980e15f6de37853bd))
+* **typescript-server:** separate mounted and retired versions ([2682edf](https://github.com/xidl/xidl/commit/2682edf3c54cc53413e0a4ec99e7e2cac866eed8))
+* **xidlc:** accept an explicit set of locked versions ([9c0dfb0](https://github.com/xidl/xidl/commit/9c0dfb0c92612b156d3ab6a87c25695e9b7f5d92))
+
 ## [0.113.0](https://github.com/xidl/xidl/compare/v0.112.0...v0.113.0) (2026-11-26)
 
 
